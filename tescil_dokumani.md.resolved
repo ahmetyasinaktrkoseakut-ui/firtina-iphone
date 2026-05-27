@@ -1,0 +1,297 @@
+# FIRTINA AI - BİLGİSAYAR PROGRAMI TESCİL KAYNAK KODU DOKÜMANI
+
+**Program Adı:** FIRTINA AI  
+**Geliştirici:** Ahmet Yasin AKTÜRK  
+**Platform:** Android (Native + Hybrid)  
+**Tarih:** 16 Mart 2026
+
+---
+
+## BÖLÜM 1: YAPILANDIRMA VE MANİFEST (AndroidManifest.xml)
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.AhmetYasinAI"
+        android:usesCleartextTraffic="true"
+        tools:targetApi="31">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.AhmetYasinAI">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".WebViewActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AhmetYasinAI" />
+
+        <service
+            android:name=".MyFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+    </application>
+</manifest>
+```
+
+---
+
+## BÖLÜM 2: ANA PROGRAM MANTIĞI (MainActivity.java)
+```java
+package com.ahmetyasin.aitools;
+
+import android.annotation.SuppressLint;
+import android.os.Bundle;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import androidx.appcompat.app.AppCompatActivity;
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.os.Build;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import android.util.Log;
+import com.google.firebase.messaging.FirebaseMessaging;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
+import android.widget.Toast;
+
+public class MainActivity extends AppCompatActivity {
+
+    private WebView myWebView;
+
+    @SuppressLint("SetJavaScriptEnabled")
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        
+        myWebView = new WebView(this);
+        setContentView(myWebView);
+
+        WebSettings webSettings = myWebView.getSettings();
+        webSettings.setJavaScriptEnabled(true);
+        webSettings.setDomStorageEnabled(true);
+        webSettings.setAllowFileAccess(true);
+
+        myWebView.addJavascriptInterface(new WebAppInterface(this), "Android");
+
+        myWebView.setWebViewClient(new android.webkit.WebViewClient());
+        myWebView.loadUrl("file:///android_asset/index.html");
+
+        if (Build.VERSION.SDK_INT >= 33) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1);
+            }
+        }
+        
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
+                new IntentFilter("InAppNotification"));
+
+        setupRemoteConfig();
+    }
+    
+    private void setupRemoteConfig() {
+        try {
+            FirebaseRemoteConfig mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+            FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
+                    .setMinimumFetchIntervalInSeconds(3600)
+                    .build();
+            mFirebaseRemoteConfig.setConfigSettingsAsync(configSettings);
+
+            mFirebaseRemoteConfig.fetchAndActivate()
+                    .addOnCompleteListener(this, task -> {
+                        if (task.isSuccessful()) {
+                            String remoteJson = mFirebaseRemoteConfig.getString("ai_tools_json");
+                            injectRemoteData(remoteJson);
+                        }
+                    });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void injectRemoteData(String remoteJson) {
+         if (remoteJson == null || remoteJson.isEmpty()) return;
+         
+         String base64Json = "";
+         try {
+             base64Json = android.util.Base64.encodeToString(remoteJson.getBytes("UTF-8"), android.util.Base64.NO_WRAP);
+         } catch (Exception e) {
+             e.printStackTrace();
+             return;
+         }
+         
+         final String finalBase64 = base64Json;
+         myWebView.post(() -> {
+             myWebView.evaluateJavascript("if(window.updateToolsDataFromBase64) { window.updateToolsDataFromBase64('" + finalBase64 + "'); }", null);
+         });
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (myWebView.canGoBack()) {
+            myWebView.goBack();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    private final BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String title = intent.getStringExtra("title");
+            String body = intent.getStringExtra("body");
+            if(title != null) title = title.replace("'", "\\'");
+            if(body != null) body = body.replace("'", "\\'");
+            final String jsCode = "javascript:if(window.showInAppNotification) window.showInAppNotification('" + title + "', '" + body + "')";
+            myWebView.post(() -> myWebView.evaluateJavascript(jsCode, null));
+        }
+    };
+}
+```
+
+---
+
+## BÖLÜM 3: HİBRİT ARAYÜZ (index.html) - İLK 25 SAYFA
+```html
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FIRTINA AI - Araç Dizini</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+            --theme-color: #4b8df7;
+            --theme-glow: rgba(59, 130, 246, 0.5);
+            transition: background-color 0.5s ease;
+        }
+        /* ... CSS Sınıfları ve Animasyonlar ... */
+        .glass-card {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        /* [Burada yaklaşık 1200 satırlık görsel ve işlevsel CSS tanımlamaları yer almaktadır] */
+    </style>
+</head>
+<body class="min-h-screen relative overflow-hidden" id="mainBody">
+    <div id="splashScreen" class="fixed inset-0 z-[100] bg-slate-950 flex items-center justify-center">
+        <!-- Yıldırım Efektleri ve Karşılama Ekranı -->
+        <h1 class="text-6xl font-black text-white">FIRTINA <span class="text-blue-500">AI</span></h1>
+    </div>
+
+    <header class="fixed top-0 left-0 right-0 z-40 bg-slate-900/80 backdrop-blur-lg border-b border-white/10">
+        <div class="container mx-auto px-4 py-3">
+             <!-- Logo ve Arama Çubuğu -->
+             <input type="text" id="searchInput" placeholder="Araç ara..." class="w-full bg-blue-600/20 rounded-xl p-3.5">
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 pt-[170px] pb-8">
+        <div id="categoryGrid" class="grid grid-cols-2 lg:grid-cols-4 gap-4"></div>
+        <div id="toolsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-4 hidden"></div>
+    </main>
+    
+    <script>
+        // Uygulama Mantığı ve Veri Yönetimi
+        const initialTools = [
+            { id: 1, name: "Google Gemini", url: "https://gemini.google.com", categories: ["Metin", "Kodlama", "Müzik"] },
+            // [Burada uygulamanın temel araç veritabanı yer almaktadır]
+        ];
+        
+        function renderCategories() {
+            // Kategorilerin dinamik oluşturulması
+        }
+        
+        function renderTools() {
+            // Araç listesinin render edilmesi ve filtrelenmesi
+        }
+    </script>
+</body>
+</html>
+```
+
+---
+
+## BÖLÜM 4: HİBRİT ARAYÜZ (index.html) - SON 25 SAYFA
+```javascript
+    <script>
+        // --- AKILLI ASİSTAN (GROQ AI) ---
+        async function askGroqAI(userMessage) {
+            const systemPrompt = "Sen FIRTINA AI asistanısın...";
+            try {
+                const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                    method: "POST",
+                    headers: { "Authorization": "Bearer [GROQ_KEY]" },
+                    body: JSON.stringify({ model: "llama-3.3-70b-versatile", messages: [...] })
+                });
+                const data = await response.json();
+                return data.choices[0].message.content;
+            } catch (error) {
+                return processOfflineQuery(userMessage); // İnternet yoksa çevrimdışı mantık
+            }
+        }
+
+        function processOfflineQuery(query) {
+            // Kullanıcı niyetine göre yerel veritabanından akıllı eşleştirme
+            const scoredTools = tools.map(tool => ({ tool, score: calculateScore(query, tool) }));
+            return formatAIResponse(scoredTools.sort((a,b) => b.score - a.score).slice(0,3));
+        }
+
+        // --- ANDROID KÖPRÜSÜ VE SENKRONİZASYON ---
+        window.updateToolsDataFromBase64 = (base64String) => {
+            const decodedJson = decodeURIComponent(escape(atob(base64String)));
+            const data = JSON.parse(decodedJson);
+            if (Array.isArray(data)) tools = data;
+            renderTools();
+        };
+
+        window.addEventListener('load', () => {
+             // Açılış animasyonları ve veri yükleme
+             setTimeout(() => {
+                 document.getElementById('splashScreen').classList.add('opacity-0');
+                 document.getElementById('mainBody').style.overflow = 'auto';
+             }, 2000);
+        });
+    </script>
+</html>
+```
+
+---
+**BEYAN:** Bu doküman, FIRTINA AI isimli bilgisayar programının kaynak kodunun belirleyici özelliklerini taşıyan ilk ve son sayfalarını içermektedir. Programın tamamı dijital ortamda muhafaza edilmektedir.
