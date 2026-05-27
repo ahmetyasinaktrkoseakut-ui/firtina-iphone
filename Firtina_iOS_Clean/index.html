@@ -1546,14 +1546,15 @@
     <!-- Lead Collection Modal -->
     <div id="leadModal">
         <div class="lead-card">
-            <div class="lead-icon">🎁</div>
-            <h2 class="text-2xl font-black text-white mb-3">Hediye Eğitim!</h2>
-            <p class="text-slate-300 mb-8 font-medium">Ücretsiz Eğitimi Almak İçin Mailinizi Yazın</p>
+            <div class="lead-icon">✉️</div>
+            <h2 class="text-2xl font-black text-white mb-3">Bültene Abone Olun!</h2>
+            <p class="text-slate-300 mb-8 font-medium">Yapay zeka eğitim rehberi ve ipuçları e-posta kutunuza gelsin</p>
             <form id="leadForm" onsubmit="handleLeadSubmit(event)">
                 <input type="email" id="leadEmail" class="lead-input" placeholder="E-posta adresiniz..."
                     aria-label="E-posta adresiniz" required>
-                <button type="submit" id="leadSubmitBtn" class="lead-btn">Eğitimi Al 🚀</button>
+                <button type="submit" id="leadSubmitBtn" class="lead-btn">Bültene abone olun</button>
             </form>
+            <button type="button" onclick="handleSkipClick()" class="mt-4 text-slate-400 hover:text-white transition-colors duration-200 text-sm font-semibold underline block mx-auto">GEÇ</button>
             <p id="leadErrorMessage" class="text-red-400 text-sm mt-4 hidden"></p>
         </div>
     </div>
@@ -5930,7 +5931,7 @@
                     addDoc(collection(db, "leads"), {
                         email: email,
                         timestamp: serverTimestamp(),
-                        source: "android_app_v1"
+                        source: "ios_app_v1"
                     }),
                     timeoutPromise
                 ]);
@@ -5949,13 +5950,13 @@
                 }
 
                 if (window.showInAppNotification) {
-                    window.showInAppNotification("Başarılı!", "Eğitim linki yakında mail adresinize gönderilecektir.");
+                    window.showInAppNotification("Başarılı!", "Bültenimize başarıyla abone oldunuz.");
                 }
 
             } catch (error) {
                // "Lead Save Error:", error);
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = "Eğitimi Al 🚀";
+                submitBtn.innerHTML = "Bültene abone olun";
 
                 if (error.message === "TIMEOUT") {
                     errorMsg.innerText = "Bağlantı zaman aşımına uğradı. Lütfen internetinizi kontrol edin ve Firebase Firestore 'Rules' kısmında yazma izni verildiğinden emin olun.";
@@ -5965,6 +5966,36 @@
                 errorMsg.classList.remove('hidden');
             }
         };
+
+        // Skip Button Logic (GEÇ)
+        window.handleSkipClick = () => {
+            if (confirm("Emin misiniz? (Tekrar sorulmayacak)")) {
+                localStorage.setItem('firtina_ai_user_registered', 'true');
+                const modal = document.getElementById('leadModal');
+                if (modal) {
+                    modal.classList.remove('active');
+                    setTimeout(() => {
+                        modal.style.display = 'none';
+                        modal.remove();
+                    }, 500);
+                }
+            }
+        };
+
+        // Dynamic button text change when email is being typed/entered
+        setTimeout(() => {
+            const emailInput = document.getElementById('leadEmail');
+            const submitBtn = document.getElementById('leadSubmitBtn');
+            if (emailInput && submitBtn) {
+                emailInput.addEventListener('input', () => {
+                    if (emailInput.value.trim().length > 0) {
+                        submitBtn.innerHTML = "Bültene abone olun";
+                    } else {
+                        submitBtn.innerHTML = "Bültene abone olun";
+                    }
+                });
+            }
+        }, 100);
 
         // Check if user is already registered
         window.checkLeadStatus = () => {
@@ -5982,7 +6013,7 @@
 
         // Privacy Policy Navigation
         window.openPrivacy = () => {
-            const url = "file:///android_asset/privacy.html";
+            const url = "privacy.html";
             try {
                 if (window.Android && typeof window.Android.openCustomTab === 'function') {
                     window.Android.openCustomTab(url);
