@@ -1657,13 +1657,8 @@
         <!-- Prompts Screen (Gizli) -->
         <div id="promptsScreen" class="hidden">
             <div class="text-center max-w-xl mx-auto mb-10">
-                <h2 class="text-2xl md:text-3xl font-black text-white mb-3" id="promptsTitle">Pratik AI Promptları</h2>
-                <p class="text-slate-400 text-sm" id="promptsSubtitle">Kopyalayın, boşlukları doldurun ve dilediğiniz yapay zekaya göndererek kullanın!</p>
-            </div>
-            
-            <!-- Kategori Filtre Butonları -->
-            <div class="flex gap-2 overflow-x-auto pb-4 mb-6 scrollbar-none" id="promptsCategories">
-                <!-- Javascript ile doldurulacak -->
+                <h2 class="text-2xl md:text-3xl font-black text-white mb-3" id="promptsTitle">Fotoğraf Üretim Promptları</h2>
+                <p class="text-slate-400 text-sm" id="promptsSubtitle">Göz alıcı görseller üretmek için hazır poz, açı ve ışık şablonları.</p>
             </div>
             
             <!-- Prompt Kartları -->
@@ -1742,8 +1737,8 @@
                     btnEnter: "Uygulamaya Gir 🚀"
                 },
                 aiAssistant: { fabLabel: "Araç Bul", headerTitle: "AI Asistan", welcomeMsg: "Merhaba, FIRTINA AI olarak sana yardımcı olabilirim. Ne için araç arıyorsun?", inputPlaceholder: "Örn: Sunum hazırlama aracı...", noResults: "Maalesef bu konuda bir araç bulamadım. 😔<br>Farklı kelimelerle tekrar dener misin?", resultsHeader: "İşte bulduğum en iyi araçlar: 👇<br>", viewBtn: "İncele" },
-                nav: { home: "Ana Sayfa", assistant: "ASİSTAN", prompts: "Promptlar", favorites: "Favoriler" },
-                prompts: { title: "Pratik AI Promptları", subtitle: "Kopyalayın, boşlukları doldurun ve dilediğiniz yapay zekaya göndererek kullanın!" },
+                nav: { home: "Ana Sayfa", assistant: "ASİSTAN", prompts: "Fotoğraf", favorites: "Favoriler" },
+                prompts: { title: "Fotoğraf Üretim Promptları", subtitle: "Göz alıcı görseller üretmek için hazır poz, açı ve ışık şablonları." },
                 catDesc: {
                     Kodlama: "Yazılım asistanları ve araçları",
                     Görsel: "Sanat ve tasarım stüdyosu",
@@ -1775,8 +1770,8 @@
                 cats: { "Genel": "General", "Metin": "Text", "Görsel": "Image", "Video": "Video", "3D": "3D", "Müzik": "Music", "Kodlama": "Coding", "Akademik": "Academic", "Verimlilik": "Productivity", "Ses": "Voice", "Sohbet": "Chat" },
                 pricing: { "Ücretsiz": "Free", "Freemium": "Freemium", "Ücretli": "Paid", "Deneme Sürümü": "Trial" },
                 aiAssistant: { fabLabel: "Find Tool", headerTitle: "AI Assistant (Offline)", welcomeMsg: "Hello! 👋<br>I can help you offline. What are you looking for?", inputPlaceholder: "Ex: Presentation tool...", noResults: "Sorry, nothing found. 😔<br>Try other keywords?", resultsHeader: "Here are the best tools: 👇<br>", viewBtn: "View" },
-                nav: { home: "Home", assistant: "ASSISTANT", prompts: "Prompts", favorites: "Favorites" },
-                prompts: { title: "Practical AI Prompts", subtitle: "Copy, fill in the blanks, and send to any AI to use!" },
+                nav: { home: "Home", assistant: "ASSISTANT", prompts: "Photo", favorites: "Favorites" },
+                prompts: { title: "Photo Generation Prompts", subtitle: "Ready-made pose, angle, and lighting templates to generate stunning images." },
                 catDesc: {
                     Kodlama: "Coding assistants & tools",
                     Görsel: "Art & design studio",
@@ -4825,88 +4820,87 @@
         let favorites = []; // Favoriler dizisi
         let activeCategory = null;
         let searchQuery = '';
-        let activePromptsCategory = 'all';
 
-        // GÜNLÜK KULLANICI ODAKLI PRATİK PROMPTLAR
+        // YAPAY ZEKA GÖRSEL/FOTOĞRAF ÜRETİMİ PROMPTLARI (MIDJOURNEY & DALL-E)
         const promptsData = [
             {
                 id: 1,
-                category: { tr: "Günlük Yazım", en: "Daily Writing" },
-                title: { tr: "Resmi E-Posta / İzin İsteme", en: "Formal Email / Leave Request" },
-                desc: { tr: "İş veya okul için mazeret belirterek izin talep e-postası yazar.", en: "Writes a formal email requesting a leave with a reason." },
+                category: { tr: "Poz & Kadraj", en: "Pose & Framing" },
+                title: { tr: "Portre Yakın Çekim (Close-up)", en: "Close-up Portrait" },
+                desc: { tr: "Yüz detaylarına, gözlere ve cilt dokusuna odaklanan profesyonel yakın çekim.", en: "Close-up portrait focusing on eyes, expression, and detailed skin texture." },
                 text: { 
-                    tr: "Yöneticime/Öğretmenime yazmak için, [Mazeretiniz - Örn: hasta olduğum] gerekçesiyle [Gün Sayısı - Örn: 2 gün] izin talep ettiğim, son derece kibar ve resmi bir e-posta taslağı yazar mısın?",
-                    en: "Write a polite and formal email to my manager/teacher requesting a leave of [Number of days - e.g. 2 days] due to [Reason - e.g. feeling unwell]."
+                    tr: "A close-up portrait of [Subject - e.g. a smiling woman], focusing on eyes, natural facial expression, detailed skin texture, soft bokeh background, photorealistic, shot on 85mm lens, 8k resolution --ar 4:5 --v 6.0",
+                    en: "A close-up portrait of [Subject - e.g. a smiling woman], focusing on eyes, natural facial expression, detailed skin texture, soft bokeh background, photorealistic, shot on 85mm lens, 8k resolution --ar 4:5 --v 6.0"
                 }
             },
             {
                 id: 2,
-                category: { tr: "Günlük Yazım", en: "Daily Writing" },
-                title: { tr: "Yazım Hatalarını ve Anlatımı Düzeltme", en: "Grammar & Style Improver" },
-                desc: { tr: "Yazdığınız bozuk veya hatalı metinleri akıcı ve profesyonel yapar.", en: "Improves your draft text to make it sound fluent and clear." },
+                category: { tr: "Poz & Kadraj", en: "Pose & Framing" },
+                title: { tr: "Boydan Sokak Çekimi (Full-Body)", en: "Full-Body Street Shot" },
+                desc: { tr: "Doğal yürüyüş halinde, boydan sokak stili ve zengin derinlik içeren kadraj.", en: "Full-body street style photograph with natural walking pose and background depth." },
                 text: { 
-                    tr: "Aşağıdaki metni anlamını bozmadan, tüm yazım ve imla hatalarını düzelterek, kulağa daha akıcı ve düzgün gelecek şekilde yeniden düzenle: [Düzeltilecek metniniz]",
-                    en: "Please rewrite the following text to correct all grammar/spelling errors and make it sound more natural and professional: [Your text here]"
+                    tr: "A full-body street style photograph of [Subject - e.g. a young man in fashion clothing] walking in [Location - e.g. downtown Paris], candid shot, dynamic walking pose, urban background, natural daylight, shot on 35mm lens, realistic depth of field --ar 9:16 --v 6.0",
+                    en: "A full-body street style photograph of [Subject - e.g. a young man in fashion clothing] walking in [Location - e.g. downtown Paris], candid shot, dynamic walking pose, urban background, natural daylight, shot on 35mm lens, realistic depth of field --ar 9:16 --v 6.0"
                 }
             },
             {
                 id: 3,
-                category: { tr: "Sosyal Medya", en: "Social Media" },
-                title: { tr: "Instagram Fotoğraf Açıklaması", en: "Instagram Caption Writer" },
-                desc: { tr: "Paylaşacağınız fotoğraflar için kısa, eğlenceli ve emoji içeren yazılar yazar.", en: "Creates short, engaging captions with emojis for your posts." },
+                category: { tr: "Poz & Kadraj", en: "Pose & Framing" },
+                title: { tr: "Dramatik Kuş Bakışı (High-Angle)", en: "Bird's Eye View" },
+                desc: { tr: "Yüksek açı dron kamerası tarzıyla çekilmiş derinlikli manzara ve kompozisyon.", en: "Cinematic drone photography style with rich landscape composition and details." },
                 text: { 
-                    tr: "[Fotoğrafın çekildiği yer veya detay - Örn: deniz kenarında kahve içerken] çekildiğim bir fotoğraf için Instagram'da paylaşabileceğim, kısa, samimi ve emoji içeren 3 farklı açıklama önerisi yazar mısın?",
-                    en: "Write 3 short and engaging Instagram captions with emojis for a photo of [Photo details - e.g. drinking coffee by the beach]."
+                    tr: "A high-angle bird's eye view photograph of [Subject/Scene - e.g. a person walking through a colorful autumn forest path], cinematic composition, natural highlights and shadows, drone photography style, high details --ar 16:9 --v 6.0",
+                    en: "A high-angle bird's eye view photograph of [Subject/Scene - e.g. a person walking through a colorful autumn forest path], cinematic composition, natural highlights and shadows, drone photography style, high details --ar 16:9 --v 6.0"
                 }
             },
             {
                 id: 4,
-                category: { tr: "Sosyal Medya", en: "Social Media" },
-                title: { tr: "Özel Gün Tebrik Mesajı", en: "Special Day Wish Creator" },
-                desc: { tr: "Doğum günü, bayram gibi özel günler için sıcak tebrik mesajları yazar.", en: "Creates warm wishes for birthdays, holidays, or anniversaries." },
+                category: { tr: "Poz & Kadraj", en: "Pose & Framing" },
+                title: { tr: "Dinamik Aksiyon Çekimi", en: "Dynamic Action Shot" },
+                desc: { tr: "Koşma veya zıplama gibi hızlı anları havada sabitleyen net stüdyo çekimi.", en: "High-speed shutter shot freezing fast movements like jumping or dancing." },
                 text: { 
-                    tr: "[Kişi - Örn: canım annem / yakın arkadaşım] için [Özel Gün - Örn: doğum günü / yeni yıl] kutlaması amacıyla gönderebileceğim, samimi ve sevgi dolu bir tebrik mesajı hazırlar mısın?",
-                    en: "Write a warm and heartfelt message for [Person - e.g. my best friend] to wish them a happy [Event - e.g. birthday]."
+                    tr: "A dynamic action shot of [Subject - e.g. a dancer leaping in the air], freezing the motion, clothing texture flying, detailed expression, high shutter speed, dramatic studio lighting, dark background --ar 16:9 --v 6.0",
+                    en: "A dynamic action shot of [Subject - e.g. a dancer leaping in the air], freezing the motion, clothing texture flying, detailed expression, high shutter speed, dramatic studio lighting, dark background --ar 16:9 --v 6.0"
                 }
             },
             {
                 id: 5,
-                category: { tr: "Ev & Günlük Yaşam", en: "Daily Life" },
-                title: { tr: "Evdeki Malzemelerle Yemek Tarifi", en: "Quick Recipe from Ingredients" },
-                desc: { tr: "Elinizde bulunan malzemelere göre pratik yemek fikirleri sunar.", en: "Suggests simple recipes based on ingredients you have at home." },
+                category: { tr: "Işık & Atmosfer", en: "Lighting & Mood" },
+                title: { tr: "Yumuşak Altın Saat Işığı", en: "Golden Hour Portrait" },
+                desc: { tr: "Gün batımı saatlerinin sıcak, sarı tonlardaki doğal dış mekan güneş ışığı.", en: "Warm golden hour natural daylight with soft backlighting and lens flare." },
                 text: { 
-                    tr: "Elimde sadece [Malzemeleriniz - Örn: tavuk göğsü, patates, domates salçası] var. Bunları kullanarak yapabileceğim, pratik ve lezzetli bir yemek tarifi hazırlar mısın?",
-                    en: "I only have these ingredients at home: [List ingredients - e.g. chicken breast, potatoes, onions]. What is a simple and delicious recipe I can make with them?"
+                    tr: "A warm golden hour outdoor photograph of [Subject - e.g. a couple smiling], soft warm sunlight, lens flare, backlighting, natural scenery background, emotional mood, shot on 50mm lens --ar 3:2 --v 6.0",
+                    en: "A warm golden hour outdoor photograph of [Subject - e.g. a couple smiling], soft warm sunlight, lens flare, backlighting, natural scenery background, emotional mood, shot on 50mm lens --ar 3:2 --v 6.0"
                 }
             },
             {
                 id: 6,
-                category: { tr: "Ev & Günlük Yaşam", en: "Daily Life" },
-                title: { tr: "Pratik Seyahat Planlayıcısı", en: "Quick Travel Itinerary" },
-                desc: { tr: "Gideceğiniz şehir için gezilecek yerleri ve pratik rotayı belirler.", en: "Creates a simple travel route and must-see places list." },
+                category: { tr: "Işık & Atmosfer", en: "Lighting & Mood" },
+                title: { tr: "Renkli Siberpunk Gece Işıkları", en: "Cyberpunk Neon Lighting" },
+                desc: { tr: "Gece vakti neon tabelalarının yüzdeki renkli yansımaları ve ıslak zemin detayları.", en: "Night portrait illuminated by cyberpunk neon signs with rain reflections." },
                 text: { 
-                    tr: "[Şehir Adı - Örn: Kapadokya / Roma] şehrine [Gün Sayısı - Örn: 3 günlük] bir gezi planlıyorum. Bana gezilmesi gereken en önemli yerleri içeren, yormayacak bir rota hazırlar mısın?",
-                    en: "I am planning a [Number of days - e.g. 2-day] trip to [City - e.g. Paris]. Please create a simple, stress-free travel itinerary with the best places to visit."
+                    tr: "A cinematic night portrait of [Subject - e.g. a woman with sunglasses], illuminated by glowing neon signs of [Location - e.g. Tokyo street in rain], rain reflections on the ground, cyberpunk aesthetic, high contrast, teal and orange color grading --ar 16:9 --v 6.0",
+                    en: "A cinematic night portrait of [Subject - e.g. a woman with sunglasses], illuminated by glowing neon signs of [Location - e.g. Tokyo street in rain], rain reflections on the ground, cyberpunk aesthetic, high contrast, teal and orange color grading --ar 16:9 --v 6.0"
                 }
             },
             {
                 id: 7,
-                category: { tr: "Okul & Öğrenme", en: "Education & Learning" },
-                title: { tr: "Kitap, Konu veya Ödev Özeti", en: "Quick Study Summary" },
-                desc: { tr: "Uzun konuları veya kitapları en önemli 5 maddede hızlıca özetler.", en: "Summarizes long articles, books, or topics in 5 key bullet points." },
+                category: { tr: "Işık & Atmosfer", en: "Lighting & Mood" },
+                title: { tr: "Profesyonel Stüdyo Portresi", en: "Classic Studio Lighting" },
+                desc: { tr: "İş insanı tanıtım fotoğrafları için klasik üç noktalı yumuşak ışıklandırma.", en: "Classic three-point lighting setup for commercial studio portraits." },
                 text: { 
-                    tr: "[Konu veya Kitap Adı - Örn: Fotosentez / Nutuk] hakkında en önemli ve bilinmesi gereken bilgileri içeren, 5 maddelik anlaşılır bir özet yazar mısın?",
-                    en: "Create a simple 5-bullet-point summary explaining [Topic or Book - e.g. photosynthesis] for a quick study guide."
+                    tr: "A professional studio portrait of [Subject - e.g. a young corporate businessman], dark grey background, classic three-point lighting setup, soft key light, fill light, hair light, high detail, commercial photography style --ar 4:5 --v 6.0",
+                    en: "A professional studio portrait of [Subject - e.g. a young corporate businessman], dark grey background, classic three-point lighting setup, soft key light, fill light, hair light, high detail, commercial photography style --ar 4:5 --v 6.0"
                 }
             },
             {
                 id: 8,
-                category: { tr: "Okul & Öğrenme", en: "Education & Learning" },
-                title: { tr: "Soru Çözüm ve Mantık Yardımcısı", en: "Step-by-Step Question Solver" },
-                desc: { tr: "Çözemediğiniz soruların çözüm mantığını adım adım açıklar.", en: "Explains how to solve a question step-by-step with logic." },
+                category: { tr: "Işık & Atmosfer", en: "Lighting & Mood" },
+                title: { tr: "Siyah Beyaz Sanatsal Portre", en: "Dramatic Black & White" },
+                desc: { tr: "Derin gölgelerle yüz hatlarını ve cilt dokularını vurgulayan yüksek kontrast.", en: "High contrast monochrome portrait with dramatic side shadows." },
                 text: { 
-                    tr: "Aşağıdaki sorunun çözüm yolunu, her adımı ve neden öyle yapıldığını çok basit bir dille açıklayarak gösterir misin: [Sorunuzu buraya yazın veya yapıştırın]",
-                    en: "Please solve the following question and explain the steps and logic behind each calculation in simple terms: [Your question here]"
+                    tr: "A high-contrast black and white fine art portrait of [Subject - e.g. an old man with wrinkles], dramatic side lighting, deep shadows, highlighting facial expressions and textures, timeless mood, monochrome --ar 1:1 --v 6.0",
+                    en: "A high-contrast black and white fine art portrait of [Subject - e.g. an old man with wrinkles], dramatic side lighting, deep shadows, highlighting facial expressions and textures, timeless mood, monochrome --ar 1:1 --v 6.0"
                 }
             }
         ];
@@ -4935,46 +4929,8 @@
             const promptsTab = document.getElementById('navItemPrompts');
             if (promptsTab) promptsTab.classList.add('active');
             
-            renderPromptsCategories();
             renderPrompts();
         };
-
-        // Render Prompts Categories Filter
-        function renderPromptsCategories() {
-            const catContainer = document.getElementById('promptsCategories');
-            if (!catContainer) return;
-            catContainer.innerHTML = '';
-            
-            const lang = currentLang;
-            const uniqueCats = ['all'];
-            promptsData.forEach(p => {
-                const catName = p.category[lang] || p.category.tr;
-                if (!uniqueCats.includes(catName)) {
-                    uniqueCats.push(catName);
-                }
-            });
-            
-            uniqueCats.forEach(cat => {
-                const isSelected = activePromptsCategory === cat;
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                
-                btn.className = isSelected 
-                    ? "px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 text-white shadow-lg shadow-blue-500/25 border border-blue-500/30 transition-all shrink-0"
-                    : "px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800/40 text-slate-400 hover:text-white border border-white/5 transition-all shrink-0";
-                
-                btn.innerText = cat === 'all' 
-                    ? (translations[lang]?.all || 'All') 
-                    : cat;
-                
-                btn.onclick = () => {
-                    activePromptsCategory = cat;
-                    renderPromptsCategories();
-                    renderPrompts();
-                };
-                catContainer.appendChild(btn);
-            });
-        }
 
         // Render Prompts List
         function renderPrompts() {
@@ -4983,13 +4939,8 @@
             grid.innerHTML = '';
             
             const lang = currentLang;
-            const filtered = promptsData.filter(p => {
-                if (activePromptsCategory === 'all') return true;
-                const catName = p.category[lang] || p.category.tr;
-                return catName === activePromptsCategory;
-            });
             
-            filtered.forEach(p => {
+            promptsData.forEach(p => {
                 const title = p.title[lang] || p.title.tr;
                 const desc = p.desc[lang] || p.desc.tr;
                 const text = p.text[lang] || p.text.tr;
@@ -4998,22 +4949,29 @@
                 const card = document.createElement('div');
                 card.className = "glass-card p-5 rounded-xl border border-white/5 hover:border-blue-500/30 transition-all duration-300 flex flex-col justify-between hover:bg-slate-800/60";
                 
-                card.innerHTML = `
-                    <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">${cat}</span>
-                        </div>
-                        <h3 class="font-bold text-lg text-white mb-2">${title}</h3>
-                        <p class="text-sm text-slate-400 mb-4 leading-relaxed">${desc}</p>
-                        <div class="bg-slate-950/80 border border-white/5 rounded-lg p-3 text-xs text-slate-300 font-mono mb-4 whitespace-pre-wrap select-all relative group-hover:bg-slate-950">
-                            ${text}
-                        </div>
+                const infoDiv = document.createElement('div');
+                infoDiv.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">${escapeHTML(cat)}</span>
                     </div>
-                    <button onclick="copyPromptText('${text.replace(/'/g, "\\'")}')" class="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium shadow-lg shadow-blue-900/30 transition-all active:scale-98">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 002 2h2a2 2 0 01-2 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
-                        <span>\${lang === 'tr' ? 'Kopyala' : 'Copy'}</span>
-                    </button>
+                    <h3 class="font-bold text-lg text-white mb-2">${escapeHTML(title)}</h3>
+                    <p class="text-sm text-slate-400 mb-4 leading-relaxed">${escapeHTML(desc)}</p>
+                    <div class="bg-slate-950/80 border border-white/5 rounded-lg p-3 text-xs text-slate-300 font-mono mb-4 whitespace-pre-wrap select-all relative group-hover:bg-slate-950"></div>
                 `;
+                infoDiv.querySelector('.font-mono').textContent = text;
+                card.appendChild(infoDiv);
+                
+                const copyBtn = document.createElement('button');
+                copyBtn.className = "flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium shadow-lg shadow-blue-900/30 transition-all active:scale-98";
+                copyBtn.innerHTML = `
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 01-2 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                    <span>${lang === 'tr' ? 'Kopyala' : 'Copy'}</span>
+                `;
+                copyBtn.addEventListener('click', () => {
+                    copyPromptText(text);
+                });
+                
+                card.appendChild(copyBtn);
                 grid.appendChild(card);
             });
         }
@@ -5171,13 +5129,13 @@
 
             // Bottom Nav Localization
             if (document.getElementById('navTextHome')) document.getElementById('navTextHome').innerText = t.nav?.home || 'Home';
-            if (document.getElementById('navTextPrompts')) document.getElementById('navTextPrompts').innerText = t.nav?.prompts || 'Prompts';
+            if (document.getElementById('navTextPrompts')) document.getElementById('navTextPrompts').innerText = t.nav?.prompts || 'Photo';
             if (document.getElementById('navTextAssistant')) document.getElementById('navTextAssistant').innerText = t.nav?.assistant || 'ASSISTANT';
             if (document.getElementById('navTextFavorites')) document.getElementById('navTextFavorites').innerText = t.nav?.favorites || 'Favorites';
 
             // Prompts Section Header Localization
-            if (document.getElementById('promptsTitle')) document.getElementById('promptsTitle').innerText = t.prompts?.title || 'Pratik AI Promptları';
-            if (document.getElementById('promptsSubtitle')) document.getElementById('promptsSubtitle').innerText = t.prompts?.subtitle || 'Kopyalayın, boşlukları doldurun ve dilediğiniz yapay zekaya göndererek kullanın!';
+            if (document.getElementById('promptsTitle')) document.getElementById('promptsTitle').innerText = t.prompts?.title || 'Photo Generation Prompts';
+            if (document.getElementById('promptsSubtitle')) document.getElementById('promptsSubtitle').innerText = t.prompts?.subtitle || 'Ready-made pose, angle, and lighting templates to generate stunning images.';
 
             // Trends Header Localization
             if (document.getElementById('trendsHeader')) {
@@ -6544,7 +6502,7 @@
                 <svg class="w-6 h-6 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
                 </svg>
-                <span id="navTextPrompts" class="text-xs font-medium">Promptlar</span>
+                <span id="navTextPrompts" class="text-xs font-medium">Fotoğraf</span>
             </div>
 
             <!-- AI FAB (Center) -->
