@@ -5746,6 +5746,28 @@
             appendMessage(txt, 'user');
             input.value = '';
 
+            // Günlük Limit Kontrolü (10 Mesaj)
+            const limit = 10;
+            const today = new Date().toDateString();
+            const savedDate = localStorage.getItem('firtina_ai_daily_usage_date');
+            let count = parseInt(localStorage.getItem('firtina_ai_daily_usage_count') || '0', 10);
+
+            if (savedDate !== today) {
+                localStorage.setItem('firtina_ai_daily_usage_date', today);
+                count = 0;
+                localStorage.setItem('firtina_ai_daily_usage_count', '0');
+            }
+
+            if (count >= limit) {
+                const offlineResponse = processOfflineQuery(txt);
+                appendMessage(`Bugünlük Yapay Zeka Asistanı limitinize (${limit} mesaj) ulaştınız. Yarın limitiniz yenilenecektir. Geçici olarak çevrimdışı yerel asistan modunda yanıt veriyorum:<br><br>${offlineResponse}<br><br><span class='text-xs opacity-50'>(Yerel mod kullanıldı)</span>`, 'bot');
+                const limitTextEl = document.getElementById('aiChatLimitText');
+                if (limitTextEl) {
+                    limitTextEl.innerText = '0';
+                }
+                return;
+            }
+
             // Yükleniyor Göstergesi
             const loadingId = 'loading-' + Date.now();
             const loadingMsg = document.createElement('div');
@@ -5755,7 +5777,7 @@
             document.getElementById('aiMessages').appendChild(loadingMsg);
             document.getElementById('aiMessages').scrollTop = document.getElementById('aiMessages').scrollHeight;
 
-            // A. Önce Online AI (Groq) Dene - HER ZAMAN DENE (Navigator.onLine bazen hatalı olabilir)
+            // A. Önce Online AI (Groq) Dene
             let aiResponse = await askGroqAI(txt);
 
             // Yükleniyor yazısını kaldır
@@ -5763,21 +5785,24 @@
             if (loader) loader.remove();
 
             // Hata kontrolü
-            // Hata kontrolü
             if (aiResponse && aiResponse.startsWith("DEBUG_ERROR:")) {
                 const errorDetail = aiResponse.replace("DEBUG_ERROR:", "").trim();
-               // "Online AI failed:", errorDetail);
-
-                // FALLBACK MODE (Sessiz geçiş)
+                // Online AI başarısız oldu (Yoğunluk, Kota vb.), Yerel Fallback'e geç
                 const offlineResponse = processOfflineQuery(txt);
-                appendMessage(offlineResponse + "<br><br><span class='text-xs opacity-50'>(Offline mod kullanıldı)</span>", 'bot');
+                appendMessage(`Sunucularımızda yoğunluk veya bağlantı sorunu yaşanıyor. Geçici olarak yerel asistan modunda yanıt veriyorum:<br><br>${offlineResponse}<br><br><span class='text-xs opacity-50'>(Yerel mod kullanıldı)</span>`, 'bot');
             } else if (aiResponse) {
-                // Başarılı cevap
+                // Başarılı cevap: Limiti bir artır
+                count++;
+                localStorage.setItem('firtina_ai_daily_usage_count', count.toString());
+                const remaining = Math.max(0, limit - count);
+                const limitTextEl = document.getElementById('aiChatLimitText');
+                if (limitTextEl) {
+                    limitTextEl.innerText = remaining;
+                }
                 appendMessage(aiResponse, 'bot');
             } else {
-                // null döndüyse
                 const offlineResponse = processOfflineQuery(txt);
-                appendMessage(offlineResponse + "<br><br><span class='text-xs opacity-50'>(Offline mod kullanıldı)</span>", 'bot');
+                appendMessage(offlineResponse + "<br><br><span class='text-xs opacity-50'>(Yerel mod kullanıldı)</span>", 'bot');
             }
         }
 
@@ -5865,7 +5890,7 @@
             <div class="flex items-center gap-3">
                 <div class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)] animate-pulse">
                 </div>
-                <h3 class="text-white font-semibold">AI Asistan (Offline)</h3>
+                <h3 class="text-white font-semibold" id="aiChatHeaderTitle">Fırtına AI Asistanı</h3>
             </div>
             <button onclick="toggleAIChat()" type="button" class="text-slate-400 hover:text-white" aria-label="Kapat">
                 <svg class="w-5 h-5" style="fill:none; stroke:currentColor;" viewBox="0 0 24 24" aria-hidden="true">
@@ -5875,7 +5900,7 @@
             </button>
         </div>
         <div id="aiMessages" class="ai-messages">
-            <div class="ai-msg bot">Merhaba! Ne tür bir araç arıyorsunuz?</div>
+            <div class="ai-msg bot">Merhaba! Fırtına AI Asistanına hoş geldiniz. Size nasıl yardımcı olabilirim? (Bugünlük kalan yapay zeka limitiniz: <span id="aiChatLimitText" class="font-bold text-blue-400">10</span> mesaj)</div>
         </div>
         <div class="ai-input-area">
             <input type="text" id="aiInput" class="ai-input" placeholder="Örn: Sunum aracı..."
@@ -5969,16 +5994,14 @@
 
         // Skip Button Logic (GEÇ)
         window.handleSkipClick = () => {
-            if (confirm("Emin misiniz? (Tekrar sorulmayacak)")) {
-                localStorage.setItem('firtina_ai_user_registered', 'true');
-                const modal = document.getElementById('leadModal');
-                if (modal) {
-                    modal.classList.remove('active');
-                    setTimeout(() => {
-                        modal.style.display = 'none';
-                        modal.remove();
-                    }, 500);
-                }
+            localStorage.setItem('firtina_ai_user_registered', 'true');
+            const modal = document.getElementById('leadModal');
+            if (modal) {
+                modal.classList.remove('active');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                    modal.remove();
+                }, 500);
             }
         };
 
@@ -6042,6 +6065,21 @@
                 win.classList.remove('active');
             } else {
                 win.classList.add('active');
+                
+                // Günlük limit güncelleme
+                const limit = 10;
+                const today = new Date().toDateString();
+                const savedDate = localStorage.getItem('firtina_ai_daily_usage_date');
+                let count = parseInt(localStorage.getItem('firtina_ai_daily_usage_count') || '0', 10);
+                if (savedDate !== today) {
+                    count = 0;
+                }
+                const remaining = Math.max(0, limit - count);
+                const limitTextEl = document.getElementById('aiChatLimitText');
+                if (limitTextEl) {
+                    limitTextEl.innerText = remaining;
+                }
+
                 // Focus input after animation completes
                 setTimeout(() => {
                     const input = document.getElementById('aiInput');
