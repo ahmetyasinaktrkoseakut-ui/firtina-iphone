@@ -1653,6 +1653,24 @@
         <div id="emptyState" class="hidden text-center py-12 text-slate-500">
             <p>Aradığınız kriterlere uygun araç bulunamadı.</p>
         </div>
+
+        <!-- Prompts Screen (Gizli) -->
+        <div id="promptsScreen" class="hidden">
+            <div class="text-center max-w-xl mx-auto mb-10">
+                <h2 class="text-2xl md:text-3xl font-black text-white mb-3" id="promptsTitle">Pratik AI Promptları</h2>
+                <p class="text-slate-400 text-sm" id="promptsSubtitle">Kopyalayın, boşlukları doldurun ve dilediğiniz yapay zekaya göndererek kullanın!</p>
+            </div>
+            
+            <!-- Kategori Filtre Butonları -->
+            <div class="flex gap-2 overflow-x-auto pb-4 mb-6 scrollbar-none" id="promptsCategories">
+                <!-- Javascript ile doldurulacak -->
+            </div>
+            
+            <!-- Prompt Kartları -->
+            <div id="promptsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Javascript ile doldurulacak -->
+            </div>
+        </div>
     </main>
 
     <!-- Professional Legal Footer -->
@@ -1724,7 +1742,8 @@
                     btnEnter: "Uygulamaya Gir 🚀"
                 },
                 aiAssistant: { fabLabel: "Araç Bul", headerTitle: "AI Asistan", welcomeMsg: "Merhaba, FIRTINA AI olarak sana yardımcı olabilirim. Ne için araç arıyorsun?", inputPlaceholder: "Örn: Sunum hazırlama aracı...", noResults: "Maalesef bu konuda bir araç bulamadım. 😔<br>Farklı kelimelerle tekrar dener misin?", resultsHeader: "İşte bulduğum en iyi araçlar: 👇<br>", viewBtn: "İncele" },
-                nav: { home: "Ana Sayfa", assistant: "ASİSTAN", favorites: "Favoriler" },
+                nav: { home: "Ana Sayfa", assistant: "ASİSTAN", prompts: "Promptlar", favorites: "Favoriler" },
+                prompts: { title: "Pratik AI Promptları", subtitle: "Kopyalayın, boşlukları doldurun ve dilediğiniz yapay zekaya göndererek kullanın!" },
                 catDesc: {
                     Kodlama: "Yazılım asistanları ve araçları",
                     Görsel: "Sanat ve tasarım stüdyosu",
@@ -1756,7 +1775,8 @@
                 cats: { "Genel": "General", "Metin": "Text", "Görsel": "Image", "Video": "Video", "3D": "3D", "Müzik": "Music", "Kodlama": "Coding", "Akademik": "Academic", "Verimlilik": "Productivity", "Ses": "Voice", "Sohbet": "Chat" },
                 pricing: { "Ücretsiz": "Free", "Freemium": "Freemium", "Ücretli": "Paid", "Deneme Sürümü": "Trial" },
                 aiAssistant: { fabLabel: "Find Tool", headerTitle: "AI Assistant (Offline)", welcomeMsg: "Hello! 👋<br>I can help you offline. What are you looking for?", inputPlaceholder: "Ex: Presentation tool...", noResults: "Sorry, nothing found. 😔<br>Try other keywords?", resultsHeader: "Here are the best tools: 👇<br>", viewBtn: "View" },
-                nav: { home: "Home", assistant: "ASSISTANT", favorites: "Favorites" },
+                nav: { home: "Home", assistant: "ASSISTANT", prompts: "Prompts", favorites: "Favorites" },
+                prompts: { title: "Practical AI Prompts", subtitle: "Copy, fill in the blanks, and send to any AI to use!" },
                 catDesc: {
                     Kodlama: "Coding assistants & tools",
                     Görsel: "Art & design studio",
@@ -4805,6 +4825,231 @@
         let favorites = []; // Favoriler dizisi
         let activeCategory = null;
         let searchQuery = '';
+        let activePromptsCategory = 'all';
+
+        // GÜNLÜK KULLANICI ODAKLI PRATİK PROMPTLAR
+        const promptsData = [
+            {
+                id: 1,
+                category: { tr: "Günlük Yazım", en: "Daily Writing" },
+                title: { tr: "Resmi E-Posta / İzin İsteme", en: "Formal Email / Leave Request" },
+                desc: { tr: "İş veya okul için mazeret belirterek izin talep e-postası yazar.", en: "Writes a formal email requesting a leave with a reason." },
+                text: { 
+                    tr: "Yöneticime/Öğretmenime yazmak için, [Mazeretiniz - Örn: hasta olduğum] gerekçesiyle [Gün Sayısı - Örn: 2 gün] izin talep ettiğim, son derece kibar ve resmi bir e-posta taslağı yazar mısın?",
+                    en: "Write a polite and formal email to my manager/teacher requesting a leave of [Number of days - e.g. 2 days] due to [Reason - e.g. feeling unwell]."
+                }
+            },
+            {
+                id: 2,
+                category: { tr: "Günlük Yazım", en: "Daily Writing" },
+                title: { tr: "Yazım Hatalarını ve Anlatımı Düzeltme", en: "Grammar & Style Improver" },
+                desc: { tr: "Yazdığınız bozuk veya hatalı metinleri akıcı ve profesyonel yapar.", en: "Improves your draft text to make it sound fluent and clear." },
+                text: { 
+                    tr: "Aşağıdaki metni anlamını bozmadan, tüm yazım ve imla hatalarını düzelterek, kulağa daha akıcı ve düzgün gelecek şekilde yeniden düzenle: [Düzeltilecek metniniz]",
+                    en: "Please rewrite the following text to correct all grammar/spelling errors and make it sound more natural and professional: [Your text here]"
+                }
+            },
+            {
+                id: 3,
+                category: { tr: "Sosyal Medya", en: "Social Media" },
+                title: { tr: "Instagram Fotoğraf Açıklaması", en: "Instagram Caption Writer" },
+                desc: { tr: "Paylaşacağınız fotoğraflar için kısa, eğlenceli ve emoji içeren yazılar yazar.", en: "Creates short, engaging captions with emojis for your posts." },
+                text: { 
+                    tr: "[Fotoğrafın çekildiği yer veya detay - Örn: deniz kenarında kahve içerken] çekildiğim bir fotoğraf için Instagram'da paylaşabileceğim, kısa, samimi ve emoji içeren 3 farklı açıklama önerisi yazar mısın?",
+                    en: "Write 3 short and engaging Instagram captions with emojis for a photo of [Photo details - e.g. drinking coffee by the beach]."
+                }
+            },
+            {
+                id: 4,
+                category: { tr: "Sosyal Medya", en: "Social Media" },
+                title: { tr: "Özel Gün Tebrik Mesajı", en: "Special Day Wish Creator" },
+                desc: { tr: "Doğum günü, bayram gibi özel günler için sıcak tebrik mesajları yazar.", en: "Creates warm wishes for birthdays, holidays, or anniversaries." },
+                text: { 
+                    tr: "[Kişi - Örn: canım annem / yakın arkadaşım] için [Özel Gün - Örn: doğum günü / yeni yıl] kutlaması amacıyla gönderebileceğim, samimi ve sevgi dolu bir tebrik mesajı hazırlar mısın?",
+                    en: "Write a warm and heartfelt message for [Person - e.g. my best friend] to wish them a happy [Event - e.g. birthday]."
+                }
+            },
+            {
+                id: 5,
+                category: { tr: "Ev & Günlük Yaşam", en: "Daily Life" },
+                title: { tr: "Evdeki Malzemelerle Yemek Tarifi", en: "Quick Recipe from Ingredients" },
+                desc: { tr: "Elinizde bulunan malzemelere göre pratik yemek fikirleri sunar.", en: "Suggests simple recipes based on ingredients you have at home." },
+                text: { 
+                    tr: "Elimde sadece [Malzemeleriniz - Örn: tavuk göğsü, patates, domates salçası] var. Bunları kullanarak yapabileceğim, pratik ve lezzetli bir yemek tarifi hazırlar mısın?",
+                    en: "I only have these ingredients at home: [List ingredients - e.g. chicken breast, potatoes, onions]. What is a simple and delicious recipe I can make with them?"
+                }
+            },
+            {
+                id: 6,
+                category: { tr: "Ev & Günlük Yaşam", en: "Daily Life" },
+                title: { tr: "Pratik Seyahat Planlayıcısı", en: "Quick Travel Itinerary" },
+                desc: { tr: "Gideceğiniz şehir için gezilecek yerleri ve pratik rotayı belirler.", en: "Creates a simple travel route and must-see places list." },
+                text: { 
+                    tr: "[Şehir Adı - Örn: Kapadokya / Roma] şehrine [Gün Sayısı - Örn: 3 günlük] bir gezi planlıyorum. Bana gezilmesi gereken en önemli yerleri içeren, yormayacak bir rota hazırlar mısın?",
+                    en: "I am planning a [Number of days - e.g. 2-day] trip to [City - e.g. Paris]. Please create a simple, stress-free travel itinerary with the best places to visit."
+                }
+            },
+            {
+                id: 7,
+                category: { tr: "Okul & Öğrenme", en: "Education & Learning" },
+                title: { tr: "Kitap, Konu veya Ödev Özeti", en: "Quick Study Summary" },
+                desc: { tr: "Uzun konuları veya kitapları en önemli 5 maddede hızlıca özetler.", en: "Summarizes long articles, books, or topics in 5 key bullet points." },
+                text: { 
+                    tr: "[Konu veya Kitap Adı - Örn: Fotosentez / Nutuk] hakkında en önemli ve bilinmesi gereken bilgileri içeren, 5 maddelik anlaşılır bir özet yazar mısın?",
+                    en: "Create a simple 5-bullet-point summary explaining [Topic or Book - e.g. photosynthesis] for a quick study guide."
+                }
+            },
+            {
+                id: 8,
+                category: { tr: "Okul & Öğrenme", en: "Education & Learning" },
+                title: { tr: "Soru Çözüm ve Mantık Yardımcısı", en: "Step-by-Step Question Solver" },
+                desc: { tr: "Çözemediğiniz soruların çözüm mantığını adım adım açıklar.", en: "Explains how to solve a question step-by-step with logic." },
+                text: { 
+                    tr: "Aşağıdaki sorunun çözüm yolunu, her adımı ve neden öyle yapıldığını çok basit bir dille açıklayarak gösterir misin: [Sorunuzu buraya yazın veya yapıştırın]",
+                    en: "Please solve the following question and explain the steps and logic behind each calculation in simple terms: [Your question here]"
+                }
+            }
+        ];
+
+        // Prompts Screen Toggle
+        window.showPromptsScreen = () => {
+            const catGrid = document.getElementById('categoryGrid');
+            const toolsG = document.getElementById('toolsGrid');
+            const promptsS = document.getElementById('promptsScreen');
+            const backBtn = document.getElementById('backToCategoriesBtn');
+            const emptySt = document.getElementById('emptyState');
+            
+            if (catGrid) { catGrid.classList.add('hidden'); catGrid.style.display = 'none'; }
+            if (toolsG) { toolsG.classList.add('hidden'); toolsG.style.display = 'none'; }
+            if (backBtn) { backBtn.classList.add('hidden'); backBtn.style.display = 'none'; }
+            if (emptySt) { emptySt.classList.add('hidden'); emptySt.style.display = 'none'; }
+            
+            if (promptsS) {
+                promptsS.classList.remove('hidden');
+                promptsS.style.display = 'block';
+            }
+            
+            document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            const promptsTab = document.getElementById('navItemPrompts');
+            if (promptsTab) promptsTab.classList.add('active');
+            
+            renderPromptsCategories();
+            renderPrompts();
+        };
+
+        // Render Prompts Categories Filter
+        function renderPromptsCategories() {
+            const catContainer = document.getElementById('promptsCategories');
+            if (!catContainer) return;
+            catContainer.innerHTML = '';
+            
+            const lang = currentLang;
+            const uniqueCats = ['all'];
+            promptsData.forEach(p => {
+                const catName = p.category[lang] || p.category.tr;
+                if (!uniqueCats.includes(catName)) {
+                    uniqueCats.push(catName);
+                }
+            });
+            
+            uniqueCats.forEach(cat => {
+                const isSelected = activePromptsCategory === cat;
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                
+                btn.className = isSelected 
+                    ? "px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 text-white shadow-lg shadow-blue-500/25 border border-blue-500/30 transition-all shrink-0"
+                    : "px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800/40 text-slate-400 hover:text-white border border-white/5 transition-all shrink-0";
+                
+                btn.innerText = cat === 'all' 
+                    ? (translations[lang]?.all || 'All') 
+                    : cat;
+                
+                btn.onclick = () => {
+                    activePromptsCategory = cat;
+                    renderPromptsCategories();
+                    renderPrompts();
+                };
+                catContainer.appendChild(btn);
+            });
+        }
+
+        // Render Prompts List
+        function renderPrompts() {
+            const grid = document.getElementById('promptsGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            
+            const lang = currentLang;
+            const filtered = promptsData.filter(p => {
+                if (activePromptsCategory === 'all') return true;
+                const catName = p.category[lang] || p.category.tr;
+                return catName === activePromptsCategory;
+            });
+            
+            filtered.forEach(p => {
+                const title = p.title[lang] || p.title.tr;
+                const desc = p.desc[lang] || p.desc.tr;
+                const text = p.text[lang] || p.text.tr;
+                const cat = p.category[lang] || p.category.tr;
+                
+                const card = document.createElement('div');
+                card.className = "glass-card p-5 rounded-xl border border-white/5 hover:border-blue-500/30 transition-all duration-300 flex flex-col justify-between hover:bg-slate-800/60";
+                
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">${cat}</span>
+                        </div>
+                        <h3 class="font-bold text-lg text-white mb-2">${title}</h3>
+                        <p class="text-sm text-slate-400 mb-4 leading-relaxed">${desc}</p>
+                        <div class="bg-slate-950/80 border border-white/5 rounded-lg p-3 text-xs text-slate-300 font-mono mb-4 whitespace-pre-wrap select-all relative group-hover:bg-slate-950">
+                            ${text}
+                        </div>
+                    </div>
+                    <button onclick="copyPromptText('${text.replace(/'/g, "\\'")}')" class="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium shadow-lg shadow-blue-900/30 transition-all active:scale-98">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 002 2h2a2 2 0 01-2 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                        <span>\${lang === 'tr' ? 'Kopyala' : 'Copy'}</span>
+                    </button>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Copy Helper
+        window.copyPromptText = (text) => {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    if (window.showInAppNotification) {
+                        window.showInAppNotification(currentLang === 'tr' ? "Başarılı" : "Success", currentLang === 'tr' ? "Prompt kopyalandı!" : "Prompt copied!");
+                    }
+                }).catch(err => {
+                    fallbackCopy(text);
+                });
+            } else {
+                fallbackCopy(text);
+            }
+        };
+
+        function fallbackCopy(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                if (window.showInAppNotification) {
+                    window.showInAppNotification(currentLang === 'tr' ? "Başarılı" : "Success", currentLang === 'tr' ? "Prompt kopyalandı!" : "Prompt copied!");
+                }
+            } catch (err) {
+                alert(currentLang === 'tr' ? "Kopyalanamadı." : "Could not copy.");
+            }
+            document.body.removeChild(textArea);
+        }
 
 
 
@@ -4926,8 +5171,13 @@
 
             // Bottom Nav Localization
             if (document.getElementById('navTextHome')) document.getElementById('navTextHome').innerText = t.nav?.home || 'Home';
+            if (document.getElementById('navTextPrompts')) document.getElementById('navTextPrompts').innerText = t.nav?.prompts || 'Prompts';
             if (document.getElementById('navTextAssistant')) document.getElementById('navTextAssistant').innerText = t.nav?.assistant || 'ASSISTANT';
             if (document.getElementById('navTextFavorites')) document.getElementById('navTextFavorites').innerText = t.nav?.favorites || 'Favorites';
+
+            // Prompts Section Header Localization
+            if (document.getElementById('promptsTitle')) document.getElementById('promptsTitle').innerText = t.prompts?.title || 'Pratik AI Promptları';
+            if (document.getElementById('promptsSubtitle')) document.getElementById('promptsSubtitle').innerText = t.prompts?.subtitle || 'Kopyalayın, boşlukları doldurun ve dilediğiniz yapay zekaya göndererek kullanın!';
 
             // Trends Header Localization
             if (document.getElementById('trendsHeader')) {
@@ -5163,6 +5413,19 @@
             activeCategory = null;
             categoryGrid.classList.remove('hidden');
             toolsGrid.classList.add('hidden');
+            
+            const promptsS = document.getElementById('promptsScreen');
+            if (promptsS) {
+                promptsS.classList.add('hidden');
+                promptsS.style.display = 'none';
+            }
+
+            // Bottom Nav Active Classes
+            document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            const homeTab = document.getElementById('navItemHome');
+            if (homeTab) homeTab.classList.add('active');
 
             // Back button
             backToCategoriesBtn.classList.add('hidden');
@@ -5195,6 +5458,24 @@
 
             categoryGrid.classList.add('hidden');
             toolsGrid.classList.remove('hidden');
+
+            const promptsS = document.getElementById('promptsScreen');
+            if (promptsS) {
+                promptsS.classList.add('hidden');
+                promptsS.style.display = 'none';
+            }
+
+            // Bottom Nav Active Classes
+            document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            if (activeCategory === 'favorites') {
+                const favTab = document.getElementById('navItemFavorites');
+                if (favTab) favTab.classList.add('active');
+            } else {
+                const homeTab = document.getElementById('navItemHome');
+                if (homeTab) homeTab.classList.add('active');
+            }
 
             // Hide sponsor banner in tools view
             const sponsorContainer = document.getElementById('sponsorContainer');
@@ -6251,11 +6532,19 @@
     <nav id="bottomNav" class="bottom-nav flex hidden" style="display: none;">
         <div class="nav-content">
             <!-- Home -->
-            <div onclick="returnToCategories()" class="nav-item active">
+            <div id="navItemHome" onclick="returnToCategories()" class="nav-item active">
                 <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
                     <path d="M12 3l10 9h-3v8h-5v-6h-4v6h-5v-8h-3l10-9z" />
                 </svg>
                 <span id="navTextHome" class="text-xs font-medium">Ana Sayfa</span>
+            </div>
+
+            <!-- Prompts -->
+            <div id="navItemPrompts" onclick="showPromptsScreen()" class="nav-item">
+                <svg class="w-6 h-6 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z" />
+                </svg>
+                <span id="navTextPrompts" class="text-xs font-medium">Promptlar</span>
             </div>
 
             <!-- AI FAB (Center) -->
@@ -6269,7 +6558,7 @@
             </div>
 
             <!-- Favorites -->
-            <div onclick="setCategory('favorites')" class="nav-item">
+            <div id="navItemFavorites" onclick="setCategory('favorites')" class="nav-item">
                 <svg class="w-6 h-6 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
                     <path
                         d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
