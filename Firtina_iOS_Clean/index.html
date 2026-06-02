@@ -7220,8 +7220,15 @@ class="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg tran
             if (document.getElementById('infoModalPrivacyBtn')) document.getElementById('infoModalPrivacyBtn').innerText = getTranslation(currentLang, 'infoModal.privacyBtn', 'Privacy Policy');
             if (document.getElementById('infoModalCloseBtn')) document.getElementById('infoModalCloseBtn').innerText = getTranslation(currentLang, 'infoModal.closeBtn', 'Close');
             
-            // Re-render prompts with the new language
-            renderPrompts();
+            // Sync all language select dropdowns in the DOM
+            document.querySelectorAll('#languageSelect').forEach(select => {
+                select.value = currentLang;
+            });
+
+            // Re-render all views to update text instantly
+            if (typeof renderCategories === 'function') renderCategories();
+            if (typeof renderTools === 'function') renderTools();
+            if (typeof renderPrompts === 'function') renderPrompts();
 
             // Trends Header Localization
             if (document.getElementById('trendsHeader')) {
