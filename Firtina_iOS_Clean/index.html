@@ -6558,406 +6558,768 @@ class="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg tran
         // YAPAY ZEKA GÖRSEL/FOTOĞRAF ÜRETİMİ PROMPTLARI (MIDJOURNEY & DALL-E)
         const promptsData = [
             {
-                id: 1,
-                category: { tr: "Poz & Kadraj", en: "Pose & Framing" },
-                title: { tr: "Portre Yakın Çekim", en: "Close-up Portrait" },
-                desc: { tr: "Yüz detaylarına, gözlere ve cilt dokusuna odaklanan profesyonel yakın çekim.", en: "Close-up portrait focusing on eyes, expression, and detailed skin texture." },
-                text: { 
-                    tr: "A close-up portrait of [Subject - e.g., a smiling woman], focusing on eyes, natural facial expression, detailed skin texture, soft bokeh background, photorealistic, shot on 85mm lens, 8k resolution --ar 4:5 --v 6.0",
-                    en: "A close-up portrait of [Subject - e.g., a smiling woman], focusing on eyes, natural facial expression, detailed skin texture, soft bokeh background, photorealistic, shot on 85mm lens, 8k resolution --ar 4:5 --v 6.0"
-                }
+                        "id": 1,
+                        "category": {
+                                    "tr": "Bilim Kurgu & Siberpunk",
+                                    "en": "Sci-Fi & Cyberpunk"
+                        },
+                        "title": {
+                                    "tr": "Neon Sokak Serserisi",
+                                    "en": "Neon Street Rebel"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde siberpunk deri ceketli karakter, neon yansımalı ıslak sokak.",
+                                    "en": "A realistic photograph of cyberpunk leather jacket, wet street, neon light reflections."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing an urban cyberpunk leather jacket with glowing LED strips, standing on a wet street with bright neon signs reflecting in puddles, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing an urban cyberpunk leather jacket with glowing LED strips, standing on a wet street with bright neon signs reflecting in puddles, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             },
             {
-                id: 2,
-                category: { tr: "Poz & Kadraj", en: "Pose & Framing" },
-                title: { tr: "Boydan Sokak Çekimi", en: "Full-Body Street Shot" },
-                desc: { tr: "Doğal yürüyüş halinde, boydan sokak stili ve zengin derinlik içeren kadraj.", en: "Full-body street style photograph with natural walking pose and background depth." },
-                text: { 
-                    tr: "A full-body street style photograph of [Subject - e.g., a young man in fashion clothing] walking in [Location - e.g., downtown Paris], candid shot, dynamic walking pose, urban background, natural daylight, shot on 35mm lens, realistic depth of field --ar 9:16 --v 6.0",
-                    en: "A full-body street style photograph of [Subject - e.g., a young man in fashion clothing] walking in [Location - e.g., downtown Paris], candid shot, dynamic walking pose, urban background, natural daylight, shot on 35mm lens, realistic depth of field --ar 9:16 --v 6.0"
-                }
+                        "id": 2,
+                        "category": {
+                                    "tr": "Bilim Kurgu & Siberpunk",
+                                    "en": "Sci-Fi & Cyberpunk"
+                        },
+                        "title": {
+                                    "tr": "Mecha Robot Pilotu",
+                                    "en": "Mecha Robot Pilot"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde devasa bir metal mecha robotun yüksek teknolojili kokpitindeki pilot.",
+                                    "en": "A realistic photograph of high-tech cockpit of a massive metallic mecha robot."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing a sleek, high-tech dark pilot plug-suit, sitting inside the realistic metallic cockpit of a giant mechanical robot, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing a sleek, high-tech dark pilot plug-suit, sitting inside the realistic metallic cockpit of a giant mechanical robot, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             },
             {
-                id: 3,
-                category: { tr: "Poz & Kadraj", en: "Pose & Framing" },
-                title: { tr: "Dramatik Kuş Bakışı", en: "Bird's Eye View" },
-                desc: { tr: "Yüksek açı dron kamerası tarzıyla çekilmiş derinlikli manzara ve kompozisyon.", en: "Cinematic drone photography style with rich landscape composition and details." },
-                text: { 
-                    tr: "A high-angle bird's eye view photograph of [Subject/Scene - e.g., a person walking through a colorful autumn forest path], cinematic composition, natural highlights and shadows, drone photography style, high details --ar 16:9 --v 6.0",
-                    en: "A high-angle bird's eye view photograph of [Subject/Scene - e.g., a person walking through a colorful autumn forest path], cinematic composition, natural highlights and shadows, drone photography style, high details --ar 16:9 --v 6.0"
-                }
+                        "id": 3,
+                        "category": {
+                                    "tr": "Bilim Kurgu & Siberpunk",
+                                    "en": "Sci-Fi & Cyberpunk"
+                        },
+                        "title": {
+                                    "tr": "Uzay Mekiği Kaptanı",
+                                    "en": "Spaceship Captain"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde yıldız gemisinin komuta köprüsünde galaksiyi izleyen kaptan.",
+                                    "en": "A realistic photograph of futuristic captain on the command bridge of a starship."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing a crisp futuristic military uniform with silver badges, standing on the command bridge of a massive starship overlooking the galaxy, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing a crisp futuristic military uniform with silver badges, standing on the command bridge of a massive starship overlooking the galaxy, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             },
             {
-                id: 4,
-                category: { tr: "Poz & Kadraj", en: "Pose & Framing" },
-                title: { tr: "Dinamik Aksiyon Çekimi", en: "Dynamic Action Shot" },
-                desc: { tr: "Koşma veya zıplama gibi hızlı anları havada sabitleyen net stüdyo çekimi.", en: "High-speed shutter shot freezing fast movements like jumping or dancing." },
-                text: { 
-                    tr: "A dynamic action shot of [Subject - e.g., a dancer leaping in the air], freezing the motion, clothing texture flying, detailed expression, high shutter speed, dramatic studio lighting, dark background --ar 16:9 --v 6.0",
-                    en: "A dynamic action shot of [Subject - e.g., a dancer leaping in the air], freezing the motion, clothing texture flying, detailed expression, high shutter speed, dramatic studio lighting, dark background --ar 16:9 --v 6.0"
-                }
+                        "id": 4,
+                        "category": {
+                                    "tr": "Bilim Kurgu & Siberpunk",
+                                    "en": "Sci-Fi & Cyberpunk"
+                        },
+                        "title": {
+                                    "tr": "Mars Kolonisti",
+                                    "en": "Mars Colonist"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde Mars kızıl kumlarında, arka planda cam kubbelerle duran astronot.",
+                                    "en": "A realistic photograph of astronaut standing on the red sandy surface of mars."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing a realistic, slightly dusty modern space suit with oxygen tubes, standing on the red sandy surface of Mars with glass domes in the background, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing a realistic, slightly dusty modern space suit with oxygen tubes, standing on the red sandy surface of Mars with glass domes in the background, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             },
             {
-                id: 5,
-                category: { tr: "Poz & Kadraj", en: "Pose & Framing" },
-                title: { tr: "Hollanda Açısı", en: "Dutch Angle Shot" },
-                desc: { tr: "Eğik ufuk çizgisiyle dinamik ve dramatik bir gerilim hissi yaratan sinematik kadraj.", en: "A cinematic Dutch angle shot creating a dynamic and dramatic sense of tension." },
-                text: { 
-                    tr: "A cinematic Dutch angle shot of [Subject - e.g., a vintage car driving fast on a wet road], tilted horizon, dynamic perspective, reflection of street lights, high contrast, action mood --ar 16:9 --v 6.0",
-                    en: "A cinematic Dutch angle shot of [Subject - e.g., a vintage car driving fast on a wet road], tilted horizon, dynamic perspective, reflection of street lights, high contrast, action mood --ar 16:9 --v 6.0"
-                }
+                        "id": 5,
+                        "category": {
+                                    "tr": "Bilim Kurgu & Siberpunk",
+                                    "en": "Sci-Fi & Cyberpunk"
+                        },
+                        "title": {
+                                    "tr": "Siber-Samuray",
+                                    "en": "Cyber-Samurai"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde yağmurlu siberpunk şehrinde, ışıklı enerji kılıçlı samuray.",
+                                    "en": "A realistic photograph of samurai holding an energy sword in a rainy cyberpunk city."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing futuristic high-tech samurai armor with glowing neon edges, holding a deactivated energy sword, standing in a rainy cyberpunk city, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing futuristic high-tech samurai armor with glowing neon edges, holding a deactivated energy sword, standing in a rainy cyberpunk city, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             },
             {
-                id: 6,
-                category: { tr: "Poz & Kadraj", en: "Pose & Framing" },
-                title: { tr: "Makro Göz Çekimi", en: "Macro Eye Close-up" },
-                desc: { tr: "Gözün iris detaylarını, yansımaları ve kirpik dokusunu gösteren aşırı yakın çekim.", en: "An extreme macro close-up of a human eye showing details in the iris and reflection." },
-                text: { 
-                    tr: "An extreme macro close-up photograph of a [Color - e.g., green] eye, focusing on iris details, reflections on the pupil, visible eyelashes, sharp textures, professional macro lens, high-definition --ar 1:1 --v 6.0",
-                    en: "An extreme macro close-up photograph of a [Color - e.g., green] eye, focusing on iris details, reflections on the pupil, visible eyelashes, sharp textures, professional macro lens, high-definition --ar 1:1 --v 6.0"
-                }
+                        "id": 6,
+                        "category": {
+                                    "tr": "Bilim Kurgu & Siberpunk",
+                                    "en": "Sci-Fi & Cyberpunk"
+                        },
+                        "title": {
+                                    "tr": "Galaktik İmparator",
+                                    "en": "Galactic Emperor"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde fütüristik gezegen şehrine bakan tahtında oturan hükümdar.",
+                                    "en": "A realistic photograph of emperor on a massive throne overlooking a futuristic city."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing extravagant futuristic royal robes with gold accents, sitting on a massive sleek throne overlooking a futuristic planetary city, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing extravagant futuristic royal robes with gold accents, sitting on a massive sleek throne overlooking a futuristic planetary city, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             },
             {
-                id: 7,
-                category: { tr: "Poz & Kadraj", en: "Pose & Framing" },
-                title: { tr: "Omuz Üstü Çekim", en: "Over-the-Shoulder Shot" },
-                desc: { tr: "Bir karakterin omzunun arkasından diğer konuya odaklanan sinematik anlatım kadrajı.", en: "An over-the-shoulder shot focusing on the secondary subject with a cinema look." },
-                text: { 
-                    tr: "An over-the-shoulder shot of [Subject - e.g., a woman sitting in a cafe] talking to [Person - e.g., an old man whose shoulder is in the foreground], cinema style, shallow depth of field, natural lighting --ar 16:9 --v 6.0",
-                    en: "An over-the-shoulder shot of [Subject - e.g., a woman sitting in a cafe] talking to [Person - e.g., an old man whose shoulder is in the foreground], cinema style, shallow depth of field, natural lighting --ar 16:9 --v 6.0"
-                }
+                        "id": 7,
+                        "category": {
+                                    "tr": "Bilim Kurgu & Siberpunk",
+                                    "en": "Sci-Fi & Cyberpunk"
+                        },
+                        "title": {
+                                    "tr": "Distopik Savaşçı",
+                                    "en": "Dystopian Warrior"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde yıkılmış bir metropolün tozlu harabelerinde taktiksel savaşçı.",
+                                    "en": "A realistic photograph of tactical post-apocalyptic warrior in a ruined megacity."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing rugged post-apocalyptic tactical gear and a dark scarf, standing in the ruins of a destroyed concrete megacity, cinematic dust in the air, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing rugged post-apocalyptic tactical gear and a dark scarf, standing in the ruins of a destroyed concrete megacity, cinematic dust in the air, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             },
             {
-                id: 8,
-                category: { tr: "Poz & Kadraj", en: "Pose & Framing" },
-                title: { tr: "Siluet Çekimi", en: "Low-Angle Silhouette" },
-                desc: { tr: "Ters ışıkta konunun sadece hatlarını ve gölgesini vurgulayan alt açı kompozisyonu.", en: "A low-angle silhouette photograph highlighting the outline and shadow in backlighting." },
-                text: { 
-                    tr: "A low-angle silhouette photograph of [Subject - e.g., a lone traveler on a hill], sunset background, strong backlight, golden sky, high contrast, minimalist composition --ar 3:2 --v 6.0",
-                    en: "A low-angle silhouette photograph of [Subject - e.g., a lone traveler on a hill], sunset background, strong backlight, golden sky, high contrast, minimalist composition --ar 3:2 --v 6.0"
-                }
+                        "id": 8,
+                        "category": {
+                                    "tr": "Bilim Kurgu & Siberpunk",
+                                    "en": "Sci-Fi & Cyberpunk"
+                        },
+                        "title": {
+                                    "tr": "Zaman Yolcusu",
+                                    "en": "Time Traveler"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde zaman laboratuvarında, vintage ve fütüristik giyimli karakter.",
+                                    "en": "A realistic photograph of character in a time lab, mixing vintage and futuristic clothing."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing a mix of highly advanced futuristic tech-wear and a classic vintage trench coat, standing inside a glowing time-machine laboratory, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing a mix of highly advanced futuristic tech-wear and a classic vintage trench coat, standing inside a glowing time-machine laboratory, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             },
             {
-                id: 9,
-                category: { tr: "Poz & Kadraj", en: "Pose & Framing" },
-                title: { tr: "Simetrik Merkez Kadraj", en: "Symmetrical Centered Shot" },
-                desc: { tr: "Konunun tam ortalandığı, mimari ve estetik dengenin ön planda olduğu minimal kompozisyon.", en: "A symmetrical centered shot emphasizing architectural balance and minimalism." },
-                text: { 
-                    tr: "A symmetrical centered shot of [Subject - e.g., a classic library aisle], leading lines, perfect alignment, high details, cinematic lighting, architectural aesthetics --ar 16:9 --v 6.0",
-                    en: "A symmetrical centered shot of [Subject - e.g., a classic library aisle], leading lines, perfect alignment, high details, cinematic lighting, architectural aesthetics --ar 16:9 --v 6.0"
-                }
+                        "id": 9,
+                        "category": {
+                                    "tr": "Tarih & Epik",
+                                    "en": "History & Epic"
+                        },
+                        "title": {
+                                    "tr": "Viking Jarl'ı",
+                                    "en": "Viking Jarl"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde karlı dağ yamacında, denizde viking gemisiyle tarihi savaşçı.",
+                                    "en": "A realistic photograph of historical viking warrior on a snowy cliff, sea longship."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing historical authentic viking fur and heavy leather armor, standing on a snowy mountain cliff with a wooden viking longship in the sea below, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing historical authentic viking fur and heavy leather armor, standing on a snowy mountain cliff with a wooden viking longship in the sea below, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             },
             {
-                id: 10,
-                category: { tr: "Poz & Kadraj", en: "Pose & Framing" },
-                title: { tr: "Geniş Açı Manzara Portresi", en: "Wide-Angle Environmental Portrait" },
-                desc: { tr: "Konuyu çevresiyle birlikte geniş açıda gösteren derinlikli hikaye anlatımı çekimi.", en: "A wide-angle environmental portrait showing the subject within their deep surroundings." },
-                text: { 
-                    tr: "A wide-angle environmental portrait of [Subject - e.g., an explorer standing inside a massive ice cave], epic scale, cinematic lighting, wide shot on 16mm lens, high details --ar 16:9 --v 6.0",
-                    en: "A wide-angle environmental portrait of [Subject - e.g., an explorer standing inside a massive ice cave], epic scale, cinematic lighting, wide shot on 16mm lens, high details --ar 16:9 --v 6.0"
-                }
+                        "id": 10,
+                        "category": {
+                                    "tr": "Tarih & Epik",
+                                    "en": "History & Epic"
+                        },
+                        "title": {
+                                    "tr": "Roma Gladyatörü",
+                                    "en": "Roman Gladiator"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde Kolezyum'un ortasında, güneş altında zırhlı gladyatör.",
+                                    "en": "A realistic photograph of gladiator in the middle of the sun-drenched roman colosseum."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing authentic ancient roman gladiator leather armor and metal shoulder pads, standing in the middle of the Colosseum with sand and bright sunlight, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing authentic ancient roman gladiator leather armor and metal shoulder pads, standing in the middle of the Colosseum with sand and bright sunlight, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             },
             {
-                id: 11,
-                category: { tr: "Işık & Atmosfer", en: "Lighting & Mood" },
-                title: { tr: "Yumuşak Altın Saat Işığı", en: "Golden Hour Portrait" },
-                desc: { tr: "Gün batımı saatlerinin sıcak, sarı tonlardaki doğal dış mekan güneş ışığı.", en: "Warm golden hour natural daylight with soft backlighting and lens flare." },
-                text: { 
-                    tr: "A warm golden hour outdoor photograph of [Subject - e.g., a couple smiling], soft warm sunlight, lens flare, backlighting, natural scenery background, emotional mood, shot on 50mm lens --ar 3:2 --v 6.0",
-                    en: "A warm golden hour outdoor photograph of [Subject - e.g., a couple smiling], soft warm sunlight, lens flare, backlighting, natural scenery background, emotional mood, shot on 50mm lens --ar 3:2 --v 6.0"
-                }
+                        "id": 11,
+                        "category": {
+                                    "tr": "Tarih & Epik",
+                                    "en": "History & Epic"
+                        },
+                        "title": {
+                                    "tr": "Eski Mısır Firavunu",
+                                    "en": "Egyptian Pharaoh"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde meşalelerle aydınlatılmış tapınakta altın takılarıyla firavun.",
+                                    "en": "A realistic photograph of pharaoh in gold garments inside a sandstone temple."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing highly detailed ancient Egyptian royal garments, gold jewelry and a headdress, standing inside a massive sandstone temple lit by torches, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing highly detailed ancient Egyptian royal garments, gold jewelry and a headdress, standing inside a massive sandstone temple lit by torches, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             },
             {
-                id: 12,
-                category: { tr: "Işık & Atmosfer", en: "Lighting & Mood" },
-                title: { tr: "Renkli Siberpunk Gece Işıkları", en: "Cyberpunk Neon Lighting" },
-                desc: { tr: "Gece vakti neon tabelalarının yüzdeki renkli yansımaları ve ıslak zemin detayları.", en: "Night portrait illuminated by cyberpunk neon signs with rain reflections." },
-                text: { 
-                    tr: "A cinematic night portrait of [Subject - e.g., a woman with sunglasses], illuminated by glowing neon signs of [Location - e.g., Tokyo street in rain], rain reflections on the ground, cyberpunk aesthetic, high contrast, teal and orange color grading --ar 16:9 --v 6.0",
-                    en: "A cinematic night portrait of [Subject - e.g., a woman with sunglasses], illuminated by glowing neon signs of [Location - e.g., Tokyo street in rain], rain reflections on the ground, cyberpunk aesthetic, high contrast, teal and orange color grading --ar 16:9 --v 6.0"
-                }
+                        "id": 12,
+                        "category": {
+                                    "tr": "Tarih & Epik",
+                                    "en": "History & Epic"
+                        },
+                        "title": {
+                                    "tr": "16. Yüzyıl Osmanlı Paşası",
+                                    "en": "16th-Century Ottoman Pasha"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde balkondan İstanbul Boğazı'na bakan Osmanlı paşası.",
+                                    "en": "A realistic photograph of ottoman pasha looking over the bosphorus from a balcony."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing historical 16th-century Ottoman royal silk clothing and a regal caftan, standing on a marble balcony overlooking the Bosphorus in the past, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing historical 16th-century Ottoman royal silk clothing and a regal caftan, standing on a marble balcony overlooking the Bosphorus in the past, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             },
             {
-                id: 13,
-                category: { tr: "Işık & Atmosfer", en: "Lighting & Mood" },
-                title: { tr: "Profesyonel Stüdyo Portresi", en: "Classic Studio Lighting" },
-                desc: { tr: "İş insanı tanıtım fotoğrafları için klasik üç noktalı yumuşak ışıklandırma.", en: "Classic three-point lighting setup for commercial studio portraits." },
-                text: { 
-                    tr: "A professional studio portrait of [Subject - e.g., a young corporate businessman], dark grey background, classic three-point lighting setup, soft key light, fill light, hair light, high detail, commercial photography style --ar 4:5 --v 6.0",
-                    en: "A professional studio portrait of [Subject - e.g., a young corporate businessman], dark grey background, classic three-point lighting setup, soft key light, fill light, hair light, high detail, commercial photography style --ar 4:5 --v 6.0"
-                }
+                        "id": 13,
+                        "category": {
+                                    "tr": "Tarih & Epik",
+                                    "en": "History & Epic"
+                        },
+                        "title": {
+                                    "tr": "Efsanevi Korsan Kaptanı",
+                                    "en": "Legendary Pirate Captain"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde fırtınalı gecede, korsan gemisinin ahşap güvertesinde kaptan.",
+                                    "en": "A realistic photograph of pirate captain on a wet wooden deck during a stormy night."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing an authentic 18th-century pirate captain coat and leather boots, standing on the wet wooden deck of a pirate ship during a stormy night, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing an authentic 18th-century pirate captain coat and leather boots, standing on the wet wooden deck of a pirate ship during a stormy night, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             },
             {
-                id: 14,
-                category: { tr: "Işık & Atmosfer", en: "Lighting & Mood" },
-                title: { tr: "Siyah Beyaz Sanatsal Portre", en: "Dramatic Black & White" },
-                desc: { tr: "Derin gölgelerle yüz hatlarını ve cilt dokularını vurgulayan yüksek kontrast.", en: "High contrast monochrome portrait with dramatic side shadows." },
-                text: { 
-                    tr: "A high-contrast black and white fine art portrait of [Subject - e.g., an old man with wrinkles], dramatic side lighting, deep shadows, highlighting facial expressions and textures, timeless mood, monochrome --ar 1:1 --v 6.0",
-                    en: "A high-contrast black and white fine art portrait of [Subject - e.g., an old man with wrinkles], dramatic side lighting, deep shadows, highlighting facial expressions and textures, timeless mood, monochrome --ar 1:1 --v 6.0"
-                }
+                        "id": 14,
+                        "category": {
+                                    "tr": "Tarih & Epik",
+                                    "en": "History & Epic"
+                        },
+                        "title": {
+                                    "tr": "Japon Şogunu",
+                                    "en": "Japanese Shogun"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde kiraz çiçeği yaprakları arasında samuray zırhlı şogun.",
+                                    "en": "A realistic photograph of shogun in samurai armor in a cherry blossom zen garden."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing traditional, highly detailed historical Japanese samurai armor, standing in a peaceful zen garden with falling pink cherry blossom petals, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing traditional, highly detailed historical Japanese samurai armor, standing in a peaceful zen garden with falling pink cherry blossom petals, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             },
             {
-                id: 15,
-                category: { tr: "Işık & Atmosfer", en: "Lighting & Mood" },
-                title: { tr: "Hacimsel Işık Süzmeleri", en: "Volumetric God Rays" },
-                desc: { tr: "Sisli havada ağaçların veya pencerelerin arasından süzülen dramatik güneş ışınları.", en: "Cinematic volumetric lighting with god rays shining through misty openings." },
-                text: { 
-                    tr: "Cinematic volumetric lighting with god rays shining through [Scene - e.g., tall forest pine trees in the morning fog], soft particles in the air, deep contrast, highly atmospheric --ar 16:9 --v 6.0",
-                    en: "Cinematic volumetric lighting with god rays shining through [Scene - e.g., tall forest pine trees in the morning fog], soft particles in the air, deep contrast, highly atmospheric --ar 16:9 --v 6.0"
-                }
+                        "id": 15,
+                        "category": {
+                                    "tr": "Tarih & Epik",
+                                    "en": "History & Epic"
+                        },
+                        "title": {
+                                    "tr": "Vahşi Batı Şerifi",
+                                    "en": "Wild West Sheriff"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde çöl kasabasının ortasında duran cowboy şapkalı şerif.",
+                                    "en": "A realistic photograph of sheriff standing in a dusty desert town street at high noon."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing a dusty cowboy hat, a leather duster coat, and a silver star badge, standing in the middle of a desert town street at high noon, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing a dusty cowboy hat, a leather duster coat, and a silver star badge, standing in the middle of a desert town street at high noon, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             },
             {
-                id: 16,
-                category: { tr: "Işık & Atmosfer", en: "Lighting & Mood" },
-                title: { tr: "Gece Sisli Sokak", en: "Misty Night Mood" },
-                desc: { tr: "Sokak lambalarının ışığı altında puslu, gizemli ve sinematik gece atmosferi.", en: "A moody, misty night photograph of a street under glowing streetlamps." },
-                text: { 
-                    tr: "A moody, misty night photograph of [Scene - e.g., an empty cobblestone alleyway], warm glow from ancient gas lamps, thick fog, wet pavement reflecting the light, cinematic atmosphere --ar 16:9 --v 6.0",
-                    en: "A moody, misty night photograph of [Scene - e.g., an empty cobblestone alleyway], warm glow from ancient gas lamps, thick fog, wet pavement reflecting the light, cinematic atmosphere --ar 16:9 --v 6.0"
-                }
+                        "id": 16,
+                        "category": {
+                                    "tr": "Tarih & Epik",
+                                    "en": "History & Epic"
+                        },
+                        "title": {
+                                    "tr": "Rönesans Asilzadesi",
+                                    "en": "Renaissance Noble"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde Floransa sarayının bahçesinde, nakışlı ipek kıyafetli asilzade.",
+                                    "en": "A realistic photograph of italian noble in embroidered garments in a florence palace."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing elegant, intricately embroidered 15th-century Italian renaissance clothing, standing in a beautiful Florence palace courtyard, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing elegant, intricately embroidered 15th-century Italian renaissance clothing, standing in a beautiful Florence palace courtyard, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             },
             {
-                id: 17,
-                category: { tr: "Işık & Atmosfer", en: "Lighting & Mood" },
-                title: { tr: "Sert Gölge Portresi", en: "High-Contrast Film Noir" },
-                desc: { tr: "Klasik dedektif filmlerindeki gibi panjurlardan süzülen çizgili, keskin ışık ve gölgeler.", en: "A high-contrast film noir style portrait with sharp window blind shadows." },
-                text: { 
-                    tr: "A classic film noir high-contrast portrait of [Subject - e.g., a man in a fedora], sharp horizontal blind shadows cast across his face, low key lighting, dark moody background, high details --ar 4:5 --v 6.0",
-                    en: "A classic film noir high-contrast portrait of [Subject - e.g., a man in a fedora], sharp horizontal blind shadows cast across his face, low key lighting, dark moody background, high details --ar 4:5 --v 6.0"
-                }
+                        "id": 17,
+                        "category": {
+                                    "tr": "Gerçekçi Fantastik",
+                                    "en": "Realistic Fantasy"
+                        },
+                        "title": {
+                                    "tr": "Yüce Elf Hükümdarı",
+                                    "en": "High Elven Ruler"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde ışıldayan bitkilerle dolu büyülü ormanda elven zırhlı elf.",
+                                    "en": "A realistic photograph of elf in silver leaf armor in a bioluminescent forest."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing elegant, silver elven plate armor with intricate leaf patterns, standing in a majestic magical forest with glowing bioluminescent plants, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing elegant, silver elven plate armor with intricate leaf patterns, standing in a majestic magical forest with glowing bioluminescent plants, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             },
             {
-                id: 18,
-                category: { tr: "Işık & Atmosfer", en: "Lighting & Mood" },
-                title: { tr: "Mum Işığı Atmosferi", en: "Warm Candlelight Portrait" },
-                desc: { tr: "Sadece mum aleviyle aydınlanan, yüz hatlarını yumuşatan sıcak ve samimi tonlar.", en: "A warm candlelight portrait with soft features and intimate warm tones." },
-                text: { 
-                    tr: "An intimate portrait of [Subject - e.g., a young woman], lit only by a single warm candle flame nearby, soft ambient glow, long shadows, emotional and cozy atmosphere, warm colors --ar 3:2 --v 6.0",
-                    en: "An intimate portrait of [Subject - e.g., a young woman], lit only by a single warm candle flame nearby, soft ambient glow, long shadows, emotional and cozy atmosphere, warm colors --ar 3:2 --v 6.0"
-                }
+                        "id": 18,
+                        "category": {
+                                    "tr": "Gerçekçi Fantastik",
+                                    "en": "Realistic Fantasy"
+                        },
+                        "title": {
+                                    "tr": "Buzul Şövalyesi",
+                                    "en": "Frost Knight"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde mavi buzdan devasa kalenin içinde, üzeri kar kaplı zırhlı şövalye.",
+                                    "en": "A realistic photograph of knight in frost-covered armor inside an ice castle."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing heavy, thick fantasy plate armor covered in frost and snow, standing inside a massive, freezing castle made of solid blue ice, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing heavy, thick fantasy plate armor covered in frost and snow, standing inside a massive, freezing castle made of solid blue ice, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             },
             {
-                id: 19,
-                category: { tr: "Işık & Atmosfer", en: "Lighting & Mood" },
-                title: { tr: "Çift Renkli Neon Estetiği", en: "Bi-color Neon Glow" },
-                desc: { tr: "Yüzün bir yanını pembe, diğer yanını mavi tonlarda aydınlatan kontrast neon ışıklar.", en: "A dual-tone neon portrait with magenta and cyan split lighting." },
-                text: { 
-                    tr: "A studio portrait of [Subject - e.g., a cybernetic model], illuminated by dual-tone split lighting, vivid magenta light on the left and bright cyan light on the right, high contrast, clean background --ar 16:9 --v 6.0",
-                    en: "A studio portrait of [Subject - e.g., a cybernetic model], illuminated by dual-tone split lighting, vivid magenta light on the left and bright cyan light on the right, high contrast, clean background --ar 16:9 --v 6.0"
-                }
+                        "id": 19,
+                        "category": {
+                                    "tr": "Gerçekçi Fantastik",
+                                    "en": "Realistic Fantasy"
+                        },
+                        "title": {
+                                    "tr": "Gizemli Büyücü",
+                                    "en": "Mysterious Wizard"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde gotik kütüphanede büyülü parlayan kitap okuyan büyücü.",
+                                    "en": "A realistic photograph of wizard reading a glowing spellbook in a dark gothic library."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing dark, flowing velvet mystical robes with silver embroidery, reading an ancient glowing spellbook in a dark gothic library filled with floating candles, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing dark, flowing velvet mystical robes with silver embroidery, reading an ancient glowing spellbook in a dark gothic library filled with floating candles, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             },
             {
-                id: 20,
-                category: { tr: "Işık & Atmosfer", en: "Lighting & Mood" },
-                title: { tr: "Doğal Bulutlu Gün Işığı", en: "Soft Overcast Diffused Light" },
-                desc: { tr: "Gölgeleri yumuşatan, parlamayı önleyen ve renk tonlarını eşitleyen doğal kapalı hava ışığı.", en: "A soft overcast diffused daylight portrait minimizing glare and shadows." },
-                text: { 
-                    tr: "A natural daylight portrait of [Subject - e.g., a girl in a wool sweater] shot on a cloudy overcast day, soft diffused light, no harsh shadows, natural colors, organic feel --ar 4:5 --v 6.0",
-                    en: "A natural daylight portrait of [Subject - e.g., a girl in a wool sweater] shot on a cloudy overcast day, soft diffused light, no harsh shadows, natural colors, organic feel --ar 4:5 --v 6.0"
-                }
+                        "id": 20,
+                        "category": {
+                                    "tr": "Gerçekçi Fantastik",
+                                    "en": "Realistic Fantasy"
+                        },
+                        "title": {
+                                    "tr": "Orman Koruyucusu",
+                                    "en": "Forest Guardian"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde sisli ormanda, parıldayan ateş böcekleriyle çevrili mistik figür.",
+                                    "en": "A realistic photograph of mystical figure with a staff, surrounded by fireflies."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing clothing made of woven vines, green leather, and leaves, holding a wooden staff, surrounded by magical glowing fireflies in a dense, foggy forest, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing clothing made of woven vines, green leather, and leaves, holding a wooden staff, surrounded by magical glowing fireflies in a dense, foggy forest, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             },
             {
-                id: 21,
-                category: { tr: "Stil & Estetik", en: "Style & Aesthetic" },
-                title: { tr: "35mm Vintage Analog Film", en: "35mm Vintage Film Aesthetic" },
-                desc: { tr: "Grenli dokusu, hafif renk sapmaları ve nostaljik tonlarıyla 90'lar analog fotoğraf stili.", en: "90s analog photography style with grainy texture, chromatic aberration, and nostalgia." },
-                text: { 
-                    tr: "A vintage 35mm analog film photograph of [Subject/Scene - e.g., friends road-tripping in a convertible], organic film grain, light leaks, warm retro color grading, nostalgic vibe --ar 3:2 --v 6.0",
-                    en: "A vintage 35mm analog film photograph of [Subject/Scene - e.g., friends road-tripping in a convertible], organic film grain, light leaks, warm retro color grading, nostalgic vibe --ar 3:2 --v 6.0"
-                }
+                        "id": 21,
+                        "category": {
+                                    "tr": "Gerçekçi Fantastik",
+                                    "en": "Realistic Fantasy"
+                        },
+                        "title": {
+                                    "tr": "Ejderha Terbiyecisi",
+                                    "en": "Dragon Tamer"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde dumanlı mağarada uyuyan devasa ejderhanın yanında terbiyeci.",
+                                    "en": "A realistic photograph of tamer in leather armor next to a sleeping dragon in a cave."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing rugged, fire-proof dragon-leather armor, standing confidently next to a massive, realistic sleeping dragon in a dark, smoky rocky cave, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing rugged, fire-proof dragon-leather armor, standing confidently next to a massive, realistic sleeping dragon in a dark, smoky rocky cave, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             },
             {
-                id: 22,
-                category: { tr: "Stil & Estetik", en: "Style & Aesthetic" },
-                title: { tr: "Moda Dergisi Çekimi", en: "Editorial High-Fashion" },
-                desc: { tr: "Parlak tonlar, kusursuz makyaj ve dramatik pozlarla yüksek moda dergisi kapak stili.", en: "High-fashion editorial magazine style with bright tones and dramatic posing." },
-                text: { 
-                    tr: "An editorial high-fashion magazine cover shoot featuring [Subject - e.g., a model in avant-garde metallic clothing], dramatic pose, high contrast, studio lighting, bold colors, Vogue aesthetic --ar 4:5 --v 6.0",
-                    en: "An editorial high-fashion magazine cover shoot featuring [Subject - e.g., a model in avant-garde metallic clothing], dramatic pose, high contrast, studio lighting, bold colors, Vogue aesthetic --ar 4:5 --v 6.0"
-                }
+                        "id": 22,
+                        "category": {
+                                    "tr": "Gerçekçi Fantastik",
+                                    "en": "Realistic Fantasy"
+                        },
+                        "title": {
+                                    "tr": "Karanlık Lord",
+                                    "en": "Dark Lord"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde turuncu lavların önünde, siyah zırh ve pelerinli karanlık lord.",
+                                    "en": "A realistic photograph of dark lord in black armor on a volcanic mountain edge."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing spiked, menacing black fantasy armor with a tattered red cape, standing on a volcanic mountain edge with glowing orange lava in the background, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing spiked, menacing black fantasy armor with a tattered red cape, standing on a volcanic mountain edge with glowing orange lava in the background, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             },
             {
-                id: 23,
-                category: { tr: "Stil & Estetik", en: "Style & Aesthetic" },
-                title: { tr: "Belgesel Sokak Fotoğrafçılığı", en: "Candid Street Documentary" },
-                desc: { tr: "Sokaktaki gerçek anları ve duyguları yakalayan, yapaylıktan uzak doğal çekim.", en: "Candid street documentary capturing real moments and raw emotions naturally." },
-                text: { 
-                    tr: "A candid street documentary photograph of [Scene - e.g., an old craftsman repairing a watch inside his shop], natural ambient light, capturing raw emotion and life details, honest storytelling style --ar 3:2 --v 6.0",
-                    en: "A candid street documentary photograph of [Scene - e.g., an old craftsman repairing a watch inside his shop], natural ambient light, capturing raw emotion and life details, honest storytelling style --ar 3:2 --v 6.0"
-                }
+                        "id": 23,
+                        "category": {
+                                    "tr": "Gerçekçi Fantastik",
+                                    "en": "Realistic Fantasy"
+                        },
+                        "title": {
+                                    "tr": "Çöl Büyücüsü",
+                                    "en": "Desert Mage"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde sonsuz kum tepelerinde, parlayan bir altın eser tutan çöl büyücüsü.",
+                                    "en": "A realistic photograph of mage holding a glowing artifact in a vast sandy desert."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing light, flowing silk desert robes covering the mouth, standing in a vast sand dune desert while holding a glowing golden artifact, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing light, flowing silk desert robes covering the mouth, standing in a vast sand dune desert while holding a glowing golden artifact, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             },
             {
-                id: 24,
-                category: { tr: "Stil & Estetik", en: "Style & Aesthetic" },
-                title: { tr: "Popüler Portre Bokeh Etkisi", en: "Modern Cinematic Bokeh" },
-                desc: { tr: "Arka plandaki şehir ışıklarını yumuşak renk halkalarına dönüştüren sığ derinlikli çekim.", en: "Shallow depth of field turning background city lights into soft colorful circles." },
-                text: { 
-                    tr: "A modern cinematic portrait of [Subject - e.g., a man wearing a coat] on a city street at night, extremely shallow depth of field, beautiful circular background bokeh from streetlights, 85mm f1.2 lens --ar 16:9 --v 6.0",
-                    en: "A modern cinematic portrait of [Subject - e.g., a man wearing a coat] on a city street at night, extremely shallow depth of field, beautiful circular background bokeh from streetlights, 85mm f1.2 lens --ar 16:9 --v 6.0"
-                }
+                        "id": 24,
+                        "category": {
+                                    "tr": "Gerçekçi Fantastik",
+                                    "en": "Realistic Fantasy"
+                        },
+                        "title": {
+                                    "tr": "Su Altı Tapınak Bekçisi",
+                                    "en": "Underwater Sentinel"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde Atlantis harabelerinde deniz kabuklu antik bronz zırhlı bekçi.",
+                                    "en": "A realistic photograph of guardian in bronze armor in underwater atlantis."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing ancient, oxidized bronze armor adorned with seashells, standing underwater in the ruins of Atlantis, surrounded by swimming fish, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing ancient, oxidized bronze armor adorned with seashells, standing underwater in the ruins of Atlantis, surrounded by swimming fish, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             },
             {
-                id: 25,
-                category: { tr: "Stil & Estetik", en: "Style & Aesthetic" },
-                title: { tr: "Kutup Işıkları Altında", en: "Northern Lights Aesthetic" },
-                desc: { tr: "Gökyüzündeki yeşil ve mor aurora ışıklarının altındaki büyüleyici gece çekimi.", en: "A breathtaking night photograph under glowing green and purple auroras." },
-                text: { 
-                    tr: "A breathtaking night landscape of [Subject/Scene - e.g., a small lit wooden cabin] under a massive glowing green and purple aurora borealis, starry night sky, snow-covered ground, cinematic composition --ar 16:9 --v 6.0",
-                    en: "A breathtaking night landscape of [Subject/Scene - e.g., a small lit wooden cabin] under a massive glowing green and purple aurora borealis, starry night sky, snow-covered ground, cinematic composition --ar 16:9 --v 6.0"
-                }
+                        "id": 25,
+                        "category": {
+                                    "tr": "Aksiyon & Roller",
+                                    "en": "Action & Roles"
+                        },
+                        "title": {
+                                    "tr": "Gizli Ajan",
+                                    "en": "Secret Agent"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde lüks bir kumarhanede şık smokinli karizmatik ajan.",
+                                    "en": "A realistic photograph of secret agent in a sharp tuxedo inside a luxury casino."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing a sharp, perfectly tailored black tuxedo, standing confidently in a luxurious, high-end casino with crystal chandeliers, cinematic lighting, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing a sharp, perfectly tailored black tuxedo, standing confidently in a luxurious, high-end casino with crystal chandeliers, cinematic lighting, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             },
             {
-                id: 26,
-                category: { tr: "Stil & Estetik", en: "Style & Aesthetic" },
-                title: { tr: "Polaroid Anlık Fotoğraf", en: "Nostalgic Polaroid Print" },
-                desc: { tr: "Kendine has çerçevesi, soluk renk tonları ve anlık nostaljik hissi ile polaroid stili.", en: "Nostalgic polaroid print style with characteristic borders and faded colors." },
-                text: { 
-                    tr: "A vintage Polaroid print of [Subject - e.g., a retro bicycle parked next to a flower shop], faded colors, soft focus, square format, authentic polaroid frame, nostalgic feel --ar 1:1 --v 6.0",
-                    en: "A vintage Polaroid print of [Subject - e.g., a retro bicycle parked next to a flower shop], faded colors, soft focus, square format, authentic polaroid frame, nostalgic feel --ar 1:1 --v 6.0"
-                }
+                        "id": 26,
+                        "category": {
+                                    "tr": "Aksiyon & Roller",
+                                    "en": "Action & Roles"
+                        },
+                        "title": {
+                                    "tr": "Zirvedeki Dağcı",
+                                    "en": "Mountaineer at the Peak"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde Everest'in karlı ve rüzgarlı zirvesinde duran dağcı.",
+                                    "en": "A realistic photograph of climber in an orange parka at the peak of mount everest."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing heavy winter mountaineering gear, an orange parka, and goggles resting on the forehead, standing at the snowy, windy peak of Mount Everest, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing heavy winter mountaineering gear, an orange parka, and goggles resting on the forehead, standing at the snowy, windy peak of Mount Everest, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             },
             {
-                id: 27,
-                category: { tr: "Dış Mekan & Manzara", en: "Outdoor & Landscape" },
-                title: { tr: "Karlı Zirvede Gün Doğumu", en: "Sunrise on Snowy Peak" },
-                desc: { tr: "Dağ zirvesindeki ilk güneş ışıklarının taze kar üzerindeki parıltısını gösteren dondurucu soğuk kompozisyon.", en: "The first morning light illuminating fresh snow on a freezing mountain peak." },
-                text: { 
-                    tr: "A breathtaking landscape of a snow-covered mountain peak during sunrise, first rays of orange light hitting the peak, frozen textures, wide shot, pristine white snow, crisp cold air --ar 16:9 --v 6.0",
-                    en: "A breathtaking landscape of a snow-covered mountain peak during sunrise, first rays of orange light hitting the peak, frozen textures, wide shot, pristine white snow, crisp cold air --ar 16:9 --v 6.0"
-                }
+                        "id": 27,
+                        "category": {
+                                    "tr": "Aksiyon & Roller",
+                                    "en": "Action & Roles"
+                        },
+                        "title": {
+                                    "tr": "Derin Deniz Dalgıcı",
+                                    "en": "Deep Sea Diver"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde güneş ışıklarının süzüldüğü mercan resifini keşfeden dalgıç.",
+                                    "en": "A realistic photograph of scuba diver exploring a colorful coral reef under sun rays."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing a modern, professional scuba diving suit with a high-tech oxygen tank, exploring a vibrant, colorful coral reef with sun rays piercing the water, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing a modern, professional scuba diving suit with a high-tech oxygen tank, exploring a vibrant, colorful coral reef with sun rays piercing the water, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             },
             {
-                id: 28,
-                category: { tr: "Dış Mekan & Manzara", en: "Outdoor & Landscape" },
-                title: { tr: "Yağmur Sonrası Şehir Yansımaları", en: "Post-Rain Cityscape" },
-                desc: { tr: "Yağmurun ardından ıslanan asfalt yoldaki gökdelenlerin ve araç ışıklarının yansıması.", en: "Wet asphalt road reflecting skyscrapers and car headlights after rain." },
-                text: { 
-                    tr: "A wet city street after rain, puddles reflecting colorful glowing neon skyscraper lights and moving car lights, long exposure, cinematic urban atmosphere at night --ar 16:9 --v 6.0",
-                    en: "A wet city street after rain, puddles reflecting colorful glowing neon skyscraper lights and moving car lights, long exposure, cinematic urban atmosphere at night --ar 16:9 --v 6.0"
-                }
+                        "id": 28,
+                        "category": {
+                                    "tr": "Aksiyon & Roller",
+                                    "en": "Action & Roles"
+                        },
+                        "title": {
+                                    "tr": "Uzay Yürüyüşü",
+                                    "en": "Astronaut Spacewalk"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde arka planda Dünya ile istasyonun dışında süzülen astronot.",
+                                    "en": "A realistic photograph of astronaut floating in space outside the iss, earth background."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing a highly detailed white NASA EVA spacesuit, floating in zero gravity outside the International Space Station with the Earth in the background, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing a highly detailed white NASA EVA spacesuit, floating in zero gravity outside the International Space Station with the Earth in the background, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             },
             {
-                id: 29,
-                category: { tr: "Dış Mekan & Manzara", en: "Outdoor & Landscape" },
-                title: { tr: "Tropikal Cennet Plajı", en: "Tropical Oasis Beach" },
-                desc: { tr: "Turkuaz okyanus dalgaları, beyaz kumlar ve gün batımı renklerinin buluştuğu egzotik sahil.", en: "Turquoise ocean waves, white sands, and warm sunset colors meeting." },
-                text: { 
-                    tr: "An aerial drone shot of a tropical sandy beach with turquoise waves gently crashing on the shore, lush green palm trees, warm orange sunset glow, clean minimalist composition --ar 16:9 --v 6.0",
-                    en: "An aerial drone shot of a tropical sandy beach with turquoise waves gently crashing on the shore, lush green palm trees, warm orange sunset glow, clean minimalist composition --ar 16:9 --v 6.0"
-                }
+                        "id": 29,
+                        "category": {
+                                    "tr": "Aksiyon & Roller",
+                                    "en": "Action & Roles"
+                        },
+                        "title": {
+                                    "tr": "Savaş Jet Pilotu",
+                                    "en": "Fighter Jet Pilot"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde uçak gemisinde, F-22 jetinin yanında kaskıyla yürüyen pilot.",
+                                    "en": "A realistic photograph of jet pilot walking next to an f-22 on an aircraft carrier."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing a modern military fighter pilot flight suit and holding a helmet under the arm, walking on an aircraft carrier deck next to an F-22 jet, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing a modern military fighter pilot flight suit and holding a helmet under the arm, walking on an aircraft carrier deck next to an F-22 jet, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             },
             {
-                id: 30,
-                category: { tr: "Dış Mekan & Manzara", en: "Outdoor & Landscape" },
-                title: { tr: "Orman İçi Gizli Şelale", en: "Hidden Forest Waterfall" },
-                desc: { tr: "Yemyeşil yosunlu kayaların arasından dökülen nehir suyunun uzun pozlama sisli görüntüsü.", en: "Long exposure landscape of river water cascading through mossy green rocks." },
-                text: { 
-                    tr: "A long exposure photograph of a hidden waterfall inside a deep green forest, misty flowing water, moss-covered dark rocks, natural soft sunlight filtering through leaves, serene mood --ar 16:9 --v 6.0",
-                    en: "A long exposure photograph of a hidden waterfall inside a deep green forest, misty flowing water, moss-covered dark rocks, natural soft sunlight filtering through leaves, serene mood --ar 16:9 --v 6.0"
-                }
+                        "id": 30,
+                        "category": {
+                                    "tr": "Aksiyon & Roller",
+                                    "en": "Action & Roles"
+                        },
+                        "title": {
+                                    "tr": "Film Noir Dedektifi",
+                                    "en": "Film Noir Detective"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde yağmurlu ve sisli sokak lambasının altında, trençkotlu dedektif.",
+                                    "en": "A realistic photograph of detective in a fedora under a street lamp in a wet alley."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing a classic 1940s detective trench coat and a fedora hat, standing under a flickering street lamp in a foggy, dark, rain-slicked alleyway, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing a classic 1940s detective trench coat and a fedora hat, standing under a flickering street lamp in a foggy, dark, rain-slicked alleyway, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             },
             {
-                id: 31,
-                category: { tr: "Dış Mekan & Manzara", en: "Outdoor & Landscape" },
-                title: { tr: "Sonsuz Çöl Kumulları", en: "Endless Desert Dunes" },
-                desc: { tr: "Rüzgarın şekillendirdiği kum tepelerindeki dalgalı çizgiler ve batan güneşin sıcak gölgeleri.", en: "Wind-swept sand ridges and long warm shadows during sunset." },
-                text: { 
-                    tr: "Minimalist landscape of desert sand dunes at sunset, sharp wind-swept ridges, deep warm orange and gold hues, long dramatic shadows, clean composition, vast scale --ar 16:9 --v 6.0",
-                    en: "Minimalist landscape of desert sand dunes at sunset, sharp wind-swept ridges, deep warm orange and gold hues, long dramatic shadows, clean composition, vast scale --ar 16:9 --v 6.0"
-                }
+                        "id": 31,
+                        "category": {
+                                    "tr": "Aksiyon & Roller",
+                                    "en": "Action & Roles"
+                        },
+                        "title": {
+                                    "tr": "Kutup Kaşifi",
+                                    "en": "Arctic Explorer"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde kutup buzullarında, kızak köpekleriyle duran kaşif.",
+                                    "en": "A realistic photograph of explorer standing on a frozen glacier with sled dogs."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing heavy, fur-lined red arctic expedition parkas, standing on a massive frozen glacier with a team of husky sled dogs in the distance, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing heavy, fur-lined red arctic expedition parkas, standing on a massive frozen glacier with a team of husky sled dogs in the distance, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             },
             {
-                id: 32,
-                category: { tr: "Dış Mekan & Manzara", en: "Outdoor & Landscape" },
-                title: { tr: "Antik Taş Köprü", en: "Ancient Stone Arch Bridge" },
-                desc: { tr: "Sisli bir nehir üzerinde yükselen, doğayla bütünleşmiş tarihi kemerli taş köprü manzarası.", en: "Historic stone arch bridge over a foggy river integrated with nature." },
-                text: { 
-                    tr: "A moody, cinematic landscape of an ancient stone arch bridge spanning a wide river covered in morning fog, deep green trees, mysterious and calm atmosphere --ar 16:9 --v 6.0",
-                    en: "A moody, cinematic landscape of an ancient stone arch bridge spanning a wide river covered in morning fog, deep green trees, mysterious and calm atmosphere --ar 16:9 --v 6.0"
-                }
+                        "id": 32,
+                        "category": {
+                                    "tr": "Aksiyon & Roller",
+                                    "en": "Action & Roles"
+                        },
+                        "title": {
+                                    "tr": "Borsa Milyarderi",
+                                    "en": "Wall Street Billionaire"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde New York manzaralı penthouse ofisinde duran milyarder.",
+                                    "en": "A realistic photograph of billionaire in a tailored suit in a penthouse room."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing an ultra-luxurious, custom-tailored Wall Street pinstripe suit, standing in a massive penthouse office overlooking the New York City skyline, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing an ultra-luxurious, custom-tailored Wall Street pinstripe suit, standing in a massive penthouse office overlooking the New York City skyline, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             },
             {
-                id: 33,
-                category: { tr: "Makro & Detay", en: "Macro & Detail" },
-                title: { tr: "Su Damlası Yansıması", en: "Water Droplet Reflection" },
-                desc: { tr: "Bir yaprağın üzerindeki su damlasında ters yansıyan arka plan çiçeğinin makro çekimi.", en: "Macro photography of a water drop on a leaf reflecting a flower." },
-                text: { 
-                    tr: "A macro photograph of a single perfect water droplet resting on a vibrant green leaf, reflecting a tiny yellow flower in the background inside the droplet, highly detailed, sharp focus --ar 1:1 --v 6.0",
-                    en: "A macro photograph of a single perfect water droplet resting on a vibrant green leaf, reflecting a tiny yellow flower in the background inside the droplet, highly detailed, sharp focus --ar 1:1 --v 6.0"
-                }
+                        "id": 33,
+                        "category": {
+                                    "tr": "Sinematik & Temalar",
+                                    "en": "Cinematic & Themes"
+                        },
+                        "title": {
+                                    "tr": "Matrix Evreni",
+                                    "en": "Matrix Universe"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde yeşil dijital kod yağmuru altında, siyah deri trençkotlu karakter.",
+                                    "en": "A realistic photograph of character in a long leather coat under green digital rain."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing a sleek, long black leather coat and stylish dark sunglasses, standing in an all-white sterile room with glowing green digital rain falling around, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing a sleek, long black leather coat and stylish dark sunglasses, standing in an all-white sterile room with glowing green digital rain falling around, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             },
             {
-                id: 34,
-                category: { tr: "Makro & Detay", en: "Macro & Detail" },
-                title: { tr: "Çiçek Poleni Detayı", en: "Flower Pollen Close-up" },
-                desc: { tr: "Çiçeğin merkezindeki polenlerin, renk geçişlerinin ve taç yaprak liflerinin aşırı yakın çekimi.", en: "Extreme macro shot of pollen grains and petals at the center of a flower." },
-                text: { 
-                    tr: "An extreme macro shot of the center of a [Color - e.g., purple] lily flower, showing individual pollen grains on the stamens, velvet textures, vibrant color gradient, soft lighting --ar 1:1 --v 6.0",
-                    en: "An extreme macro shot of the center of a [Color - e.g., purple] lily flower, showing individual pollen grains on the stamens, velvet textures, vibrant color gradient, soft lighting --ar 1:1 --v 6.0"
-                }
+                        "id": 34,
+                        "category": {
+                                    "tr": "Sinematik & Temalar",
+                                    "en": "Cinematic & Themes"
+                        },
+                        "title": {
+                                    "tr": "Çorak Topraklar",
+                                    "en": "Wasteland Survivor"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde çölde modifiyeli kaslı arabasının yanında duran hayatta kalan.",
+                                    "en": "A realistic photograph of survivor next to a muscle car in a post-apocalyptic desert."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing dirty, spiked leather post-apocalyptic wasteland survival clothing, standing next to a heavily modified, rusty muscle car in a vast desert, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing dirty, spiked leather post-apocalyptic wasteland survival clothing, standing next to a heavily modified, rusty muscle car in a vast desert, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             },
             {
-                id: 35,
-                category: { tr: "Makro & Detay", en: "Macro & Detail" },
-                title: { tr: "Kar Tanesi Kristali", en: "Snowflake Crystal Macro" },
-                desc: { tr: "Koyu renkli bir kumaş veya yüzey üzerindeki tek bir kar tanesinin eşsiz geometrik kristal yapısı.", en: "Extreme macro of a single snowflake showing its geometric crystal structures." },
-                text: { 
-                    tr: "An extreme macro photograph of a single perfect snowflake crystal resting on a dark wool texture, showing its intricate symmetrical geometric structure, cold blue highlights --ar 1:1 --v 6.0",
-                    en: "An extreme macro photograph of a single perfect snowflake crystal resting on a dark wool texture, showing its intricate symmetrical geometric structure, cold blue highlights --ar 1:1 --v 6.0"
-                }
+                        "id": 35,
+                        "category": {
+                                    "tr": "Sinematik & Temalar",
+                                    "en": "Cinematic & Themes"
+                        },
+                        "title": {
+                                    "tr": "Peaky Blinders Tarzı",
+                                    "en": "Peaky Blinders Style"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde 1920'lerin dumanlı Birmingham sokaklarında yürüyen karakter.",
+                                    "en": "A realistic photograph of character in a tweed suit in 1920s birmingham streets."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing a sharp 1920s tweed suit, a dark overcoat, and a classic flat cap, walking confidently through the smoky, industrial brick streets of 1920s Birmingham, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing a sharp 1920s tweed suit, a dark overcoat, and a classic flat cap, walking confidently through the smoky, industrial brick streets of 1920s Birmingham, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             },
             {
-                id: 36,
-                category: { tr: "Makro & Detay", en: "Macro & Detail" },
-                title: { tr: "Vintage Saat Mekanizması", en: "Vintage Watch Gears" },
-                desc: { tr: "Antika bir saatin pirinç çarklarını, dişlilerini ve ince işçilik detaylarını gösteren endüstriyel makro.", en: "Industrial macro showing the brass gears and springs of an antique watch." },
-                text: { 
-                    tr: "A close-up macro photograph of the intricate inner gears, wheels, and springs of a vintage brass pocket watch, shiny metallic reflections, highly detailed engineering --ar 3:2 --v 6.0",
-                    en: "A close-up macro photograph of the intricate inner gears, wheels, and springs of a vintage brass pocket watch, shiny metallic reflections, highly detailed engineering --ar 3:2 --v 6.0"
-                }
+                        "id": 36,
+                        "category": {
+                                    "tr": "Sinematik & Temalar",
+                                    "en": "Cinematic & Themes"
+                        },
+                        "title": {
+                                    "tr": "Zombi Kıyameti Sağ Kalan",
+                                    "en": "Zombie Apocalypse Survivor"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde terk edilmiş overgrown bir sokakta arbaletiyle yürüyen savaşçı.",
+                                    "en": "A realistic photograph of survivor with a crossbow on an overgrown, abandoned street."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing torn, dirty survival clothes with a tactical backpack and a crossbow on the shoulder, walking cautiously through an overgrown, abandoned city street, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing torn, dirty survival clothes with a tactical backpack and a crossbow on the shoulder, walking cautiously through an overgrown, abandoned city street, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             },
             {
-                id: 37,
-                category: { tr: "Makro & Detay", en: "Macro & Detail" },
-                title: { tr: "Kelebek Kanadı Dokusu", en: "Butterfly Wing Texture" },
-                desc: { tr: "Kelebek kanadındaki pulların, canlı renk desenlerinin ve mikroskobik dokunun makro çekimi.", en: "Macro shot displaying detailed iridescent color scales on a butterfly wing." },
-                text: { 
-                    tr: "A microscopic macro photograph of the wing of a [Species - e.g., Monarch] butterfly, showing the scales like tiny roof tiles, rich orange and black patterns, detailed texture --ar 1:1 --v 6.0",
-                    en: "A microscopic macro photograph of the wing of a [Species - e.g., Monarch] butterfly, showing the scales like tiny roof tiles, rich orange and black patterns, detailed texture --ar 1:1 --v 6.0"
-                }
+                        "id": 37,
+                        "category": {
+                                    "tr": "Sinematik & Temalar",
+                                    "en": "Cinematic & Themes"
+                        },
+                        "title": {
+                                    "tr": "Yeraltı Hackerı",
+                                    "en": "Underground Hacker"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde monitörlerin ışığıyla aydınlanan odadaki hacker.",
+                                    "en": "A realistic photograph of hacker in a dark room lit by computer screens."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing high-tech streetwear with glowing wires woven into the fabric, sitting in a dark, messy room illuminated only by multiple glowing computer screens, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing high-tech streetwear with glowing wires woven into the fabric, sitting in a dark, messy room illuminated only by multiple glowing computer screens, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             },
             {
-                id: 38,
-                category: { tr: "Makro & Detay", en: "Macro & Detail" },
-                title: { tr: "Kahve Çekirdeği Kavrulması", en: "Roasted Coffee Bean Macro" },
-                desc: { tr: "Yeni kavrulmuş, üzeri yağlı kahve çekirdeklerinin çatlak ve pürüzlü yüzey detayları.", en: "Macro close-up showing cracked and oily textures of freshly roasted coffee beans." },
-                text: { 
-                    tr: "A macro close-up of freshly roasted dark coffee beans, oily glistening surface, tiny cracks and rich textures, warm coffee brown colors, cozy steam in background --ar 1:1 --v 6.0",
-                    en: "A macro close-up of freshly roasted dark coffee beans, oily glistening surface, tiny cracks and rich textures, warm coffee brown colors, cozy steam in background --ar 1:1 --v 6.0"
-                }
+                        "id": 38,
+                        "category": {
+                                    "tr": "Sinematik & Temalar",
+                                    "en": "Cinematic & Themes"
+                        },
+                        "title": {
+                                    "tr": "Venedik Karnavalı",
+                                    "en": "Venetian Carnival"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde gece Venedik kanallarında gondolda duran kostümlü karakter.",
+                                    "en": "A realistic photograph of venice carnival costume on a gondola at night."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing an ornate, highly detailed and luxurious Venetian carnival costume, standing on a classic wooden gondola sailing through Venice canals at night, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing an ornate, highly detailed and luxurious Venetian carnival costume, standing on a classic wooden gondola sailing through Venice canals at night, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             },
             {
-                id: 39,
-                category: { tr: "Makro & Detay", en: "Macro & Detail" },
-                title: { tr: "Renkli Mürekkep Karışımı", en: "Liquid Ink Swirls" },
-                desc: { tr: "Suya bırakılan farklı renklerdeki mürekkeplerin oluşturduğu soyut dalgalar ve akışkan desenler.", en: "Abstract swirls and fluid patterns of multicolored liquid inks in water." },
-                text: { 
-                    tr: "A high-speed macro photograph of colorful blue, red, and gold ink swirling in clear water, creating abstract cloud-like patterns, dark background, fluid dynamics --ar 16:9 --v 6.0",
-                    en: "A high-speed macro photograph of colorful blue, red, and gold ink swirling in clear water, creating abstract cloud-like patterns, dark background, fluid dynamics --ar 16:9 --v 6.0"
-                }
+                        "id": 39,
+                        "category": {
+                                    "tr": "Sinematik & Temalar",
+                                    "en": "Cinematic & Themes"
+                        },
+                        "title": {
+                                    "tr": "Steampunk Mucidi",
+                                    "en": "Steampunk Inventor"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde dişliler ve buhar borularıyla dolu atölyesindeki mucit.",
+                                    "en": "A realistic photograph of inventor in a workshop with brass cogs and steam pipes."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing victorian-era steampunk clothing, a brown leather vest with brass cogs, standing in a workshop filled with complex clockwork machines and steam pipes, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing victorian-era steampunk clothing, a brown leather vest with brass cogs, standing in a workshop filled with complex clockwork machines and steam pipes, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             },
             {
-                id: 40,
-                category: { tr: "Makro & Detay", en: "Macro & Detail" },
-                title: { tr: "Eskimiş Kitap Sayfası Lifleri", en: "Aged Book Page Texture" },
-                desc: { tr: "Yüzyıllık bir kitabın sararmış kâğıt liflerini ve üzerindeki mürekkep izlerini gösteren dokusal yakın çekim.", en: "Close-up macro of paper fibers and faded ink on a yellowed antique page." },
-                text: { 
-                    tr: "A close-up macro photograph of the yellowed paper texture of an antique book from the 18th century, visible paper fibers, old faded black ink, aged rustic aesthetic --ar 3:2 --v 6.0",
-                    en: "A close-up macro photograph of the yellowed paper texture of an antique book from the 18th century, visible paper fibers, old faded black ink, aged rustic aesthetic --ar 3:2 --v 6.0"
-                }
+                        "id": 40,
+                        "category": {
+                                    "tr": "Sinematik & Temalar",
+                                    "en": "Cinematic & Themes"
+                        },
+                        "title": {
+                                    "tr": "Kırmızı Halı Yıldızı",
+                                    "en": "Red Carpet Star"
+                        },
+                        "desc": {
+                                    "tr": "Gerçekçi bir fotoğraf karesinde flaşlar patlayan kırmızı halıda yürüyen ünlü yıldız.",
+                                    "en": "A realistic photograph of star walking on a red carpet under paparazzi flashes."
+                        },
+                        "text": {
+                                    "tr": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing a stunning, high-fashion designer outfit, walking on a glamorous red carpet surrounded by flashing paparazzi camera lights and velvet ropes, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0",
+                                    "en": "A high-quality realistic portrait photo of a [Subject - e.g., person], wearing a stunning, high-fashion designer outfit, walking on a glamorous red carpet surrounded by flashing paparazzi camera lights and velvet ropes, highly detailed, photorealistic, 8k resolution, shot on 85mm lens --ar 4:5 --v 6.0"
+                        }
             }
-        ];
+];
+
+        
 
         // Prompts Screen Toggle
         window.showInfoModal = () => {
@@ -7986,7 +8348,7 @@ class="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg tran
         // --- GROQ AI ENTEGRASYONU (Akıllı Asistan) ---
         // ==========================================
 
-        const GROQ_API_KEY = "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";
+        const GROQ_API_KEY = "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";
         const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 
         // 1. Yapay Zekaya veritabanını öğreten hafıza fonksiyonu
