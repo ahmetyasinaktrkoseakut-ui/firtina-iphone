@@ -6121,7 +6121,9 @@
         function showCategories() {
             activeCategory = null;
             categoryGrid.classList.remove('hidden');
+            categoryGrid.style.display = '';
             toolsGrid.classList.add('hidden');
+            toolsGrid.style.display = 'none';
             
             const promptsS = document.getElementById('promptsScreen');
             if (promptsS) {
@@ -6166,7 +6168,9 @@
             savedScrollY = window.scrollY;
 
             categoryGrid.classList.add('hidden');
+            categoryGrid.style.display = 'none';
             toolsGrid.classList.remove('hidden');
+            toolsGrid.style.display = '';
 
             const promptsS = document.getElementById('promptsScreen');
             if (promptsS) {
