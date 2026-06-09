@@ -49,6 +49,18 @@ struct WebView: UIViewRepresentable {
         """
         let script = WKUserScript(source: jsCode, injectionTime: .atDocumentEnd, forMainFrameOnly: false)
         configuration.userContentController.addUserScript(script)
+        
+        // --- BLOB REVOCATION DELAY PATCH (atDocumentStart) ---
+        let revokeScriptCode = """
+        if (!window.safeRevokeObjectURL) {
+            window.safeRevokeObjectURL = window.URL.revokeObjectURL;
+            window.URL.revokeObjectURL = function(url) {
+                setTimeout(function() { window.safeRevokeObjectURL(url); }, 10000);
+            };
+        }
+        """
+        let revokeScript = WKUserScript(source: revokeScriptCode, injectionTime: .atDocumentStart, forMainFrameOnly: false)
+        configuration.userContentController.addUserScript(revokeScript)
         // ---------------------------------
 
         let webView = WKWebView(frame: .zero, configuration: configuration)
