@@ -831,7 +831,7 @@
             border-radius: 20px;
             color: #94a3b8;
             font-size: 14px;
-            z-index: 100;
+            z-index: 10005;
             cursor: pointer;
             transition: all 0.2s;
         }
@@ -1269,6 +1269,7 @@
                         bottomNav.style.display = 'flex';
                         bottomNav.style.opacity = '1';
                         bottomNav.style.visibility = 'visible';
+                        bottomNav.style.zIndex = '10000';
                     }
                 }, 400);
             } else {
@@ -1281,6 +1282,7 @@
                     bottomNav.classList.remove('hidden');
                     bottomNav.style.display = 'flex';
                     bottomNav.style.opacity = '1';
+                    bottomNav.style.zIndex = '10000';
                 }
             }
         }
@@ -6648,7 +6650,7 @@
         // --- GROQ AI ENTEGRASYONU (Akıllı Asistan) ---
         // ==========================================
 
-        const GROQ_API_KEY = "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";
+        const GROQ_API_KEY = "YOUR_GROQ_API_KEY";
         const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 
         // 1. Yapay Zekaya veritabanını öğreten hafıza fonksiyonu
@@ -6914,7 +6916,7 @@
         import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyCbfJihRlqH53SwV9GUyDhMaa1A2ERtVRA",
+            apiKey: "YOUR_FIREBASE_API_KEY",
             authDomain: "firtina-ai-7f243.firebaseapp.com",
             projectId: "firtina-ai-7f243",
             storageBucket: "firtina-ai-7f243.firebasestorage.app",
@@ -7162,11 +7164,16 @@
                     splash.style.display = 'none';
                 }
 
-                // Force nav visible after safety timeout
+                // Force nav visible after safety timeout ONLY if onboarding is completed or not active
                 if (bottomNav) {
-                    bottomNav.classList.remove('hidden');
-                    bottomNav.style.display = 'flex';
-                    bottomNav.style.opacity = '1';
+                    const hasSeenOnboarding = localStorage.getItem('onboarding_v3') === 'true';
+                    const isMobile = window.innerWidth < 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                    if (hasSeenOnboarding || !isMobile) {
+                        bottomNav.classList.remove('hidden');
+                        bottomNav.style.display = 'flex';
+                        bottomNav.style.opacity = '1';
+                        bottomNav.style.zIndex = '10000';
+                    }
                 }
             }, 3500);
 

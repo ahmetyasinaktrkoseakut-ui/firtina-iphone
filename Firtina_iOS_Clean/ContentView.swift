@@ -78,18 +78,79 @@ struct WebView: UIViewRepresentable {
         }
     }
 
-    class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate {
-        // Tüm navigasyonlara şartsız izin ver (Linklerin çalışmasını engellemez)
+    class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate, WKDownloadDelegate {
+        var downloadURL: URL?
+
+        // Tüm navigasyonlara şartsız izin ver veya download ise indir
         func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-            decisionHandler(.allow)
+            if navigationAction.shouldPerformDownload {
+                decisionHandler(.download)
+            } else {
+                decisionHandler(.allow)
+            }
         }
         
+        func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse, decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
+            if navigationResponse.canShowMIMEType {
+                decisionHandler(.allow)
+            } else {
+                decisionHandler(.download)
+            }
+        }
+
+        func webView(_ webView: WKWebView, navigationAction: WKNavigationAction, didBecome download: WKDownload) {
+            download.delegate = self
+        }
+
+        func webView(_ webView: WKWebView, navigationResponse: WKNavigationResponse, didBecome download: WKDownload) {
+            download.delegate = self
+        }
+
         // target="_blank" olan linkleri zorla mevcut ekranda kendi içinde açar
         func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
             if navigationAction.targetFrame == nil {
                 webView.load(navigationAction.request)
             }
             return nil
+        }
+
+        // --- WKDownloadDelegate METHODS ---
+        func download(_ download: WKDownload, decideDestinationUsing response: URLResponse, suggestedFilename: String, completionHandler: @escaping (URL?) -> Void) {
+            let tempDir = FileManager.default.temporaryDirectory
+            let destinationURL = tempDir.appendingPathComponent(suggestedFilename)
+            self.downloadURL = destinationURL
+            try? FileManager.default.removeItem(at: destinationURL)
+            completionHandler(destinationURL)
+        }
+
+        func downloadDidFinish(_ download: WKDownload) {
+            guard let fileURL = downloadURL else { return }
+            
+            DispatchQueue.main.async {
+                let activityVC = UIActivityViewController(activityItems: [fileURL], applicationActivities: nil)
+                
+                // iPad desteği için popover ayarlaması
+                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                   let rootVC = windowScene.windows.first?.rootViewController {
+                    
+                    var topVC = rootVC
+                    while let presentedVC = topVC.presentedViewController {
+                        topVC = presentedVC
+                    }
+                    
+                    if let popover = activityVC.popoverPresentationController {
+                        popover.sourceView = topVC.view
+                        popover.sourceRect = CGRect(x: topVC.view.bounds.midX, y: topVC.view.bounds.midY, width: 0, height: 0)
+                        popover.permittedArrowDirections = []
+                    }
+                    
+                    topVC.present(activityVC, animated: true, completion: nil)
+                }
+            }
+        }
+
+        func download(_ download: WKDownload, didFailWithError error: Error, resumeData: Data?) {
+            // Hata durumunda sessizce geç
         }
     }
 }
