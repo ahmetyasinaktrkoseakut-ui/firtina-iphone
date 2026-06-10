@@ -50,25 +50,65 @@ struct WebView: UIViewRepresentable {
         let script = WKUserScript(source: jsCode, injectionTime: .atDocumentEnd, forMainFrameOnly: false)
         configuration.userContentController.addUserScript(script)
         
-        // --- BLOB REVOCATION DELAY PATCH (atDocumentStart) ---
-        let revokeScriptCode = """
-        if (!window.safeRevokeObjectURL) {
-            window.safeRevokeObjectURL = window.URL.revokeObjectURL;
-            window.URL.revokeObjectURL = function(url) {
-                setTimeout(function() { window.safeRevokeObjectURL(url); }, 10000);
-            };
-        }
-        """
-        let revokeScript = WKUserScript(source: revokeScriptCode, injectionTime: .atDocumentStart, forMainFrameOnly: false)
-        configuration.userContentController.addUserScript(revokeScript)
-        
-        // --- IOS DOWNLOAD BRIDGE SCRIPT (atDocumentEnd) ---
+        // --- IOS DOWNLOAD BRIDGE SCRIPT (atDocumentStart) ---
         let iosDownloadBridgeScriptCode = """
         (function() {
+            var isImageUrl = function(url) {
+                if (!url) return false;
+                var lower = url.toLowerCase();
+                if (lower.indexOf('googleusercontent.com') !== -1) return true;
+                return lower.endsWith('.png') || lower.endsWith('.jpg') || 
+                       lower.endsWith('.jpeg') || lower.endsWith('.webp') || 
+                       lower.endsWith('.gif') || lower.endsWith('.bmp');
+            };
+
             if (window.IosDownloadBridgeInjected) return;
             window.IosDownloadBridgeInjected = true;
 
-            function handleBlobUrl(url, filename) {
+            // Hook createObjectURL to save blobs
+            if (!window.URL.originalCreateObjectURL) {
+                window.URL.originalCreateObjectURL = window.URL.createObjectURL;
+                window.URL.blobMap = new Map();
+                window.URL.createObjectURL = function(obj) {
+                    var url = window.URL.originalCreateObjectURL(obj);
+                    if (obj instanceof Blob) {
+                        window.URL.blobMap.set(url, obj);
+                    }
+                    return url;
+                };
+            }
+
+            // Hook revokeObjectURL (delay by 15s to allow download)
+            if (!window.URL.originalRevokeObjectURL) {
+                window.URL.originalRevokeObjectURL = window.URL.revokeObjectURL;
+                window.URL.revokeObjectURL = function(url) {
+                    setTimeout(function() { window.URL.originalRevokeObjectURL(url); }, 15000);
+                };
+            }
+
+            window.sendBase64ToIos = function(base64data, mimeType, filename) {
+                if (base64data.indexOf(',') !== -1) {
+                    base64data = base64data.substring(base64data.indexOf(',') + 1);
+                }
+                if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.iosDownloadBridge) {
+                    window.webkit.messageHandlers.iosDownloadBridge.postMessage({
+                        base64: base64data,
+                        mimeType: mimeType,
+                        filename: filename || 'downloaded_file'
+                    });
+                }
+            };
+
+            window.handleBlobUrl = function(url, filename) {
+                if (window.URL.blobMap && window.URL.blobMap.has(url)) {
+                    var blob = window.URL.blobMap.get(url);
+                    var reader = new FileReader();
+                    reader.readAsDataURL(blob);
+                    reader.onloadend = function() {
+                        window.sendBase64ToIos(reader.result, blob.type, filename);
+                    };
+                    return;
+                }
                 var xhr = new XMLHttpRequest();
                 xhr.open('GET', url, true);
                 xhr.responseType = 'blob';
@@ -78,95 +118,108 @@ struct WebView: UIViewRepresentable {
                         var reader = new FileReader();
                         reader.readAsDataURL(blob);
                         reader.onloadend = function() {
-                            var base64data = reader.result;
-                            if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.iosDownloadBridge) {
-                                window.webkit.messageHandlers.iosDownloadBridge.postMessage({
-                                    base64: base64data,
-                                    mimeType: blob.type,
-                                    filename: filename || 'downloaded_file'
-                                });
-                            }
+                            window.sendBase64ToIos(reader.result, blob.type, filename);
                         };
                     }
                 };
                 xhr.send();
-            }
+            };
 
-            document.addEventListener('click', function(e) {
-                var target = e.target;
-                while (target && target.tagName !== 'A') {
-                    target = target.parentNode;
+            // Click listener with composedPath support for Shadow DOM
+            window.document.addEventListener('click', function(e) {
+                var path = e.composedPath ? e.composedPath() : [];
+                var target = null;
+                for (var i = 0; i < path.length; i++) {
+                    if (path[i] && path[i].tagName === 'A') {
+                        target = path[i];
+                        break;
+                    }
+                }
+                if (!target) {
+                    target = e.target;
+                    while (target && target.tagName !== 'A') {
+                        target = target.parentNode;
+                    }
                 }
                 if (target && target.tagName === 'A') {
-                    var href = target.getAttribute('href');
+                    var href = target.getAttribute('href') || target.href;
                     var download = target.getAttribute('download');
                     if (href) {
                         if (href.startsWith('blob:')) {
-                            handleBlobUrl(href, download);
+                            window.handleBlobUrl(href, download);
                             e.preventDefault();
                         } else if (href.startsWith('data:')) {
-                            var commaIdx = href.indexOf(',');
-                            if (commaIdx !== -1) {
-                                var base64Data = href.substring(commaIdx + 1);
-                                var meta = href.substring(0, commaIdx);
-                                var mime = 'image/png';
-                                var mimeMatch = meta.match(/data:([^;]+)/);
-                                if (mimeMatch) mime = mimeMatch[1];
-                                if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.iosDownloadBridge) {
-                                    window.webkit.messageHandlers.iosDownloadBridge.postMessage({
-                                        base64: base64Data,
-                                        mimeType: mime,
-                                        filename: download || 'downloaded_file'
-                                    });
-                                }
-                                e.preventDefault();
-                            }
+                            window.sendBase64ToIos(href, 'image/png', download);
+                            e.preventDefault();
                         }
                     }
                 }
             }, true);
 
-            var originalClick = HTMLAnchorElement.prototype.click;
-            HTMLAnchorElement.prototype.click = function() {
-                var href = this.href;
-                var download = this.getAttribute('download');
-                if (href) {
-                    if (href.startsWith('blob:')) {
-                        handleBlobUrl(href, download);
-                        return;
-                    } else if (href.startsWith('data:')) {
-                        var commaIdx = href.indexOf(',');
-                        if (commaIdx !== -1) {
-                            var base64Data = href.substring(commaIdx + 1);
-                            var meta = href.substring(0, commaIdx);
-                            var mime = 'image/png';
-                            var mimeMatch = meta.match(/data:([^;]+)/);
-                            if (mimeMatch) mime = mimeMatch[1];
-                            if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.iosDownloadBridge) {
-                                window.webkit.messageHandlers.iosDownloadBridge.postMessage({
-                                    base64: base64Data,
-                                    mimeType: mime,
-                                    filename: download || 'downloaded_file'
-                                });
-                            }
+            // Hook HTMLAnchorElement.prototype.click
+            if (window.HTMLAnchorElement) {
+                var originalClick = window.HTMLAnchorElement.prototype.click;
+                window.HTMLAnchorElement.prototype.click = function() {
+                    var href = this.href;
+                    var download = this.getAttribute('download');
+                    if (href) {
+                        if (href.startsWith('blob:')) {
+                            window.handleBlobUrl(href, download);
+                            return;
+                        } else if (href.startsWith('data:')) {
+                            window.sendBase64ToIos(href, 'image/png', download);
                             return;
                         }
                     }
-                }
-                originalClick.apply(this, arguments);
-            };
+                    if (!this.ownerDocument.body.contains(this)) {
+                        this.style.display = 'none';
+                        window.document.body.appendChild(this);
+                        try {
+                            originalClick.apply(this, arguments);
+                        } finally {
+                            window.document.body.removeChild(this);
+                        }
+                    } else {
+                        originalClick.apply(this, arguments);
+                    }
+                };
+            }
 
-            var originalOpen = window.open;
-            window.open = function(url, name, specs) {
-                if (url && url.startsWith('blob:')) {
-                    handleBlobUrl(url, 'downloaded_file');
-                    return null;
-                }
-                return originalOpen.apply(this, arguments);
-            };
+            // Hook EventTarget.prototype.dispatchEvent
+            if (window.EventTarget) {
+                var originalDispatch = window.EventTarget.prototype.dispatchEvent;
+                window.EventTarget.prototype.dispatchEvent = function(event) {
+                    if (event && event.type === 'click' && this.tagName === 'A') {
+                        var href = this.getAttribute('href') || this.href;
+                        var download = this.getAttribute('download');
+                        if (href) {
+                            if (href.startsWith('blob:')) {
+                                window.handleBlobUrl(href, download);
+                                return false;
+                            } else if (href.startsWith('data:')) {
+                                window.sendBase64ToIos(href, 'image/png', download);
+                                return false;
+                            }
+                        }
+                    }
+                    return originalDispatch.apply(this, arguments);
+                };
+            }
+
+            // Hook window.open for blobs
+            if (window.open) {
+                var originalOpen = window.open;
+                window.open = function(url, name, specs) {
+                    if (url && url.startsWith('blob:')) {
+                        window.handleBlobUrl(url, 'downloaded_file');
+                        return null;
+                    }
+                    return originalOpen.apply(this, arguments);
+                };
+            }
         })();
         """
-        let iosDownloadBridgeScript = WKUserScript(source: iosDownloadBridgeScriptCode, injectionTime: .atDocumentEnd, forMainFrameOnly: false)
+        let iosDownloadBridgeScript = WKUserScript(source: iosDownloadBridgeScriptCode, injectionTime: .atDocumentStart, forMainFrameOnly: false)
         configuration.userContentController.addUserScript(iosDownloadBridgeScript)
         
         // Register script message handler
