@@ -99,6 +99,15 @@ struct WebView: UIViewRepresentable {
                 }
             };
 
+            window.sendUrlToIos = function(url, filename) {
+                if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.iosDownloadBridge) {
+                    window.webkit.messageHandlers.iosDownloadBridge.postMessage({
+                        url: url,
+                        filename: filename || 'downloaded_file'
+                    });
+                }
+            };
+
             window.handleBlobUrl = function(url, filename) {
                 if (window.URL.blobMap && window.URL.blobMap.has(url)) {
                     var blob = window.URL.blobMap.get(url);
@@ -121,6 +130,28 @@ struct WebView: UIViewRepresentable {
                             window.sendBase64ToIos(reader.result, blob.type, filename);
                         };
                     }
+                };
+                xhr.send();
+            };
+
+            window.handleHttpUrl = function(url, filename) {
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', url, true);
+                xhr.responseType = 'blob';
+                xhr.onload = function() {
+                    if (this.status === 200) {
+                        var blob = this.response;
+                        var reader = new FileReader();
+                        reader.readAsDataURL(blob);
+                        reader.onloadend = function() {
+                            window.sendBase64ToIos(reader.result, blob.type, filename);
+                        };
+                    } else {
+                        window.sendUrlToIos(url, filename);
+                    }
+                };
+                xhr.onerror = function() {
+                    window.sendUrlToIos(url, filename);
                 };
                 xhr.send();
             };
@@ -151,6 +182,9 @@ struct WebView: UIViewRepresentable {
                         } else if (href.startsWith('data:')) {
                             window.sendBase64ToIos(href, 'image/png', download);
                             e.preventDefault();
+                        } else if (target.hasAttribute('download') || isImageUrl(href)) {
+                            window.handleHttpUrl(href, download);
+                            e.preventDefault();
                         }
                     }
                 }
@@ -168,6 +202,9 @@ struct WebView: UIViewRepresentable {
                             return;
                         } else if (href.startsWith('data:')) {
                             window.sendBase64ToIos(href, 'image/png', download);
+                            return;
+                        } else if (this.hasAttribute('download') || isImageUrl(href)) {
+                            window.handleHttpUrl(href, download);
                             return;
                         }
                     }
@@ -199,6 +236,9 @@ struct WebView: UIViewRepresentable {
                             } else if (href.startsWith('data:')) {
                                 window.sendBase64ToIos(href, 'image/png', download);
                                 return false;
+                            } else if (this.hasAttribute('download') || isImageUrl(href)) {
+                                window.handleHttpUrl(href, download);
+                                return false;
                             }
                         }
                     }
@@ -206,13 +246,18 @@ struct WebView: UIViewRepresentable {
                 };
             }
 
-            // Hook window.open for blobs
+            // Hook window.open for blobs and images
             if (window.open) {
                 var originalOpen = window.open;
                 window.open = function(url, name, specs) {
-                    if (url && url.startsWith('blob:')) {
-                        window.handleBlobUrl(url, 'downloaded_file');
-                        return null;
+                    if (url) {
+                        if (url.startsWith('blob:')) {
+                            window.handleBlobUrl(url, 'downloaded_file');
+                            return null;
+                        } else if (isImageUrl(url)) {
+                            window.handleHttpUrl(url, 'downloaded_file');
+                            return null;
+                        }
                     }
                     return originalOpen.apply(this, arguments);
                 };
@@ -233,6 +278,9 @@ struct WebView: UIViewRepresentable {
         webView.isOpaque = false
         webView.backgroundColor = .clear
         webView.scrollView.backgroundColor = .clear
+        
+        // Bypasses disallowed_useragent on Google Login
+        webView.customUserAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1"
         
         // Sayfanın gereksiz esnemesini kapatır
         webView.scrollView.contentInsetAdjustmentBehavior = .automatic
@@ -256,60 +304,120 @@ struct WebView: UIViewRepresentable {
     class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate, WKDownloadDelegate, WKScriptMessageHandler {
         var downloadURL: URL?
         
-        // Handle Javascript message calls (Blob/Base64 Downloads)
+        // Handle Javascript message calls (Blob/Base64/URL Downloads)
         func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
             if message.name == "iosDownloadBridge",
-               let body = message.body as? [String: Any],
-               let base64String = body["base64"] as? String,
-               let mimeType = body["mimeType"] as? String,
-               let filename = body["filename"] as? String {
+               let body = message.body as? [String: Any] {
                 
-                var cleanBase64 = base64String
-                if cleanBase64.contains(",") {
-                    cleanBase64 = String(cleanBase64.split(separator: ",")[1])
+                if let urlString = body["url"] as? String,
+                   let filename = body["filename"] as? String {
+                    downloadUrlNatively(urlString: urlString, filename: filename)
+                    return
                 }
                 
-                guard let decodedData = Data(base64Encoded: cleanBase64, options: .ignoreUnknownCharacters) else { return }
+                if let base64String = body["base64"] as? String,
+                   let mimeType = body["mimeType"] as? String,
+                   let filename = body["filename"] as? String {
+                    saveBase64AndPresent(base64String: base64String, mimeType: mimeType, filename: filename)
+                    return
+                }
+            }
+        }
+        
+        private func downloadUrlNatively(urlString: String, filename: String) {
+            guard let url = URL(string: urlString) else { return }
+            
+            var extensionStr = ".bin"
+            let lower = urlString.lowercased()
+            if lower.contains(".png") { extensionStr = ".png" }
+            else if lower.contains(".jpg") || lower.contains(".jpeg") { extensionStr = ".jpg" }
+            else if lower.contains(".webp") { extensionStr = ".webp" }
+            else if lower.contains(".pdf") { extensionStr = ".pdf" }
+            else if lower.contains(".gif") { extensionStr = ".gif" }
+            
+            let finalFilename = filename.hasSuffix(extensionStr) ? filename : (filename + extensionStr)
+            
+            let task = URLSession.shared.dataTask(with: url) { data, response, error in
+                guard let data = data, error == nil else {
+                    print("Error downloading native URL: \(String(describing: error))")
+                    return
+                }
                 
-                var extensionStr = ".bin"
-                if mimeType.contains("png") { extensionStr = ".png" }
-                else if mimeType.contains("jpeg") || mimeType.contains("jpg") { extensionStr = ".jpg" }
-                else if mimeType.contains("webp") { extensionStr = ".webp" }
-                else if mimeType.contains("pdf") { extensionStr = ".pdf" }
-                else if mimeType.contains("gif") { extensionStr = ".gif" }
-                
-                let finalFilename = filename.hasSuffix(extensionStr) ? filename : (filename + extensionStr)
                 let tempDir = FileManager.default.temporaryDirectory
                 let fileURL = tempDir.appendingPathComponent(finalFilename)
                 
                 try? FileManager.default.removeItem(at: fileURL)
                 do {
-                    try decodedData.write(to: fileURL)
-                    
-                    DispatchQueue.main.async {
-                        let activityVC = UIActivityViewController(activityItems: [fileURL], applicationActivities: nil)
-                        
-                        // iPad support
-                        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                           let rootVC = windowScene.windows.first?.rootViewController {
-                            
-                            var topVC = rootVC
-                            while let presentedVC = topVC.presentedViewController {
-                                topVC = presentedVC
-                            }
-                            
-                            if let popover = activityVC.popoverPresentationController {
-                                popover.sourceView = topVC.view
-                                popover.sourceRect = CGRect(x: topVC.view.bounds.midX, y: topVC.view.bounds.midY, width: 0, height: 0)
-                                popover.permittedArrowDirections = []
-                            }
-                            
-                            topVC.present(activityVC, animated: true, completion: nil)
-                        }
-                    }
+                    try data.write(to: fileURL)
+                    self.presentShareSheet(fileURL: fileURL)
                 } catch {
-                    print("Error writing downloaded file: \\(error)")
+                    print("Error writing natively downloaded file: \(error)")
                 }
+            }
+            task.resume()
+        }
+        
+        private func saveBase64AndPresent(base64String: String, mimeType: String, filename: String) {
+            var cleanBase64 = base64String
+            if cleanBase64.contains(",") {
+                cleanBase64 = String(cleanBase64.split(separator: ",")[1])
+            }
+            
+            guard let decodedData = Data(base64Encoded: cleanBase64, options: .ignoreUnknownCharacters) else { return }
+            
+            var extensionStr = ".bin"
+            if mimeType.contains("png") { extensionStr = ".png" }
+            else if mimeType.contains("jpeg") || mimeType.contains("jpg") { extensionStr = ".jpg" }
+            else if mimeType.contains("webp") { extensionStr = ".webp" }
+            else if mimeType.contains("pdf") { extensionStr = ".pdf" }
+            else if mimeType.contains("gif") { extensionStr = ".gif" }
+            
+            let finalFilename = filename.hasSuffix(extensionStr) ? filename : (filename + extensionStr)
+            let tempDir = FileManager.default.temporaryDirectory
+            let fileURL = tempDir.appendingPathComponent(finalFilename)
+            
+            try? FileManager.default.removeItem(at: fileURL)
+            do {
+                try decodedData.write(to: fileURL)
+                self.presentShareSheet(fileURL: fileURL)
+            } catch {
+                print("Error writing downloaded base64 file: \(error)")
+            }
+        }
+        
+        private func presentShareSheet(fileURL: URL) {
+            DispatchQueue.main.async {
+                guard let windowScene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene,
+                      let keyWindow = windowScene.windows.first(where: { $0.isKeyWindow }),
+                      let rootVC = keyWindow.rootViewController else {
+                    print("Error: Could not find key window root VC")
+                    return
+                }
+                
+                var topVC = rootVC
+                while true {
+                    if let presented = topVC.presentedViewController {
+                        topVC = presented
+                    } else if let navigation = topVC as? UINavigationController, let visible = navigation.visibleViewController {
+                        topVC = visible
+                    } else if let tab = topVC as? UITabBarController, let selected = tab.selectedViewController {
+                        topVC = selected
+                    } else if let child = topVC.children.last {
+                        topVC = child
+                    } else {
+                        break
+                    }
+                }
+                
+                let activityVC = UIActivityViewController(activityItems: [fileURL], applicationActivities: nil)
+                
+                if let popover = activityVC.popoverPresentationController {
+                    popover.sourceView = topVC.view
+                    popover.sourceRect = CGRect(x: topVC.view.bounds.midX, y: topVC.view.bounds.midY, width: 0, height: 0)
+                    popover.permittedArrowDirections = []
+                }
+                
+                topVC.present(activityVC, animated: true, completion: nil)
             }
         }
 
@@ -357,28 +465,7 @@ struct WebView: UIViewRepresentable {
 
         func downloadDidFinish(_ download: WKDownload) {
             guard let fileURL = downloadURL else { return }
-            
-            DispatchQueue.main.async {
-                let activityVC = UIActivityViewController(activityItems: [fileURL], applicationActivities: nil)
-                
-                // iPad desteği için popover ayarlaması
-                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                   let rootVC = windowScene.windows.first?.rootViewController {
-                    
-                    var topVC = rootVC
-                    while let presentedVC = topVC.presentedViewController {
-                        topVC = presentedVC
-                    }
-                    
-                    if let popover = activityVC.popoverPresentationController {
-                        popover.sourceView = topVC.view
-                        popover.sourceRect = CGRect(x: topVC.view.bounds.midX, y: topVC.view.bounds.midY, width: 0, height: 0)
-                        popover.permittedArrowDirections = []
-                    }
-                    
-                    topVC.present(activityVC, animated: true, completion: nil)
-                }
-            }
+            self.presentShareSheet(fileURL: fileURL)
         }
 
         func download(_ download: WKDownload, didFailWithError error: Error, resumeData: Data?) {
