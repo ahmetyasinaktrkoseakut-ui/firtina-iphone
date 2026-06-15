@@ -41,8 +41,10 @@ struct WebView: UIViewRepresentable {
         `;
         document.head.appendChild(style);
         
-        // İlk açılışta sayfanın aşağıdan başlama sorununu çözer, en tepeye sabitler
-        window.onload = function() { setTimeout(function(){ window.scrollTo(0,0); }, 50); };
+        // İlk açılışta sayfayı en tepeye sabitle (window.onload ezmeden event listener ile)
+        window.addEventListener('load', function() {
+            setTimeout(function(){ window.scrollTo(0,0); }, 50);
+        });
         
         // Gizlilik politikasını uygulama içinde açar
         window.openPrivacy = function() { window.location.href = "privacy.html"; };
@@ -90,21 +92,33 @@ struct WebView: UIViewRepresentable {
                 if (base64data.indexOf(',') !== -1) {
                     base64data = base64data.substring(base64data.indexOf(',') + 1);
                 }
+                var payload = {
+                    base64: base64data,
+                    mimeType: mimeType,
+                    filename: filename || 'downloaded_file'
+                };
                 if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.iosDownloadBridge) {
-                    window.webkit.messageHandlers.iosDownloadBridge.postMessage({
-                        base64: base64data,
-                        mimeType: mimeType,
-                        filename: filename || 'downloaded_file'
-                    });
+                    window.webkit.messageHandlers.iosDownloadBridge.postMessage(payload);
+                } else {
+                    window.parent.postMessage({
+                        type: 'iosDownloadBridgeMessage',
+                        data: payload
+                    }, '*');
                 }
             };
 
             window.sendUrlToIos = function(url, filename) {
+                var payload = {
+                    url: url,
+                    filename: filename || 'downloaded_file'
+                };
                 if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.iosDownloadBridge) {
-                    window.webkit.messageHandlers.iosDownloadBridge.postMessage({
-                        url: url,
-                        filename: filename || 'downloaded_file'
-                    });
+                    window.webkit.messageHandlers.iosDownloadBridge.postMessage(payload);
+                } else {
+                    window.parent.postMessage({
+                        type: 'iosDownloadBridgeMessage',
+                        data: payload
+                    }, '*');
                 }
             };
 
@@ -262,6 +276,17 @@ struct WebView: UIViewRepresentable {
                     return originalOpen.apply(this, arguments);
                 };
             }
+
+            // Listen to messages from subframes (sandboxed iframes forwarding)
+            if (window.top === window.self) {
+                window.addEventListener('message', function(e) {
+                    if (e.data && e.data.type === 'iosDownloadBridgeMessage' && e.data.data) {
+                        if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.iosDownloadBridge) {
+                            window.webkit.messageHandlers.iosDownloadBridge.postMessage(e.data.data);
+                        }
+                    }
+                });
+            }
         })();
         """
         let iosDownloadBridgeScript = WKUserScript(source: iosDownloadBridgeScriptCode, injectionTime: .atDocumentStart, forMainFrameOnly: false)
@@ -290,15 +315,17 @@ struct WebView: UIViewRepresentable {
         // parmakla ekranın solundan sağa kaydırarak uygulamaya geri dönülmesini sağlar.
         webView.allowsBackForwardNavigationGestures = true
         
+        // 4. SAYFA YÜKLEME ÇÖZÜMÜ (updateUIView'den taşındı)
+        if let url = Bundle.main.url(forResource: fileName, withExtension: "html"),
+           let bundleURL = Bundle.main.resourceURL {
+            webView.loadFileURL(url, allowingReadAccessTo: bundleURL)
+        }
+        
         return webView
     }
 
     func updateUIView(_ uiView: WKWebView, context: Context) {
-        if let url = Bundle.main.url(forResource: fileName, withExtension: "html"),
-           let bundleURL = Bundle.main.resourceURL {
-            // 4. GİZLİLİK POLİTİKASI ÇÖZÜMÜ
-            uiView.loadFileURL(url, allowingReadAccessTo: bundleURL)
-        }
+        // Sayfanın sonsuz döngüde yeniden yüklenmesini önlemek için boş bırakıldı
     }
 
     class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate, WKDownloadDelegate, WKScriptMessageHandler {
@@ -324,18 +351,46 @@ struct WebView: UIViewRepresentable {
             }
         }
         
+        // Helper: Resolve final filename with correct extension, preserving existing extensions
+        private func getFinalFilename(filename: String, mimeType: String?, urlString: String?) -> String {
+            let fileExtension = (filename as NSString).pathExtension.lowercased()
+            // If the filename already has a valid file extension, use it directly
+            if !fileExtension.isEmpty && fileExtension.count >= 2 && fileExtension.count <= 4 {
+                return filename
+            }
+            
+            var extensionStr = ""
+            if let mime = mimeType?.lowercased() {
+                if mime.contains("png") { extensionStr = ".png" }
+                else if mime.contains("jpeg") || mime.contains("jpg") { extensionStr = ".jpg" }
+                else if mime.contains("webp") { extensionStr = ".webp" }
+                else if mime.contains("gif") { extensionStr = ".gif" }
+                else if mime.contains("pdf") { extensionStr = ".pdf" }
+                else if mime.contains("mp3") || mime.contains("mpeg") || mime.contains("audio") { extensionStr = ".mp3" }
+                else if mime.contains("mp4") || mime.contains("video") { extensionStr = ".mp4" }
+            }
+            
+            if extensionStr.isEmpty, let urlStr = urlString?.lowercased() {
+                if urlStr.contains(".png") { extensionStr = ".png" }
+                else if urlStr.contains(".jpg") || urlStr.contains(".jpeg") { extensionStr = ".jpg" }
+                else if urlStr.contains(".webp") { extensionStr = ".webp" }
+                else if urlStr.contains(".gif") { extensionStr = ".gif" }
+                else if urlStr.contains(".pdf") { extensionStr = ".pdf" }
+                else if urlStr.contains(".mp3") { extensionStr = ".mp3" }
+                else if urlStr.contains(".mp4") { extensionStr = ".mp4" }
+            }
+            
+            if extensionStr.isEmpty {
+                extensionStr = ".bin"
+            }
+            
+            return filename.hasSuffix(extensionStr) ? filename : (filename + extensionStr)
+        }
+        
         private func downloadUrlNatively(urlString: String, filename: String) {
             guard let url = URL(string: urlString) else { return }
             
-            var extensionStr = ".bin"
-            let lower = urlString.lowercased()
-            if lower.contains(".png") { extensionStr = ".png" }
-            else if lower.contains(".jpg") || lower.contains(".jpeg") { extensionStr = ".jpg" }
-            else if lower.contains(".webp") { extensionStr = ".webp" }
-            else if lower.contains(".pdf") { extensionStr = ".pdf" }
-            else if lower.contains(".gif") { extensionStr = ".gif" }
-            
-            let finalFilename = filename.hasSuffix(extensionStr) ? filename : (filename + extensionStr)
+            let finalFilename = getFinalFilename(filename: filename, mimeType: nil, urlString: urlString)
             
             let task = URLSession.shared.dataTask(with: url) { data, response, error in
                 guard let data = data, error == nil else {
@@ -365,14 +420,7 @@ struct WebView: UIViewRepresentable {
             
             guard let decodedData = Data(base64Encoded: cleanBase64, options: .ignoreUnknownCharacters) else { return }
             
-            var extensionStr = ".bin"
-            if mimeType.contains("png") { extensionStr = ".png" }
-            else if mimeType.contains("jpeg") || mimeType.contains("jpg") { extensionStr = ".jpg" }
-            else if mimeType.contains("webp") { extensionStr = ".webp" }
-            else if mimeType.contains("pdf") { extensionStr = ".pdf" }
-            else if mimeType.contains("gif") { extensionStr = ".gif" }
-            
-            let finalFilename = filename.hasSuffix(extensionStr) ? filename : (filename + extensionStr)
+            let finalFilename = getFinalFilename(filename: filename, mimeType: mimeType, urlString: nil)
             let tempDir = FileManager.default.temporaryDirectory
             let fileURL = tempDir.appendingPathComponent(finalFilename)
             
@@ -407,6 +455,12 @@ struct WebView: UIViewRepresentable {
                     } else {
                         break
                     }
+                }
+                
+                // CRITICAL SAFETY CHECK: Prevent double presentation crashes
+                if topVC is UIActivityViewController {
+                    print("Warning: UIActivityViewController is already presented, ignoring duplicate request.")
+                    return
                 }
                 
                 let activityVC = UIActivityViewController(activityItems: [fileURL], applicationActivities: nil)

@@ -6237,8 +6237,13 @@
             }
 
             // Show back button
-            backToCategoriesBtn.classList.remove('hidden');
-            backToCategoriesBtn.style.display = 'flex';
+            if (activeCategory === 'favorites') {
+                backToCategoriesBtn.classList.add('hidden');
+                backToCategoriesBtn.style.display = 'none';
+            } else {
+                backToCategoriesBtn.classList.remove('hidden');
+                backToCategoriesBtn.style.display = 'flex';
+            }
 
             // Update back text
             const backText = document.getElementById('backToCatsText');
