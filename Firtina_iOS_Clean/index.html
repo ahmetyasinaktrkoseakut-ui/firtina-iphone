@@ -1206,6 +1206,45 @@
         .lead-btn:active {
             transform: scale(0.98);
         }
+
+        /* Yapay Zeka Atölyesi (AI Studio) Styles */
+        .studio-tab-btn {
+            position: relative;
+        }
+        .studio-tab-btn::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: #3b82f6;
+            transform: scaleX(0);
+            transition: transform 0.3s;
+        }
+        .studio-tab-btn.active::after {
+            transform: scaleX(1);
+        }
+        #gradeCircle {
+            transition: stroke-dashoffset 1s ease-out;
+        }
+        .criteria-row {
+            transition: all 0.3s ease;
+        }
+        .budget-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px border-white/5;
+            border-radius: 12px;
+            transition: all 0.2s;
+        }
+        .budget-row:hover {
+            background: rgba(15, 23, 42, 0.6);
+            border-color: rgba(59, 130, 246, 0.2);
+        }
     </style>
     <script>
         // --- Robust Onboarding Logic (Fail-Safe) ---
@@ -1491,6 +1530,11 @@
                     </span>
                 </h1>
                 <div class="flex items-center gap-2">
+                    <button onclick="showInfoModal()" type="button" aria-label="Bilgi" class="flex items-center justify-center bg-slate-800 text-white border border-white/10 rounded-lg w-10 h-10 hover:bg-slate-700 transition-colors focus:outline-none min-h-[48px] min-w-[48px]" style="background-color: #1e293b; color: white;">
+                        <svg class="w-5 h-5 text-slate-400 fill-none stroke-current stroke-2" viewBox="0 0 24 24" style="width: 20px; height: 20px;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 111.063.852l-.708 2.836a.75.75 0 001.063.852l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                        </svg>
+                    </button>
                     <select id="languageSelect" onchange="setLanguage(this.value)" aria-label="Select Language"
                         class="bg-slate-800 text-white text-xs border border-white/10 rounded-lg p-2.5 outline-none focus:ring-1 focus:ring-blue-500 min-h-[48px] min-w-[48px]"
                         style="background-color: #1e293b; color: white;">
@@ -1677,6 +1721,245 @@
                 <!-- Javascript ile doldurulacak -->
             </div>
         </div>
+        
+        <!-- Yapay Zeka Atölyesi Screen (Gizli) -->
+        <div id="studioScreen" class="hidden pb-20">
+            <!-- Header -->
+            <div class="text-center max-w-xl mx-auto mb-6">
+                <h2 class="text-2xl md:text-3xl font-black text-white mb-2" id="studioTitle">Yapay Zeka Atölyesi</h2>
+                <p class="text-slate-400 text-sm" id="studioSubtitle">Promptlarınızı optimize edin ve abonelik bütçenizi yönetin.</p>
+            </div>
+
+            <!-- Sub Navigation Tabs -->
+            <div class="flex border-b border-white/10 mb-6 max-w-md mx-auto">
+                <button onclick="setStudioTab('grader')" id="tabBtnGrader" class="flex-1 py-3 text-sm font-semibold border-b-2 border-blue-500 text-white transition-all outline-none">
+                    Prompt Skorer
+                </button>
+                <button onclick="setStudioTab('budget')" id="tabBtnBudget" class="flex-1 py-3 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-white transition-all outline-none">
+                    Bütçe Planlayıcı
+                </button>
+                <button onclick="setStudioTab('myprompts')" id="tabBtnMyPrompts" class="flex-1 py-3 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-white transition-all outline-none">
+                    Prompt Defteri
+                </button>
+            </div>
+
+            <!-- TAB 1: PROMPT GRADER -->
+            <div id="studioTabGrader" class="space-y-6">
+                <div class="glass-card p-6 rounded-2xl border border-white/5 bg-slate-900/60 max-w-2xl mx-auto">
+                    <h3 class="text-lg font-bold text-white mb-3" id="graderTitle">Prompt Analiz Paneli</h3>
+                    <textarea id="graderInput" rows="5" class="w-full bg-slate-950/80 border border-white/10 rounded-xl p-4 text-white text-sm placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all resize-none" placeholder="Promptunuzu buraya yazın veya yapıştırın..."></textarea>
+                    
+                    <div class="flex gap-3 mt-4">
+                        <button onclick="gradePrompt()" id="btnGrade" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-500/20 active:scale-98">
+                            Analiz Et & Puanla
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Grader Results (Hidden by default) -->
+                <div id="graderResults" class="hidden glass-card p-6 rounded-2xl border border-white/5 bg-slate-900/60 max-w-2xl mx-auto space-y-6">
+                    <div class="flex flex-col md:flex-row items-center gap-6 justify-center">
+                        <!-- Circular Progress SVG -->
+                        <div class="relative w-36 h-36 flex items-center justify-center">
+                            <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                                <circle class="text-slate-800" stroke-width="3" stroke="currentColor" fill="none" cx="18" cy="18" r="15.915" />
+                                <circle id="gradeCircle" class="text-blue-500 transition-all duration-1000 ease-out" stroke-width="3" stroke-dasharray="100 100" stroke-dashoffset="100" stroke-linecap="round" stroke="currentColor" fill="none" cx="18" cy="18" r="15.915" />
+                            </svg>
+                            <div class="absolute text-center">
+                                <span id="gradeScore" class="text-3xl font-black text-white">0</span>
+                                <span class="text-slate-400 text-[10px] block" id="gradeLabelText">SKOR</span>
+                            </div>
+                        </div>
+
+                        <!-- Heuristics Checklist -->
+                        <div class="flex-1 space-y-2.5 w-full">
+                            <div class="flex items-center justify-between p-2.5 bg-slate-950/40 rounded-lg border border-white/5">
+                                <span class="text-sm text-slate-300" id="lblPersona">Rol/Kimlik (Persona)</span>
+                                <span id="checkPersona" class="text-sm font-semibold">❌</span>
+                            </div>
+                            <div class="flex items-center justify-between p-2.5 bg-slate-950/40 rounded-lg border border-white/5">
+                                <span class="text-sm text-slate-300" id="lblContext">Bağlam/Detay (Context)</span>
+                                <span id="checkContext" class="text-sm font-semibold">❌</span>
+                            </div>
+                            <div class="flex items-center justify-between p-2.5 bg-slate-950/40 rounded-lg border border-white/5">
+                                <span class="text-sm text-slate-300" id="lblConstraints">Kısıtlamalar (Constraints)</span>
+                                <span id="checkConstraints" class="text-sm font-semibold">❌</span>
+                            </div>
+                            <div class="flex items-center justify-between p-2.5 bg-slate-950/40 rounded-lg border border-white/5">
+                                <span class="text-sm text-slate-300" id="lblFormat">Çıktı Biçimi (Format)</span>
+                                <span id="checkFormat" class="text-sm font-semibold">❌</span>
+                            </div>
+                            <div class="flex items-center justify-between p-2.5 bg-slate-950/40 rounded-lg border border-white/5">
+                                <span class="text-sm text-slate-300" id="lblExamples">Örnekleme (Examples)</span>
+                                <span id="checkExamples" class="text-sm font-semibold">❌</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Optimizer Panel -->
+                    <div id="optimizerPanel" class="p-4 bg-slate-950/60 rounded-xl border border-white/5 space-y-3">
+                        <div class="flex justify-between items-center">
+                            <h4 class="text-sm font-bold text-white" id="optimizerTitle">Tavsiye & Geliştirilmiş Prompt</h4>
+                            <span id="optimizationTip" class="text-xs text-blue-400">Puanı artırmak için şablonu doldurun.</span>
+                        </div>
+                        <div id="optimizerSuggestions" class="text-xs text-slate-400 leading-relaxed border-b border-white/5 pb-3"></div>
+                        <textarea id="optimizedTextarea" rows="6" class="w-full bg-slate-900 border border-white/10 rounded-lg p-3 text-white text-xs font-mono focus:border-blue-500 outline-none transition-all resize-none"></textarea>
+                        
+                        <div class="flex gap-2">
+                            <button onclick="copyOptimizedPrompt()" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 active:scale-98">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                                <span id="btnCopyOpt">Kopyala</span>
+                            </button>
+                            <button onclick="saveOptimizedToLibrary()" class="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 active:scale-98">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+                                <span id="btnSaveOpt">Kütüphaneye Kaydet</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: BUDGET PLANNER -->
+            <div id="studioTabBudget" class="hidden space-y-6">
+                <!-- Add Subscription Form -->
+                <div class="glass-card p-6 rounded-2xl border border-white/5 bg-slate-900/60 max-w-2xl mx-auto">
+                    <h3 class="text-lg font-bold text-white mb-3" id="budgetAddTitle">Abonelik Ekle</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <!-- Tools Pre-List Select -->
+                        <select id="budgetPresetSelect" onchange="handlePresetSelect(this.value)" class="bg-slate-950/80 border border-white/10 rounded-xl px-3 py-3 text-white text-sm outline-none focus:border-blue-500 min-h-[48px]">
+                            <option value="" id="optSelectTool">Bir Yapay Zeka Seçin...</option>
+                            <option value="chatgpt_plus">ChatGPT Plus ($20.00)</option>
+                            <option value="claude_pro">Claude Pro ($20.00)</option>
+                            <option value="midjourney_basic">Midjourney Basic ($10.00)</option>
+                            <option value="midjourney_std">Midjourney Standard ($30.00)</option>
+                            <option value="suno_pro">Suno Pro ($10.00)</option>
+                            <option value="copilot_pro">Copilot Pro ($20.00)</option>
+                            <option value="elevenlabs_starter">ElevenLabs Starter ($5.00)</option>
+                            <option value="runway_standard">Runway Standard ($15.00)</option>
+                            <option value="custom" id="optCustomTool">Kendi Aboneliğini Ekle...</option>
+                        </select>
+
+                        <!-- Tool Custom Name -->
+                        <input type="text" id="budgetNameInput" placeholder="Özel Araç İsmi..." class="bg-slate-950/80 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-slate-500 focus:border-blue-500 outline-none min-h-[48px]">
+                        
+                        <!-- Tool Custom Price -->
+                        <input type="number" id="budgetPriceInput" placeholder="Fiyat ($)..." class="bg-slate-950/80 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-slate-500 focus:border-blue-500 outline-none min-h-[48px]">
+                    </div>
+
+                    <!-- Hidden Category Select -->
+                    <div id="budgetCategoryWrapper" class="hidden mt-3">
+                        <select id="budgetCategorySelect" class="w-full bg-slate-950/80 border border-white/10 rounded-xl px-3 py-3 text-white text-sm outline-none focus:border-blue-500 min-h-[48px]">
+                            <option value="text">Metin (Text) AI</option>
+                            <option value="visual">Görsel (Visual) AI</option>
+                            <option value="media">Multimedya (Video/Audio) AI</option>
+                            <option value="coding">Kodlama & Verimlilik AI</option>
+                        </select>
+                    </div>
+
+                    <button onclick="addSubscription()" class="w-full mt-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-500/20 active:scale-98" id="btnAddSubText">
+                        Aboneliği Ekle
+                    </button>
+                </div>
+
+                <!-- Budget Dashboard -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                    <!-- Left: Subscriptions List -->
+                    <div class="glass-card p-6 rounded-2xl border border-white/5 bg-slate-900/60 space-y-4">
+                        <h3 class="text-lg font-bold text-white border-b border-white/5 pb-2" id="budgetStackTitle">Aktif Aboneliklerim</h3>
+                        
+                        <!-- List Container -->
+                        <div id="budgetList" class="space-y-2.5 max-h-72 overflow-y-auto pr-1">
+                            <!-- JS Generated Stack Rows -->
+                        </div>
+
+                        <!-- Summary Row -->
+                        <div class="pt-4 border-t border-white/10 flex justify-between items-center">
+                            <span class="text-slate-400 text-sm font-semibold" id="lblTotalCost">Toplam Aylık Harcama</span>
+                            <span id="budgetTotalCost" class="text-2xl font-black text-blue-400">$0.00</span>
+                        </div>
+                    </div>
+
+                    <!-- Right: Donut Chart & Optimization Tips -->
+                    <div class="glass-card p-6 rounded-2xl border border-white/5 bg-slate-900/60 flex flex-col justify-between space-y-6">
+                        <!-- Donut SVG Visualization -->
+                        <div class="flex items-center gap-4">
+                            <div class="relative w-28 h-28 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36" id="donutSVG">
+                                    <circle class="text-slate-800" stroke-width="4.5" stroke="currentColor" fill="none" cx="18" cy="18" r="15.915" />
+                                </svg>
+                                <div class="absolute text-center">
+                                    <span id="donutPercent" class="text-lg font-black text-white">0%</span>
+                                    <span class="text-[9px] text-slate-400 block uppercase" id="lblBreakdown">DAĞILIM</span>
+                                </div>
+                            </div>
+
+                            <div class="flex-1 space-y-1.5 text-xs">
+                                <div class="flex items-center gap-2 text-slate-300">
+                                    <span class="w-3 h-3 rounded-full bg-blue-500 block"></span>
+                                    <span id="legendText">Metin:</span> <strong id="valText">0%</strong>
+                                </div>
+                                <div class="flex items-center gap-2 text-slate-300">
+                                    <span class="w-3 h-3 rounded-full bg-indigo-500 block"></span>
+                                    <span id="legendVisual">Görsel:</span> <strong id="valVisual">0%</strong>
+                                </div>
+                                <div class="flex items-center gap-2 text-slate-300">
+                                    <span class="w-3 h-3 rounded-full bg-emerald-500 block"></span>
+                                    <span id="legendMedia">Medya:</span> <strong id="valMedia">0%</strong>
+                                </div>
+                                <div class="flex items-center gap-2 text-slate-300">
+                                    <span class="w-3 h-3 rounded-full bg-amber-500 block"></span>
+                                    <span id="legendCoding">Kodlama:</span> <strong id="valCoding">0%</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Savings Tips -->
+                        <div class="p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl space-y-2">
+                            <h4 class="text-xs font-bold text-blue-400 flex items-center gap-1.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <span id="lblSavingsTips">Tasarruf & Akıllı Öneriler</span>
+                            </h4>
+                            <div id="savingsTipsContainer" class="text-[11px] text-slate-300 space-y-1.5 leading-relaxed">
+                                <!-- Suggested alternatives -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: MY PROMPTS -->
+            <div id="studioTabMyPrompts" class="hidden space-y-6">
+                <!-- Add New Prompt Form -->
+                <div class="glass-card p-6 rounded-2xl border border-white/5 bg-slate-900/60 max-w-2xl mx-auto space-y-4">
+                    <h3 class="text-lg font-bold text-white" id="lblAddPrompt">Yeni Prompt Ekle</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <input type="text" id="myPromptTitleInput" placeholder="Başlık..." class="bg-slate-950/80 border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm placeholder-slate-500 focus:border-blue-500 outline-none">
+                        
+                        <select id="myPromptCategorySelect" class="bg-slate-950/80 border border-white/10 rounded-xl px-3 py-3.5 text-white text-sm outline-none focus:border-blue-500">
+                            <option value="Metin">Metin (Text)</option>
+                            <option value="Görsel">Görsel (Visual)</option>
+                            <option value="Müzik">Müzik / Ses (Audio)</option>
+                            <option value="Kodlama">Kodlama (Coding)</option>
+                            <option value="Genel">Genel (General)</option>
+                        </select>
+                    </div>
+
+                    <textarea id="myPromptTextInput" rows="4" placeholder="Prompt içeriğini buraya yazın..." class="w-full bg-slate-950/80 border border-white/10 rounded-xl p-4 text-white text-sm placeholder-slate-500 focus:border-blue-500 outline-none transition-all resize-none"></textarea>
+                    
+                    <button onclick="saveMyPrompt()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-500/20 active:scale-98" id="btnSavePromptText">
+                        Kaydet
+                    </button>
+                </div>
+
+                <!-- Custom Prompts List Grid -->
+                <div class="max-w-4xl mx-auto">
+                    <h3 class="text-lg font-bold text-white mb-4" id="lblMyPrompts">Kişisel Promptlarım</h3>
+                    <div id="myPromptsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Custom prompts cards -->
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 
     <!-- Professional Legal Footer -->
@@ -1777,7 +2060,49 @@
                     btnEnter: "Uygulamaya Gir 🚀"
                 },
                 aiAssistant: { fabLabel: "Araç Bul", headerTitle: "AI Asistan", welcomeMsg: "Merhaba, FIRTINA AI olarak sana yardımcı olabilirim. Ne için araç arıyorsun?", inputPlaceholder: "Örn: Sunum hazırlama aracı...", noResults: "Maalesef bu konuda bir araç bulamadım. 😔<br>Farklı kelimelerle tekrar dener misin?", resultsHeader: "İşte bulduğum en iyi araçlar: 👇<br>", viewBtn: "İncele" },
-                nav: { home: "Ana Sayfa", assistant: "ASİSTAN", prompts: "Promptlar", favorites: "Favoriler", info: "Bilgi" },
+                nav: { home: "Ana Sayfa", assistant: "ASİSTAN", prompts: "Promptlar", favorites: "Favoriler", studio: "Atölye" },
+                studio: {
+                    title: "Yapay Zeka Atölyesi",
+                    subtitle: "Promptlarınızı yerel olarak analiz edip puanlayın ve abonelik bütçenizi yönetin.",
+                    tabGrader: "Prompt Skorer",
+                    tabBudget: "Bütçe Planlayıcı",
+                    tabMyPrompts: "Prompt Defteri",
+                    graderTitle: "Prompt Analiz Paneli",
+                    graderTextareaPlaceholder: "Promptunuzu buraya yazın veya yapıştırın...",
+                    btnGrade: "Analiz Et & Puanla",
+                    btnGradeLoading: "Analiz ediliyor...",
+                    gradeLabel: "SKOR",
+                    graderPersona: "Rol/Kimlik (Persona)",
+                    graderContext: "Bağlam/Detay (Context)",
+                    graderConstraints: "Kısıtlamalar (Constraints)",
+                    graderFormat: "Çıktı Biçimi (Format)",
+                    graderExamples: "Örnekleme (Examples)",
+                    criteriaMet: "Kriter Sağlandı",
+                    criteriaMissing: "Kriter Eksik",
+                    optimizerTitle: "Tavsiye & Geliştirilmiş Prompt",
+                    optimizationTip: "Puanı artırmak için şablonu doldurun.",
+                    btnCopyOpt: "Kopyala",
+                    btnSaveOpt: "Kütüphaneye Kaydet",
+                    promptSavedSuccess: "Prompt başarıyla kütüphanenize kaydedildi!",
+                    budgetAddTitle: "Abonelik Ekle",
+                    optSelectTool: "Bir Yapay Zeka Seçin...",
+                    optCustomTool: "Kendi Aboneliğini Ekle...",
+                    budgetNameInput: "Özel Araç İsmi...",
+                    budgetPriceInput: "Fiyat ($)...",
+                    btnAddSubText: "Aboneliği Ekle",
+                    budgetStackTitle: "Aktif Aboneliklerim",
+                    lblTotalCost: "Toplam Aylık Harcama",
+                    lblBreakdown: "DAĞILIM",
+                    lblSavingsTips: "Tasarruf & Akıllı Öneriler",
+                    lblAddPrompt: "Yeni Prompt Ekle",
+                    lblMyPrompts: "Kişisel Promptlarım",
+                    promptTitlePlaceholder: "Başlık...",
+                    promptCategoryLabel: "Kategori",
+                    btnSavePromptText: "Kaydet",
+                    copied: "Kopyalandı!",
+                    deleted: "Silindi!",
+                    budgetEmpty: "Henüz abonelik eklenmedi."
+                },
                 prompts: { title: "Prompt Kütüphanesi", subtitle: "Göz alıcı görseller üretmek için hazır yapay zeka komut şablonları." },
                 infoModal: { version: "Versiyon", devTitle: "Geliştirici", privacyBtn: "Gizlilik Politikası", closeBtn: "Kapat" },
                 catDesc: {
@@ -1811,7 +2136,49 @@
                 cats: { "Genel": "General", "Metin": "Text", "Görsel": "Image", "Video": "Video", "3D": "3D", "Müzik": "Music", "Kodlama": "Coding", "Akademik": "Academic", "Verimlilik": "Productivity", "Ses": "Voice", "Sohbet": "Chat" },
                 pricing: { "Ücretsiz": "Free", "Freemium": "Freemium", "Ücretli": "Paid", "Deneme Sürümü": "Trial" },
                 aiAssistant: { fabLabel: "Find Tool", headerTitle: "AI Assistant (Offline)", welcomeMsg: "Hello! 👋<br>I can help you offline. What are you looking for?", inputPlaceholder: "Ex: Presentation tool...", noResults: "Sorry, nothing found. 😔<br>Try other keywords?", resultsHeader: "Here are the best tools: 👇<br>", viewBtn: "View" },
-                nav: { home: "Home", assistant: "ASSISTANT", prompts: "Prompts", favorites: "Favorites", info: "Info" },
+                nav: { home: "Home", assistant: "ASSISTANT", prompts: "Prompts", favorites: "Favorites", studio: "Studio" },
+                studio: {
+                    title: "AI Studio",
+                    subtitle: "Locally grade and optimize your prompts, and manage your subscription budget.",
+                    tabGrader: "Prompt Grader",
+                    tabBudget: "Budget Planner",
+                    tabMyPrompts: "Prompt Notebook",
+                    graderTitle: "Prompt Analysis Panel",
+                    graderTextareaPlaceholder: "Write or paste your prompt here...",
+                    btnGrade: "Analyze & Score",
+                    btnGradeLoading: "Analyzing...",
+                    gradeLabel: "SCORE",
+                    graderPersona: "Role/Persona",
+                    graderContext: "Context/Detail",
+                    graderConstraints: "Constraints",
+                    graderFormat: "Output Format",
+                    graderExamples: "Examples",
+                    criteriaMet: "Criteria Met",
+                    criteriaMissing: "Criteria Missing",
+                    optimizerTitle: "Advice & Improved Prompt",
+                    optimizationTip: "Fill in the template to increase the score.",
+                    btnCopyOpt: "Copy",
+                    btnSaveOpt: "Save to Library",
+                    promptSavedSuccess: "Prompt successfully saved to your library!",
+                    budgetAddTitle: "Add Subscription",
+                    optSelectTool: "Choose an AI...",
+                    optCustomTool: "Add Custom Subscription...",
+                    budgetNameInput: "Custom Tool Name...",
+                    budgetPriceInput: "Price ($)...",
+                    btnAddSubText: "Add Subscription",
+                    budgetStackTitle: "My Subscriptions",
+                    lblTotalCost: "Total Monthly Spend",
+                    lblBreakdown: "BREAKDOWN",
+                    lblSavingsTips: "Savings & Smart Tips",
+                    lblAddPrompt: "Add New Prompt",
+                    lblMyPrompts: "My Custom Prompts",
+                    promptTitlePlaceholder: "Title...",
+                    promptCategoryLabel: "Category",
+                    btnSavePromptText: "Save",
+                    copied: "Copied!",
+                    deleted: "Deleted!",
+                    budgetEmpty: "No subscriptions added yet."
+                },
                 prompts: { title: "Prompt Library", subtitle: "Ready-made AI command templates to generate stunning images." },
                 infoModal: { version: "Version", devTitle: "Developer", privacyBtn: "Privacy Policy", closeBtn: "Close" },
                 catDesc: {
@@ -5650,11 +6017,13 @@
             const promptsS = document.getElementById('promptsScreen');
             const backBtn = document.getElementById('backToCategoriesBtn');
             const emptySt = document.getElementById('emptyState');
+            const studioS = document.getElementById('studioScreen');
             
             if (catGrid) { catGrid.classList.add('hidden'); catGrid.style.display = 'none'; }
             if (toolsG) { toolsG.classList.add('hidden'); toolsG.style.display = 'none'; }
             if (backBtn) { backBtn.classList.add('hidden'); backBtn.style.display = 'none'; }
             if (emptySt) { emptySt.classList.add('hidden'); emptySt.style.display = 'none'; }
+            if (studioS) { studioS.classList.add('hidden'); studioS.style.display = 'none'; }
             
             if (promptsS) {
                 promptsS.classList.remove('hidden');
@@ -5854,6 +6223,7 @@
             // Varsayılan dili ayarla
             languageSelect.value = currentLang;
             loadData();
+            initStudio();
             updateLanguageUI();
 
             setupEventListeners();
@@ -5906,7 +6276,8 @@
             if (document.getElementById('navTextPrompts')) document.getElementById('navTextPrompts').innerText = getTranslation(currentLang, 'nav.prompts', 'Prompts');
             if (document.getElementById('navTextAssistant')) document.getElementById('navTextAssistant').innerText = getTranslation(currentLang, 'nav.assistant', 'ASSISTANT');
             if (document.getElementById('navTextFavorites')) document.getElementById('navTextFavorites').innerText = getTranslation(currentLang, 'nav.favorites', 'Favorites');
-            if (document.getElementById('navTextInfo')) document.getElementById('navTextInfo').innerText = getTranslation(currentLang, 'nav.info', 'Info');
+            if (document.getElementById('navTextStudio')) document.getElementById('navTextStudio').innerText = getTranslation(currentLang, 'nav.studio', 'Studio');
+            updateStudioLanguageUI();
             
             // Prompts Section Header Localization
             if (document.getElementById('promptsTitle')) document.getElementById('promptsTitle').innerText = getTranslation(currentLang, 'prompts.title', 'Prompt Library');
@@ -6170,6 +6541,11 @@
                 promptsS.classList.add('hidden');
                 promptsS.style.display = 'none';
             }
+            const studioS = document.getElementById('studioScreen');
+            if (studioS) {
+                studioS.classList.add('hidden');
+                studioS.style.display = 'none';
+            }
 
             // Bottom Nav Active Classes
             document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
@@ -6216,6 +6592,11 @@
             if (promptsS) {
                 promptsS.classList.add('hidden');
                 promptsS.style.display = 'none';
+            }
+            const studioS = document.getElementById('studioScreen');
+            if (studioS) {
+                studioS.classList.add('hidden');
+                studioS.style.display = 'none';
             }
 
             // Bottom Nav Active Classes
@@ -7344,12 +7725,12 @@
 <span id="navTextFavorites" class="text-xs font-medium">Favoriler</span>
 </div>
 
-<!-- Info -->
-<div id="navItemInfo" onclick="showInfoModal()" class="nav-item">
+<!-- Atölye -->
+<div id="navItemStudio" onclick="showStudioScreen()" class="nav-item">
 <svg class="w-6 h-6 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
-<path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
 </svg>
-<span id="navTextInfo" class="text-xs font-medium">Bilgi</span>
+<span id="navTextStudio" class="text-xs font-medium">Atölye</span>
 </div>
 </div>
 </nav>
