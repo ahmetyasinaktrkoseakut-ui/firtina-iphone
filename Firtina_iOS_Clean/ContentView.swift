@@ -63,9 +63,17 @@ struct WebView: UIViewRepresentable {
                 if (!url) return false;
                 var fullUrl = url.toLowerCase();
                 var lower = getUrlPath(url);
-                if (fullUrl.indexOf('googleusercontent.com') !== -1) return true;
-                if (fullUrl.indexOf('oaiusercontent.com') !== -1) return true;
-                if (fullUrl.indexOf('oaidalleapiprodscus.blob.core.windows.net') !== -1) return true;
+                var isImageHost = (fullUrl.indexOf('googleusercontent.com') !== -1 ||
+                                   fullUrl.indexOf('oaiusercontent.com') !== -1 ||
+                                   fullUrl.indexOf('oaidalleapiprodscus.blob.core.windows.net') !== -1);
+                var hasNonImageExt = (lower.endsWith('.pdf') || lower.endsWith('.zip') ||
+                                      lower.endsWith('.rar') || lower.endsWith('.tar') ||
+                                      lower.endsWith('.gz') || lower.endsWith('.7z') ||
+                                      lower.endsWith('.mp3') || lower.endsWith('.m4a') || 
+                                      lower.endsWith('.wav') || lower.endsWith('.ogg') || 
+                                      lower.endsWith('.aac') || lower.endsWith('.mp4') || 
+                                      lower.endsWith('.mov') || lower.endsWith('.webm'));
+                if (isImageHost && !hasNonImageExt) return true;
                 return lower.endsWith('.png') || lower.endsWith('.jpg') ||
                        lower.endsWith('.jpeg') || lower.endsWith('.webp') || 
                        lower.endsWith('.gif') || lower.endsWith('.bmp');
@@ -425,6 +433,10 @@ struct WebView: UIViewRepresentable {
             if mime.contains("quicktime") { return "mov" }
             if mime.contains("webm") { return "webm" }
             if mime.contains("zip") { return "zip" }
+            if mime.contains("rar") { return "rar" }
+            if mime.contains("tar") { return "tar" }
+            if mime.contains("gzip") || mime.contains("x-gzip") { return "gz" }
+            if mime.contains("7z") || mime.contains("7-zip") { return "7z" }
             if mime.contains("json") { return "json" }
 
             return nil
@@ -454,7 +466,7 @@ struct WebView: UIViewRepresentable {
                 "png", "jpg", "jpeg", "webp", "gif", "bmp", "heic", "heif",
                 "pdf", "mp3", "m4a", "aac", "wav", "ogg",
                 "mp4", "mov", "webm",
-                "txt", "csv", "json", "zip",
+                "txt", "csv", "json", "zip", "rar", "tar", "gz", "7z",
                 "doc", "docx", "xls", "xlsx", "ppt", "pptx",
                 "html", "htm"
             ]
