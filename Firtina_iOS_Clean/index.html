@@ -6653,7 +6653,7 @@
             window.scrollTo(0, 0);
         }
 
-        window.returnToCategories = () => {
+                window.returnToCategories = () => {
             showCategories();
         };
 
@@ -7300,6 +7300,566 @@
 
             return response;
         }
+
+        // --- Yapay Zeka Atölyesi (AI Studio) Logic ---
+        let customPrompts = [];
+        let budgetStack = [];
+        let activeStudioTab = 'grader';
+
+        window.initStudio = function initStudio() {
+            try {
+                customPrompts = JSON.parse(localStorage.getItem('firtina_custom_prompts')) || [];
+            } catch (e) {
+                customPrompts = [];
+            }
+            try {
+                budgetStack = JSON.parse(localStorage.getItem('firtina_budget_stack')) || [];
+            } catch (e) {
+                budgetStack = [];
+            }
+            setStudioTab(activeStudioTab);
+            renderBudgetList();
+            renderMyPromptsList();
+        }
+
+        window.showStudioScreen = () => {
+            const catGrid = document.getElementById('categoryGrid');
+            const toolsG = document.getElementById('toolsGrid');
+            const promptsS = document.getElementById('promptsScreen');
+            const backBtn = document.getElementById('backToCategoriesBtn');
+            const emptySt = document.getElementById('emptyState');
+            const studioS = document.getElementById('studioScreen');
+            
+            if (catGrid) { catGrid.classList.add('hidden'); catGrid.style.display = 'none'; }
+            if (toolsG) { toolsG.classList.add('hidden'); toolsG.style.display = 'none'; }
+            if (backBtn) { backBtn.classList.add('hidden'); backBtn.style.display = 'none'; }
+            if (emptySt) { emptySt.classList.add('hidden'); emptySt.style.display = 'none'; }
+            if (promptsS) { promptsS.classList.add('hidden'); promptsS.style.display = 'none'; }
+            
+            if (studioS) {
+                studioS.classList.remove('hidden');
+                studioS.style.display = 'block';
+            }
+            
+            document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            const studioTab = document.getElementById('navItemStudio');
+            if (studioTab) studioTab.classList.add('active');
+            
+            initStudio();
+        };
+
+        window.setStudioTab = (tab) => {
+            activeStudioTab = tab;
+            
+            document.getElementById('studioTabGrader').classList.add('hidden');
+            document.getElementById('studioTabBudget').classList.add('hidden');
+            document.getElementById('studioTabMyPrompts').classList.add('hidden');
+            
+            document.getElementById('tabBtnGrader').classList.remove('border-blue-500', 'text-white');
+            document.getElementById('tabBtnGrader').classList.add('border-transparent', 'text-slate-400');
+            document.getElementById('tabBtnBudget').classList.remove('border-blue-500', 'text-white');
+            document.getElementById('tabBtnBudget').classList.add('border-transparent', 'text-slate-400');
+            document.getElementById('tabBtnMyPrompts').classList.remove('border-blue-500', 'text-white');
+            document.getElementById('tabBtnMyPrompts').classList.add('border-transparent', 'text-slate-400');
+
+            if (tab === 'grader') {
+                document.getElementById('studioTabGrader').classList.remove('hidden');
+                document.getElementById('tabBtnGrader').classList.add('border-blue-500', 'text-white');
+                document.getElementById('tabBtnGrader').classList.remove('border-transparent', 'text-slate-400');
+            } else if (tab === 'budget') {
+                document.getElementById('studioTabBudget').classList.remove('hidden');
+                document.getElementById('tabBtnBudget').classList.add('border-blue-500', 'text-white');
+                document.getElementById('tabBtnBudget').classList.remove('border-transparent', 'text-slate-400');
+                renderBudgetList();
+            } else if (tab === 'myprompts') {
+                document.getElementById('studioTabMyPrompts').classList.remove('hidden');
+                document.getElementById('tabBtnMyPrompts').classList.add('border-blue-500', 'text-white');
+                document.getElementById('tabBtnMyPrompts').classList.remove('border-transparent', 'text-slate-400');
+                renderMyPromptsList();
+            }
+        };
+
+        window.gradePrompt = () => {
+            const input = document.getElementById('graderInput').value.trim();
+            if (!input) return;
+
+            const hasPersona = /\b(sen bir|as a|act as|gibi davran|yazılım uzmanı|editör|doktor|tasarımcı|danışman|expert|expert in|role|persona)\b/i.test(input);
+            const hasContext = /\b(konu|hakkında|için|amacım|hedef|target|audience|context|background|detay)\b/i.test(input) || input.length > 50;
+            const hasConstraints = /\b(yapma|olmasın|olmadan|kullanmadan|avoid|don't|do not|limit|maximum|en fazla|en çok|yazma)\b/i.test(input);
+            const hasFormat = /\b(tablo|liste|madde|markdown|kod olarak|kodla|json|formatında|table|list|bullet|bulletpoints)\b/i.test(input);
+            const hasExamples = /\b(örnek|örneğin|örnekteki gibi|gibi olsun|like|example|such as)\b/i.test(input);
+
+            let score = 0;
+            if (hasPersona) score += 20;
+            if (hasContext) score += 20;
+            if (hasConstraints) score += 20;
+            if (hasFormat) score += 20;
+            if (hasExamples) score += 20;
+
+            document.getElementById('graderResults').classList.remove('hidden');
+            document.getElementById('gradeScore').innerText = score;
+            const circle = document.getElementById('gradeCircle');
+            const offset = 100 - score;
+            circle.setAttribute('stroke-dashoffset', offset);
+            
+            if (score <= 40) {
+                circle.className.baseVal = "text-red-500 transition-all duration-1000 ease-out";
+            } else if (score <= 80) {
+                circle.className.baseVal = "text-amber-500 transition-all duration-1000 ease-out";
+            } else {
+                circle.className.baseVal = "text-emerald-500 transition-all duration-1000 ease-out";
+            }
+
+            document.getElementById('checkPersona').innerText = hasPersona ? "✅" : "❌";
+            document.getElementById('checkContext').innerText = hasContext ? "✅" : "❌";
+            document.getElementById('checkConstraints').innerText = hasConstraints ? "✅" : "❌";
+            document.getElementById('checkFormat').innerText = hasFormat ? "✅" : "❌";
+            document.getElementById('checkExamples').innerText = hasExamples ? "✅" : "❌";
+
+            let advice = "";
+            let missingKeys = [];
+            if (!hasPersona) missingKeys.push("Rol/Kimlik");
+            if (!hasContext) missingKeys.push("Bağlam");
+            if (!hasConstraints) missingKeys.push("Kısıtlamalar");
+            if (!hasFormat) missingKeys.push("Format");
+            if (!hasExamples) missingKeys.push("Örnek");
+
+            if (score === 100) {
+                advice = currentLang === 'tr' ? "Tebrikler! Promptunuz tüm profesyonel kriterleri içeriyor." : "Congratulations! Your prompt contains all professional criteria.";
+            } else {
+                advice = (currentLang === 'tr' ? "Promptunuzu geliştirmek için şu eksik bölümleri ekleyin: " : "To improve your prompt, add these missing sections: ") + missingKeys.join(", ");
+            }
+            document.getElementById('optimizerSuggestions').innerText = advice;
+
+            let template = "";
+            if (currentLang === 'tr') {
+                template = `[Rol]: Sen bir ${hasPersona ? "[Mevcut Rol]" : "Yapay Zeka Uzmanı"} rolündesin.\n` +
+                           `[Bağlam]: Görevin "${input}" isteğini yerine getirmek.\n` +
+                           `[Kısıtlamalar]: ${hasConstraints ? "[Kısıtlamalarınız]" : "Gereksiz detaylardan kaçın, sade ve net ol."}\n` +
+                           `[Format]: ${hasFormat ? "[Format]" : "Çıktıyı başlıklar halinde düzenle."}\n` +
+                           `[Örnek]: ${hasExamples ? "[Örnek]" : "Örnek şablon: ..."}`;
+            } else {
+                template = `[Role]: You are acting as a ${hasPersona ? "[Current Role]" : "AI Specialist"}.\n` +
+                           `[Context]: Your task is to process this request: "${input}".\n` +
+                           `[Constraints]: ${hasConstraints ? "[Constraints]" : "Avoid fluff, be direct and clean."}\n` +
+                           `[Format]: ${hasFormat ? "[Format]" : "Output structured in headings."}\n` +
+                           `[Example]: ${hasExamples ? "[Example]" : "Example layout: ..."}`;
+            }
+            document.getElementById('optimizedTextarea').value = template;
+        };
+
+        window.copyOptimizedPrompt = () => {
+            const txt = document.getElementById('optimizedTextarea').value;
+            if (!txt) return;
+            navigator.clipboard.writeText(txt).then(() => {
+                showToast(translations[currentLang].studio.copied || "Copied!");
+            });
+        };
+
+        window.saveOptimizedToLibrary = () => {
+            const txt = document.getElementById('optimizedTextarea').value.trim();
+            if (!txt) return;
+            
+            const newPrompt = {
+                id: 'custom-' + Date.now(),
+                title: 'Optimized Prompt - ' + new Date().toLocaleDateString(),
+                category: 'Genel',
+                text: txt
+            };
+
+            customPrompts.push(newPrompt);
+            localStorage.setItem('firtina_custom_prompts', JSON.stringify(customPrompts));
+            showToast(translations[currentLang].studio.promptSavedSuccess || "Prompt saved to library!");
+            renderMyPromptsList();
+        };
+
+        const budgetPresets = {
+            chatgpt_plus: { name: "ChatGPT Plus", price: 20, category: "text" },
+            claude_pro: { name: "Claude Pro", price: 20, category: "text" },
+            midjourney_basic: { name: "Midjourney Basic", price: 10, category: "visual" },
+            midjourney_std: { name: "Midjourney Standard", price: 30, category: "visual" },
+            suno_pro: { name: "Suno Pro", price: 10, category: "media" },
+            copilot_pro: { name: "Copilot Pro", price: 20, category: "coding" },
+            elevenlabs_starter: { name: "ElevenLabs Starter", price: 5, category: "media" },
+            runway_standard: { name: "Runway Standard", price: 15, category: "media" }
+        };
+
+        window.handlePresetSelect = (val) => {
+            const nameIn = document.getElementById('budgetNameInput');
+            const priceIn = document.getElementById('budgetPriceInput');
+            const catWrap = document.getElementById('budgetCategoryWrapper');
+
+            if (val === 'custom') {
+                nameIn.value = "";
+                priceIn.value = "";
+                nameIn.disabled = false;
+                priceIn.disabled = false;
+                catWrap.classList.remove('hidden');
+            } else if (val && budgetPresets[val]) {
+                const preset = budgetPresets[val];
+                nameIn.value = preset.name;
+                priceIn.value = preset.price;
+                nameIn.disabled = true;
+                priceIn.disabled = true;
+                catWrap.classList.add('hidden');
+                document.getElementById('budgetCategorySelect').value = preset.category;
+            } else {
+                nameIn.value = "";
+                priceIn.value = "";
+                nameIn.disabled = false;
+                priceIn.disabled = false;
+                catWrap.classList.add('hidden');
+            }
+        };
+
+        window.addSubscription = () => {
+            const presetVal = document.getElementById('budgetPresetSelect').value;
+            let name = document.getElementById('budgetNameInput').value.trim();
+            let price = parseFloat(document.getElementById('budgetPriceInput').value);
+            let category = document.getElementById('budgetCategorySelect').value;
+
+            if (!name || isNaN(price) || price < 0) return;
+
+            if (presetVal && presetVal !== 'custom') {
+                category = budgetPresets[presetVal].category;
+            }
+
+            const newSub = {
+                id: 'sub-' + Date.now(),
+                name: name,
+                price: price,
+                category: category
+            };
+
+            budgetStack.push(newSub);
+            localStorage.setItem('firtina_budget_stack', JSON.stringify(budgetStack));
+            
+            document.getElementById('budgetPresetSelect').value = "";
+            document.getElementById('budgetNameInput').value = "";
+            document.getElementById('budgetPriceInput').value = "";
+            document.getElementById('budgetNameInput').disabled = false;
+            document.getElementById('budgetPriceInput').disabled = false;
+            document.getElementById('budgetCategoryWrapper').classList.add('hidden');
+
+            renderBudgetList();
+        };
+
+        window.removeSubscription = (id) => {
+            budgetStack = budgetStack.filter(s => s.id !== id);
+            localStorage.setItem('firtina_budget_stack', JSON.stringify(budgetStack));
+            renderBudgetList();
+        };
+
+        function renderBudgetList() {
+            const listContainer = document.getElementById('budgetList');
+            if (!listContainer) return;
+
+            listContainer.innerHTML = '';
+            
+            if (budgetStack.length === 0) {
+                listContainer.innerHTML = `<p class="text-xs text-slate-500 py-6 text-center">${translations[currentLang].studio.budgetEmpty || "No subscriptions added."}</p>`;
+                document.getElementById('budgetTotalCost').innerText = '$0.00';
+                updateBudgetChart({ text: 0, visual: 0, media: 0, coding: 0 });
+                generateBudgetTips({ text: 0, visual: 0, media: 0, coding: 0 });
+                return;
+            }
+
+            let total = 0;
+            const categorySums = { text: 0, visual: 0, media: 0, coding: 0 };
+
+            budgetStack.forEach(s => {
+                total += s.price;
+                categorySums[s.category] += s.price;
+
+                const row = document.createElement('div');
+                row.className = "flex items-center justify-between p-3 bg-slate-950/40 border border-white/5 rounded-xl transition-all hover:bg-slate-950/60";
+                
+                let catColor = "bg-blue-500";
+                if (s.category === 'visual') catColor = "bg-indigo-500";
+                if (s.category === 'media') catColor = "bg-emerald-500";
+                if (s.category === 'coding') catColor = "bg-amber-500";
+
+                row.innerHTML = `
+                    <div class="flex items-center gap-2.5">
+                        <span class="w-2.5 h-2.5 rounded-full ${catColor}"></span>
+                        <span class="text-sm font-semibold text-white">${escapeHTML(s.name)}</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-sm font-bold text-slate-300">$${s.price.toFixed(2)}</span>
+                        <button onclick="removeSubscription('${s.id}')" class="text-slate-500 hover:text-red-400 p-1 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        </button>
+                    </div>
+                `;
+                listContainer.appendChild(row);
+            });
+
+            document.getElementById('budgetTotalCost').innerText = '$' + total.toFixed(2);
+            updateBudgetChart(categorySums, total);
+            generateBudgetTips(categorySums);
+        }
+
+        function updateBudgetChart(sums, total = 0) {
+            const donutPercent = document.getElementById('donutPercent');
+            const donutSVG = document.getElementById('donutSVG');
+            if (!donutSVG || !donutPercent) return;
+
+            while (donutSVG.children.length > 1) {
+                donutSVG.removeChild(donutSVG.lastChild);
+            }
+
+            if (total === 0) {
+                donutPercent.innerText = '0%';
+                document.getElementById('valText').innerText = '0%';
+                document.getElementById('valVisual').innerText = '0%';
+                document.getElementById('valMedia').innerText = '0%';
+                document.getElementById('valCoding').innerText = '0%';
+                return;
+            }
+
+            const pctText = (sums.text / total) * 100;
+            const pctVisual = (sums.visual / total) * 100;
+            const pctMedia = (sums.media / total) * 100;
+            const pctCoding = (sums.coding / total) * 100;
+
+            document.getElementById('valText').innerText = pctText.toFixed(0) + '%';
+            document.getElementById('valVisual').innerText = pctVisual.toFixed(0) + '%';
+            document.getElementById('valMedia').innerText = pctMedia.toFixed(0) + '%';
+            document.getElementById('valCoding').innerText = pctCoding.toFixed(0) + '%';
+
+            let maxPct = 0;
+            let maxCat = 'Metin';
+            if (pctText > maxPct) { maxPct = pctText; maxCat = currentLang === 'tr' ? 'Metin' : 'Text'; }
+            if (pctVisual > maxPct) { maxPct = pctVisual; maxCat = currentLang === 'tr' ? 'Görsel' : 'Image'; }
+            if (pctMedia > maxPct) { maxPct = pctMedia; maxCat = currentLang === 'tr' ? 'Medya' : 'Media'; }
+            if (pctCoding > maxPct) { maxPct = pctCoding; maxCat = currentLang === 'tr' ? 'Kodlama' : 'Coding'; }
+            donutPercent.innerText = maxPct.toFixed(0) + '%';
+
+            let cumulativePercent = 0;
+            const drawSegment = (percent, colorClass) => {
+                if (percent === 0) return;
+                const strokeDasharray = `${percent} 100`;
+                const strokeDashoffset = `${100 - cumulativePercent + 25}`;
+                
+                const circleSegment = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                circleSegment.setAttribute("class", `${colorClass} transition-all duration-1000 ease-out`);
+                circleSegment.setAttribute("stroke-width", "4.5");
+                circleSegment.setAttribute("stroke-dasharray", strokeDasharray);
+                circleSegment.setAttribute("stroke-dashoffset", strokeDashoffset);
+                circleSegment.setAttribute("stroke-linecap", "butt");
+                circleSegment.setAttribute("stroke", "currentColor");
+                circleSegment.setAttribute("fill", "none");
+                circleSegment.setAttribute("cx", "18");
+                circleSegment.setAttribute("cy", "18");
+                circleSegment.setAttribute("r", "15.915");
+
+                donutSVG.appendChild(circleSegment);
+                cumulativePercent += percent;
+            };
+
+            drawSegment(pctText, 'text-blue-500');
+            drawSegment(pctVisual, 'text-indigo-500');
+            drawSegment(pctMedia, 'text-emerald-500');
+            drawSegment(pctCoding, 'text-amber-500');
+        }
+
+        function generateBudgetTips(sums) {
+            const tipsContainer = document.getElementById('savingsTipsContainer');
+            if (!tipsContainer) return;
+
+            tipsContainer.innerHTML = '';
+
+            if (!sums || (sums.text === 0 && sums.visual === 0 && sums.media === 0 && sums.coding === 0)) {
+                tipsContainer.innerHTML = currentLang === 'tr' 
+                    ? `<p class="text-slate-400">💡 Abonelik ekledikten sonra tasarruf önerileri burada görünecektir.</p>`
+                    : `<p class="text-slate-400">💡 Savings recommendations will appear here after adding subscriptions.</p>`;
+                return;
+            }
+
+            const tips = [];
+            const isTr = currentLang === 'tr';
+
+            const hasChatGpt = budgetStack.some(s => s.name.toLowerCase().includes('chatgpt'));
+            const hasClaude = budgetStack.some(s => s.name.toLowerCase().includes('claude'));
+            const hasMidjourney = budgetStack.some(s => s.name.toLowerCase().includes('midjourney'));
+            const hasCopilot = budgetStack.some(s => s.name.toLowerCase().includes('copilot') || s.name.toLowerCase().includes('github'));
+            const hasVoice = budgetStack.some(s => s.category === 'media' && s.price > 0);
+
+            if (hasChatGpt || hasClaude) {
+                tips.push(isTr 
+                    ? `• Metin AI bütçenizi düşürmek için ücretsiz olan <b>Microsoft Copilot</b> veya <b>Gemini</b> araçlarını kullanmayı düşünebilirsiniz.` 
+                    : `• Consider using free alternatives like <b>Microsoft Copilot</b> or <b>Gemini</b> to cut down text generation costs.`);
+            }
+            if (hasMidjourney) {
+                tips.push(isTr 
+                    ? `• Ücretli görsel üretimi yerine Fırtına AI'daki yüksek kaliteli ve ücretsiz <b>Leonardo AI</b> veya <b>Bing Image Creator</b> araçlarını deneyebilirsiniz.` 
+                    : `• Try free or freemium image generators like <b>Leonardo AI</b> or <b>Bing Image Creator</b> instead of Midjourney.`);
+            }
+            if (hasCopilot) {
+                tips.push(isTr 
+                    ? `• Kod editörleri için ücretsiz veya deneme paketi sunan <b>Cursor</b> ya da <b>V0</b> platformlarını inceleyebilirsiniz.` 
+                    : `• Check out <b>Cursor</b> or <b>V0</b> which offer rich free plans for development as alternatives to Copilot.`);
+            }
+            if (hasVoice) {
+                tips.push(isTr 
+                    ? `• Multimedya seslendirmelerinde ücretsiz paket sunan <b>ElevenLabs</b> veya <b>Play.ht</b> araçlarını tercih edebilirsiniz.` 
+                    : `• For media/audio, leverage the free plans of <b>ElevenLabs</b> or <b>Play.ht</b> to save budget.`);
+            }
+
+            if (tips.length === 0) {
+                tips.push(isTr 
+                    ? `• Harika! Bütçeniz optimize görünüyor. Fırtına AI'daki ücretsiz araçları keşfetmeye devam edin.` 
+                    : `• Great! Your AI stack budget looks optimized. Continue exploring free tools on Fırtına AI.`);
+            }
+
+            tips.forEach(t => {
+                const p = document.createElement('p');
+                p.innerHTML = t;
+                tipsContainer.appendChild(p);
+            });
+        }
+
+        window.saveMyPrompt = () => {
+            const title = document.getElementById('myPromptTitleInput').value.trim();
+            const cat = document.getElementById('myPromptCategorySelect').value;
+            const text = document.getElementById('myPromptTextInput').value.trim();
+
+            if (!title || !text) return;
+
+            const newPrompt = {
+                id: 'custom-' + Date.now(),
+                title: title,
+                category: cat,
+                text: text
+            };
+
+            customPrompts.push(newPrompt);
+            localStorage.setItem('firtina_custom_prompts', JSON.stringify(customPrompts));
+            
+            document.getElementById('myPromptTitleInput').value = '';
+            document.getElementById('myPromptTextInput').value = '';
+
+            renderMyPromptsList();
+            showToast(translations[currentLang].studio.promptSavedSuccess || "Prompt saved!");
+        };
+
+        window.deleteMyPrompt = (id) => {
+            customPrompts = customPrompts.filter(p => p.id !== id);
+            localStorage.setItem('firtina_custom_prompts', JSON.stringify(customPrompts));
+            renderMyPromptsList();
+        };
+
+        window.copyMyPrompt = (txt) => {
+            navigator.clipboard.writeText(txt).then(() => {
+                showToast(translations[currentLang].studio.copied || "Copied!");
+            });
+        };
+
+        function renderMyPromptsList() {
+            const grid = document.getElementById('myPromptsGrid');
+            if (!grid) return;
+
+            grid.innerHTML = '';
+
+            if (customPrompts.length === 0) {
+                grid.className = "flex justify-center items-center py-12 text-slate-500 w-full col-span-2";
+                grid.innerHTML = currentLang === 'tr' 
+                    ? `<p class="text-sm">Henüz kişisel prompt eklemediniz.</p>`
+                    : `<p class="text-sm">You haven't added any custom prompts yet.</p>`;
+                return;
+            }
+
+            grid.className = "grid grid-cols-1 sm:grid-cols-2 gap-4";
+            customPrompts.forEach(p => {
+                const card = document.createElement('div');
+                card.className = "glass-card p-4 rounded-xl border border-white/5 bg-slate-900/40 hover:bg-slate-800/60 transition-all flex flex-col justify-between";
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[9px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">${escapeHTML(p.category)}</span>
+                            <button onclick="deleteMyPrompt('${p.id}')" class="text-slate-500 hover:text-red-400 p-1 transition-colors">
+                                <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
+                        </div>
+                        <h4 class="font-bold text-sm text-white mb-1">${escapeHTML(p.title)}</h4>
+                        <p class="text-xs text-slate-400 line-clamp-3 mb-3 leading-relaxed whitespace-pre-wrap">${escapeHTML(p.text)}</p>
+                    </div>
+                    <button onclick="copyMyPrompt(\`${p.text.replace(/`/g, '\`').replace(/\$/g, '\$')}\`)" class="w-full py-2 bg-slate-950 hover:bg-slate-900 text-white text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 active:scale-98">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                        <span>${translations[currentLang].studio.btnCopyOpt || "Copy"}</span>
+                    </button>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function showToast(msg) {
+            if (typeof window.showToastNotification === 'function') {
+                window.showToastNotification(msg);
+                return;
+            }
+            let toast = document.getElementById('studioToast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'studioToast';
+                toast.className = "fixed bottom-24 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-lg z-[100] opacity-0 transition-opacity duration-300 pointer-events-none";
+                document.body.appendChild(toast);
+            }
+            toast.innerText = msg;
+            toast.classList.remove('opacity-0');
+            toast.classList.add('opacity-100');
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0');
+            }, 2000);
+        }
+
+        window.updateStudioLanguageUI = function updateStudioLanguageUI() {
+            const t = translations[currentLang].studio;
+            if (!t) return;
+
+            if (document.getElementById('studioTitle')) document.getElementById('studioTitle').innerText = t.title;
+            if (document.getElementById('studioSubtitle')) document.getElementById('studioSubtitle').innerText = t.subtitle;
+            
+            if (document.getElementById('tabBtnGrader')) document.getElementById('tabBtnGrader').innerText = t.tabGrader;
+            if (document.getElementById('tabBtnBudget')) document.getElementById('tabBtnBudget').innerText = t.tabBudget;
+            if (document.getElementById('tabBtnMyPrompts')) document.getElementById('tabBtnMyPrompts').innerText = t.tabMyPrompts;
+            
+            if (document.getElementById('graderTitle')) document.getElementById('graderTitle').innerText = t.graderTitle;
+            if (document.getElementById('graderInput')) document.getElementById('graderInput').placeholder = t.graderTextareaPlaceholder;
+            if (document.getElementById('btnGrade')) document.getElementById('btnGrade').innerText = t.btnGrade;
+            
+            if (document.getElementById('gradeLabelText')) document.getElementById('gradeLabelText').innerText = t.gradeLabel;
+            if (document.getElementById('lblPersona')) document.getElementById('lblPersona').innerText = t.graderPersona;
+            if (document.getElementById('lblContext')) document.getElementById('lblContext').innerText = t.graderContext;
+            if (document.getElementById('lblConstraints')) document.getElementById('lblConstraints').innerText = t.graderConstraints;
+            if (document.getElementById('lblFormat')) document.getElementById('lblFormat').innerText = t.graderFormat;
+            if (document.getElementById('lblExamples')) document.getElementById('lblExamples').innerText = t.graderExamples;
+            
+            if (document.getElementById('optimizerTitle')) document.getElementById('optimizerTitle').innerText = t.optimizerTitle;
+            if (document.getElementById('optimizationTip')) document.getElementById('optimizationTip').innerText = t.optimizationTip;
+            if (document.getElementById('btnCopyOpt')) document.getElementById('btnCopyOpt').innerText = t.btnCopyOpt;
+            if (document.getElementById('btnSaveOpt')) document.getElementById('btnSaveOpt').innerText = t.btnSaveOpt;
+            
+            if (document.getElementById('budgetAddTitle')) document.getElementById('budgetAddTitle').innerText = t.budgetAddTitle;
+            if (document.getElementById('optSelectTool')) document.getElementById('optSelectTool').innerText = t.optSelectTool;
+            if (document.getElementById('optCustomTool')) document.getElementById('optCustomTool').innerText = t.optCustomTool;
+            if (document.getElementById('budgetNameInput')) document.getElementById('budgetNameInput').placeholder = t.budgetNameInput;
+            if (document.getElementById('budgetPriceInput')) document.getElementById('budgetPriceInput').placeholder = t.budgetPriceInput;
+            if (document.getElementById('btnAddSubText')) document.getElementById('btnAddSubText').innerText = t.btnAddSubText;
+            if (document.getElementById('budgetStackTitle')) document.getElementById('budgetStackTitle').innerText = t.budgetStackTitle;
+            if (document.getElementById('lblTotalCost')) document.getElementById('lblTotalCost').innerText = t.lblTotalCost;
+            if (document.getElementById('lblBreakdown')) document.getElementById('lblBreakdown').innerText = t.lblBreakdown;
+            if (document.getElementById('lblSavingsTips')) document.getElementById('lblSavingsTips').innerText = t.lblSavingsTips;
+            
+            if (document.getElementById('lblAddPrompt')) document.getElementById('lblAddPrompt').innerText = t.lblAddPrompt;
+            if (document.getElementById('myPromptTitleInput')) document.getElementById('myPromptTitleInput').placeholder = t.promptTitlePlaceholder;
+            if (document.getElementById('btnSavePromptText')) document.getElementById('btnSavePromptText').innerText = t.btnSavePromptText;
+            if (document.getElementById('lblMyPrompts')) document.getElementById('lblMyPrompts').innerText = t.lblMyPrompts;
+        }
+
     </script>
 
     <!-- OFFLINE AI ASSISTANT MODULE UI -->
