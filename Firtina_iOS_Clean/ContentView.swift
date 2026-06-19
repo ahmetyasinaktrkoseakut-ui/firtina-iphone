@@ -365,7 +365,7 @@ struct WebView: UIViewRepresentable {
                 
                 if let urlString = body["url"] as? String,
                    let filename = body["filename"] as? String {
-                    downloadUrlNatively(urlString: urlString, filename: filename)
+                    downloadUrlNatively(urlString: urlString, filename: filename, webView: message.webView)
                     return
                 }
                 
@@ -482,33 +482,70 @@ struct WebView: UIViewRepresentable {
             return "\(baseName).\(finalExtension)"
         }
 
-        private func downloadUrlNatively(urlString: String, filename: String) {
+        private func downloadUrlNatively(urlString: String, filename: String, webView: WKWebView?) {
             guard let url = URL(string: urlString) else { return }
 
-            let task = URLSession.shared.dataTask(with: url) { data, response, error in
-                guard let data = data, error == nil else {
-                    print("Error downloading native URL: \(String(describing: error))")
-                    return
+            let handleDownload = { (cookies: [HTTPCookie]) in
+                var request = URLRequest(url: url)
+                
+                let userAgent = webView?.customUserAgent ?? "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1"
+                request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
+                
+                if let webViewUrl = webView?.url?.absoluteString {
+                    request.setValue(webViewUrl, forHTTPHeaderField: "Referer")
                 }
-
-                let candidateFilename = self.preferredFilename(requested: filename, response: response)
-                let finalFilename = self.getFinalFilename(
-                    filename: candidateFilename,
-                    mimeType: response?.mimeType,
-                    urlString: urlString
-                )
-                let tempDir = FileManager.default.temporaryDirectory
-                let fileURL = tempDir.appendingPathComponent(finalFilename)
-
-                try? FileManager.default.removeItem(at: fileURL)
-                do {
-                    try data.write(to: fileURL)
-                    self.presentShareSheet(fileURL: fileURL)
-                } catch {
-                    print("Error writing natively downloaded file: \(error)")
+                
+                request.setValue("*/*", forHTTPHeaderField: "Accept")
+                
+                if !cookies.isEmpty {
+                    let host = url.host ?? ""
+                    let matchedCookies = cookies.filter { cookie in
+                        let cookieDomain = cookie.domain.lowercased()
+                        let hostLower = host.lowercased()
+                        return hostLower == cookieDomain || hostLower.hasSuffix("." + cookieDomain) || cookieDomain.hasSuffix("." + hostLower)
+                    }
+                    if !matchedCookies.isEmpty {
+                        let cookieHeaders = HTTPCookie.requestHeaderFields(with: matchedCookies)
+                        for (key, value) in cookieHeaders {
+                            request.setValue(value, forHTTPHeaderField: key)
+                        }
+                    }
                 }
+                
+                let task = URLSession.shared.downloadTask(with: request) { tempURL, response, error in
+                    guard let tempURL = tempURL, error == nil else {
+                        print("Error downloading native URL: \(String(describing: error))")
+                        return
+                    }
+                    
+                    let candidateFilename = self.preferredFilename(requested: filename, response: response)
+                    let finalFilename = self.getFinalFilename(
+                        filename: candidateFilename,
+                        mimeType: response?.mimeType,
+                        urlString: urlString
+                    )
+                    
+                    let tempDir = FileManager.default.temporaryDirectory
+                    let destinationURL = tempDir.appendingPathComponent(finalFilename)
+                    
+                    try? FileManager.default.removeItem(at: destinationURL)
+                    do {
+                        try FileManager.default.moveItem(at: tempURL, to: destinationURL)
+                        self.presentShareSheet(fileURL: destinationURL)
+                    } catch {
+                        print("Error moving downloaded file: \(error)")
+                    }
+                }
+                task.resume()
             }
-            task.resume()
+            
+            if let cookieStore = webView?.configuration.websiteDataStore.httpCookieStore {
+                cookieStore.getAllCookies { cookies in
+                    handleDownload(cookies)
+                }
+            } else {
+                handleDownload([])
+            }
         }
 
         private func saveBase64AndPresent(base64String: String, mimeType: String, filename: String) {
