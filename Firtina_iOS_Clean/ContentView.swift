@@ -595,6 +595,23 @@ struct WebView: UIViewRepresentable {
         }
         
         func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse, decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
+            if let mimeType = navigationResponse.response.mimeType?.lowercased() {
+                let isMedia = mimeType.hasPrefix("image/") ||
+                              mimeType.hasPrefix("audio/") ||
+                              mimeType.hasPrefix("video/") ||
+                              mimeType == "application/pdf" ||
+                              mimeType == "application/octet-stream"
+                
+                let isWebPage = mimeType.contains("html") ||
+                                mimeType.contains("javascript") ||
+                                mimeType.contains("text/css")
+                
+                if isMedia && !isWebPage {
+                    decisionHandler(.download)
+                    return
+                }
+            }
+
             if navigationResponse.canShowMIMEType {
                 decisionHandler(.allow)
             } else {

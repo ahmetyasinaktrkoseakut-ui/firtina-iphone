@@ -7301,10 +7301,20 @@
             return response;
         }
 
-        // --- Yapay Zeka Atölyesi (AI Studio) Logic ---
+// --- Yapay Zeka Atölyesi (AI Studio) Logic ---
         let customPrompts = [];
         let budgetStack = [];
         let activeStudioTab = 'grader';
+
+        function getStudioTranslation(key, fallback) {
+            try {
+                const studioTrans = translations[currentLang]?.studio || translations['en']?.studio || translations['tr']?.studio;
+                if (studioTrans && studioTrans[key] !== undefined) {
+                    return studioTrans[key];
+                }
+            } catch (e) {}
+            return fallback;
+        }
 
         window.initStudio = function initStudio() {
             try {
@@ -7453,9 +7463,7 @@
         window.copyOptimizedPrompt = () => {
             const txt = document.getElementById('optimizedTextarea').value;
             if (!txt) return;
-            navigator.clipboard.writeText(txt).then(() => {
-                showToast(translations[currentLang].studio.copied || "Copied!");
-            });
+            copyPromptText(txt);
         };
 
         window.saveOptimizedToLibrary = () => {
@@ -7471,7 +7479,7 @@
 
             customPrompts.push(newPrompt);
             localStorage.setItem('firtina_custom_prompts', JSON.stringify(customPrompts));
-            showToast(translations[currentLang].studio.promptSavedSuccess || "Prompt saved to library!");
+            showToast(getStudioTranslation('promptSavedSuccess', "Prompt saved to library!"));
             renderMyPromptsList();
         };
 
@@ -7559,7 +7567,7 @@
             listContainer.innerHTML = '';
             
             if (budgetStack.length === 0) {
-                listContainer.innerHTML = `<p class="text-xs text-slate-500 py-6 text-center">${translations[currentLang].studio.budgetEmpty || "No subscriptions added."}</p>`;
+                listContainer.innerHTML = `<p class="text-xs text-slate-500 py-6 text-center">${getStudioTranslation('budgetEmpty', "No subscriptions added.")}</p>`;
                 document.getElementById('budgetTotalCost').innerText = '$0.00';
                 updateBudgetChart({ text: 0, visual: 0, media: 0, coding: 0 });
                 generateBudgetTips({ text: 0, visual: 0, media: 0, coding: 0 });
@@ -7589,7 +7597,7 @@
                     <div class="flex items-center gap-3">
                         <span class="text-sm font-bold text-slate-300">$${s.price.toFixed(2)}</span>
                         <button onclick="removeSubscription('${s.id}')" class="text-slate-500 hover:text-red-400 p-1 transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            <svg class="w-4 h-4" fill="none; stroke:currentColor;" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                         </button>
                     </div>
                 `;
@@ -7648,7 +7656,7 @@
                 circleSegment.setAttribute("stroke-width", "4.5");
                 circleSegment.setAttribute("stroke-dasharray", strokeDasharray);
                 circleSegment.setAttribute("stroke-dashoffset", strokeDashoffset);
-                circleSegment.setAttribute("stroke-linecap", "butt");
+                circleSegment.setAttribute("stroke-linecap", "round");
                 circleSegment.setAttribute("stroke", "currentColor");
                 circleSegment.setAttribute("fill", "none");
                 circleSegment.setAttribute("cx", "18");
@@ -7742,7 +7750,7 @@
             document.getElementById('myPromptTextInput').value = '';
 
             renderMyPromptsList();
-            showToast(translations[currentLang].studio.promptSavedSuccess || "Prompt saved!");
+            showToast(getStudioTranslation('promptSavedSuccess', "Prompt saved!"));
         };
 
         window.deleteMyPrompt = (id) => {
@@ -7752,9 +7760,7 @@
         };
 
         window.copyMyPrompt = (txt) => {
-            navigator.clipboard.writeText(txt).then(() => {
-                showToast(translations[currentLang].studio.copied || "Copied!");
-            });
+            copyPromptText(txt);
         };
 
         function renderMyPromptsList() {
@@ -7775,22 +7781,35 @@
             customPrompts.forEach(p => {
                 const card = document.createElement('div');
                 card.className = "glass-card p-4 rounded-xl border border-white/5 bg-slate-900/40 hover:bg-slate-800/60 transition-all flex flex-col justify-between";
-                card.innerHTML = `
-                    <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-[9px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">${escapeHTML(p.category)}</span>
-                            <button onclick="deleteMyPrompt('${p.id}')" class="text-slate-500 hover:text-red-400 p-1 transition-colors">
-                                <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                            </button>
-                        </div>
-                        <h4 class="font-bold text-sm text-white mb-1">${escapeHTML(p.title)}</h4>
-                        <p class="text-xs text-slate-400 line-clamp-3 mb-3 leading-relaxed whitespace-pre-wrap">${escapeHTML(p.text)}</p>
+                
+                // Build card content DOM nodes cleanly to avoid backtick closing errors and allow secure scope closures
+                const topDiv = document.createElement('div');
+                topDiv.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-[9px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">\${escapeHTML(p.category)}</span>
+                        <button class="delete-btn text-slate-500 hover:text-red-400 p-1 transition-colors">
+                            <svg class="w-4.5 h-4.5" fill="none; stroke:currentColor;" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        </button>
                     </div>
-                    <button onclick="copyMyPrompt(\`${p.text.replace(/`/g, '\`').replace(/\$/g, '\$')}\`)" class="w-full py-2 bg-slate-950 hover:bg-slate-900 text-white text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 active:scale-98">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
-                        <span>${translations[currentLang].studio.btnCopyOpt || "Copy"}</span>
-                    </button>
+                    <h4 class="font-bold text-sm text-white mb-1">\${escapeHTML(p.title)}</h4>
+                    <p class="text-xs text-slate-400 line-clamp-3 mb-3 leading-relaxed whitespace-pre-wrap">\${escapeHTML(p.text)}</p>
                 `;
+                topDiv.querySelector('.delete-btn').addEventListener('click', () => {
+                    deleteMyPrompt(p.id);
+                });
+                card.appendChild(topDiv);
+                
+                const copyBtn = document.createElement('button');
+                copyBtn.className = "w-full py-2 bg-slate-950 hover:bg-slate-900 text-white text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 active:scale-98";
+                copyBtn.innerHTML = `
+                    <svg class="w-3.5 h-3.5" fill="none; stroke:currentColor;" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                    <span>\${getStudioTranslation('btnCopyOpt', "Copy")}</span>
+                `;
+                copyBtn.addEventListener('click', () => {
+                    copyMyPrompt(p.text);
+                });
+                card.appendChild(copyBtn);
+                
                 grid.appendChild(card);
             });
         }
@@ -7817,47 +7836,44 @@
         }
 
         window.updateStudioLanguageUI = function updateStudioLanguageUI() {
-            const t = translations[currentLang].studio;
-            if (!t) return;
-
-            if (document.getElementById('studioTitle')) document.getElementById('studioTitle').innerText = t.title;
-            if (document.getElementById('studioSubtitle')) document.getElementById('studioSubtitle').innerText = t.subtitle;
+            if (document.getElementById('studioTitle')) document.getElementById('studioTitle').innerText = getStudioTranslation('title', 'AI Studio');
+            if (document.getElementById('studioSubtitle')) document.getElementById('studioSubtitle').innerText = getStudioTranslation('subtitle', 'Locally grade and optimize your prompts, and manage your subscription budget.');
             
-            if (document.getElementById('tabBtnGrader')) document.getElementById('tabBtnGrader').innerText = t.tabGrader;
-            if (document.getElementById('tabBtnBudget')) document.getElementById('tabBtnBudget').innerText = t.tabBudget;
-            if (document.getElementById('tabBtnMyPrompts')) document.getElementById('tabBtnMyPrompts').innerText = t.tabMyPrompts;
+            if (document.getElementById('tabBtnGrader')) document.getElementById('tabBtnGrader').innerText = getStudioTranslation('tabGrader', 'Prompt Grader');
+            if (document.getElementById('tabBtnBudget')) document.getElementById('tabBtnBudget').innerText = getStudioTranslation('tabBudget', 'Budget Planner');
+            if (document.getElementById('tabBtnMyPrompts')) document.getElementById('tabBtnMyPrompts').innerText = getStudioTranslation('tabMyPrompts', 'Prompt Notebook');
             
-            if (document.getElementById('graderTitle')) document.getElementById('graderTitle').innerText = t.graderTitle;
-            if (document.getElementById('graderInput')) document.getElementById('graderInput').placeholder = t.graderTextareaPlaceholder;
-            if (document.getElementById('btnGrade')) document.getElementById('btnGrade').innerText = t.btnGrade;
+            if (document.getElementById('graderTitle')) document.getElementById('graderTitle').innerText = getStudioTranslation('graderTitle', 'Prompt Analysis Panel');
+            if (document.getElementById('graderInput')) document.getElementById('graderInput').placeholder = getStudioTranslation('graderTextareaPlaceholder', 'Write or paste your prompt here...');
+            if (document.getElementById('btnGrade')) document.getElementById('btnGrade').innerText = getStudioTranslation('btnGrade', 'Analyze & Score');
             
-            if (document.getElementById('gradeLabelText')) document.getElementById('gradeLabelText').innerText = t.gradeLabel;
-            if (document.getElementById('lblPersona')) document.getElementById('lblPersona').innerText = t.graderPersona;
-            if (document.getElementById('lblContext')) document.getElementById('lblContext').innerText = t.graderContext;
-            if (document.getElementById('lblConstraints')) document.getElementById('lblConstraints').innerText = t.graderConstraints;
-            if (document.getElementById('lblFormat')) document.getElementById('lblFormat').innerText = t.graderFormat;
-            if (document.getElementById('lblExamples')) document.getElementById('lblExamples').innerText = t.graderExamples;
+            if (document.getElementById('gradeLabelText')) document.getElementById('gradeLabelText').innerText = getStudioTranslation('gradeLabel', 'SCORE');
+            if (document.getElementById('lblPersona')) document.getElementById('lblPersona').innerText = getStudioTranslation('graderPersona', 'Role/Persona');
+            if (document.getElementById('lblContext')) document.getElementById('lblContext').innerText = getStudioTranslation('graderContext', 'Context/Detail');
+            if (document.getElementById('lblConstraints')) document.getElementById('lblConstraints').innerText = getStudioTranslation('graderConstraints', 'Constraints');
+            if (document.getElementById('lblFormat')) document.getElementById('lblFormat').innerText = getStudioTranslation('graderFormat', 'Output Format');
+            if (document.getElementById('lblExamples')) document.getElementById('lblExamples').innerText = getStudioTranslation('graderExamples', 'Examples');
             
-            if (document.getElementById('optimizerTitle')) document.getElementById('optimizerTitle').innerText = t.optimizerTitle;
-            if (document.getElementById('optimizationTip')) document.getElementById('optimizationTip').innerText = t.optimizationTip;
-            if (document.getElementById('btnCopyOpt')) document.getElementById('btnCopyOpt').innerText = t.btnCopyOpt;
-            if (document.getElementById('btnSaveOpt')) document.getElementById('btnSaveOpt').innerText = t.btnSaveOpt;
+            if (document.getElementById('optimizerTitle')) document.getElementById('optimizerTitle').innerText = getStudioTranslation('optimizerTitle', 'Advice & Improved Prompt');
+            if (document.getElementById('optimizationTip')) document.getElementById('optimizationTip').innerText = getStudioTranslation('optimizationTip', 'Fill in the template to increase the score.');
+            if (document.getElementById('btnCopyOpt')) document.getElementById('btnCopyOpt').innerText = getStudioTranslation('btnCopyOpt', 'Copy');
+            if (document.getElementById('btnSaveOpt')) document.getElementById('btnSaveOpt').innerText = getStudioTranslation('btnSaveOpt', 'Save to Library');
             
-            if (document.getElementById('budgetAddTitle')) document.getElementById('budgetAddTitle').innerText = t.budgetAddTitle;
-            if (document.getElementById('optSelectTool')) document.getElementById('optSelectTool').innerText = t.optSelectTool;
-            if (document.getElementById('optCustomTool')) document.getElementById('optCustomTool').innerText = t.optCustomTool;
-            if (document.getElementById('budgetNameInput')) document.getElementById('budgetNameInput').placeholder = t.budgetNameInput;
-            if (document.getElementById('budgetPriceInput')) document.getElementById('budgetPriceInput').placeholder = t.budgetPriceInput;
-            if (document.getElementById('btnAddSubText')) document.getElementById('btnAddSubText').innerText = t.btnAddSubText;
-            if (document.getElementById('budgetStackTitle')) document.getElementById('budgetStackTitle').innerText = t.budgetStackTitle;
-            if (document.getElementById('lblTotalCost')) document.getElementById('lblTotalCost').innerText = t.lblTotalCost;
-            if (document.getElementById('lblBreakdown')) document.getElementById('lblBreakdown').innerText = t.lblBreakdown;
-            if (document.getElementById('lblSavingsTips')) document.getElementById('lblSavingsTips').innerText = t.lblSavingsTips;
+            if (document.getElementById('budgetAddTitle')) document.getElementById('budgetAddTitle').innerText = getStudioTranslation('budgetAddTitle', 'Add Subscription');
+            if (document.getElementById('optSelectTool')) document.getElementById('optSelectTool').innerText = getStudioTranslation('optSelectTool', 'Choose an AI...');
+            if (document.getElementById('optCustomTool')) document.getElementById('optCustomTool').innerText = getStudioTranslation('optCustomTool', 'Add Custom Subscription...');
+            if (document.getElementById('budgetNameInput')) document.getElementById('budgetNameInput').placeholder = getStudioTranslation('budgetNameInput', 'Custom Tool Name...');
+            if (document.getElementById('budgetPriceInput')) document.getElementById('budgetPriceInput').placeholder = getStudioTranslation('budgetPriceInput', 'Price ($)...');
+            if (document.getElementById('btnAddSubText')) document.getElementById('btnAddSubText').innerText = getStudioTranslation('btnAddSubText', 'Add Subscription');
+            if (document.getElementById('budgetStackTitle')) document.getElementById('budgetStackTitle').innerText = getStudioTranslation('budgetStackTitle', 'My Subscriptions');
+            if (document.getElementById('lblTotalCost')) document.getElementById('lblTotalCost').innerText = getStudioTranslation('lblTotalCost', 'Total Monthly Spend');
+            if (document.getElementById('lblBreakdown')) document.getElementById('lblBreakdown').innerText = getStudioTranslation('lblBreakdown', 'BREAKDOWN');
+            if (document.getElementById('lblSavingsTips')) document.getElementById('lblSavingsTips').innerText = getStudioTranslation('lblSavingsTips', 'Savings & Smart Tips');
             
-            if (document.getElementById('lblAddPrompt')) document.getElementById('lblAddPrompt').innerText = t.lblAddPrompt;
-            if (document.getElementById('myPromptTitleInput')) document.getElementById('myPromptTitleInput').placeholder = t.promptTitlePlaceholder;
-            if (document.getElementById('btnSavePromptText')) document.getElementById('btnSavePromptText').innerText = t.btnSavePromptText;
-            if (document.getElementById('lblMyPrompts')) document.getElementById('lblMyPrompts').innerText = t.lblMyPrompts;
+            if (document.getElementById('lblAddPrompt')) document.getElementById('lblAddPrompt').innerText = getStudioTranslation('lblAddPrompt', 'Add New Prompt');
+            if (document.getElementById('myPromptTitleInput')) document.getElementById('myPromptTitleInput').placeholder = getStudioTranslation('promptTitlePlaceholder', 'Title...');
+            if (document.getElementById('btnSavePromptText')) document.getElementById('btnSavePromptText').innerText = getStudioTranslation('btnSavePromptText', 'Save');
+            if (document.getElementById('lblMyPrompts')) document.getElementById('lblMyPrompts').innerText = getStudioTranslation('lblMyPrompts', 'My Custom Prompts');
         }
 
     </script>
