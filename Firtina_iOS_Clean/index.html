@@ -7786,13 +7786,13 @@
                 const topDiv = document.createElement('div');
                 topDiv.innerHTML = `
                     <div class="flex items-center justify-between mb-2">
-                        <span class="text-[9px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">\${escapeHTML(p.category)}</span>
+                        <span class="text-[9px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">${escapeHTML(p.category)}</span>
                         <button class="delete-btn text-slate-500 hover:text-red-400 p-1 transition-colors">
                             <svg class="w-4.5 h-4.5" fill="none; stroke:currentColor;" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                         </button>
                     </div>
-                    <h4 class="font-bold text-sm text-white mb-1">\${escapeHTML(p.title)}</h4>
-                    <p class="text-xs text-slate-400 line-clamp-3 mb-3 leading-relaxed whitespace-pre-wrap">\${escapeHTML(p.text)}</p>
+                    <h4 class="font-bold text-sm text-white mb-1">${escapeHTML(p.title)}</h4>
+                    <p class="text-xs text-slate-400 line-clamp-3 mb-3 leading-relaxed whitespace-pre-wrap">${escapeHTML(p.text)}</p>
                 `;
                 topDiv.querySelector('.delete-btn').addEventListener('click', () => {
                     deleteMyPrompt(p.id);
@@ -7803,7 +7803,7 @@
                 copyBtn.className = "w-full py-2 bg-slate-950 hover:bg-slate-900 text-white text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 active:scale-98";
                 copyBtn.innerHTML = `
                     <svg class="w-3.5 h-3.5" fill="none; stroke:currentColor;" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
-                    <span>\${getStudioTranslation('btnCopyOpt', "Copy")}</span>
+                    <span>${getStudioTranslation('btnCopyOpt', "Copy")}</span>
                 `;
                 copyBtn.addEventListener('click', () => {
                     copyMyPrompt(p.text);
