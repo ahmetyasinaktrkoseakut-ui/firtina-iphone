@@ -75,6 +75,9 @@ struct WebView: UIViewRepresentable {
                 var lower = getUrlPath(url);
                 return isImageUrl(url) ||
                        lower.endsWith('.pdf') ||
+                       lower.endsWith('.zip') || lower.endsWith('.rar') ||
+                       lower.endsWith('.tar') || lower.endsWith('.gz') ||
+                       lower.endsWith('.7z') ||
                        lower.endsWith('.mp3') || lower.endsWith('.m4a') ||
                        lower.endsWith('.aac') || lower.endsWith('.wav') ||
                        lower.endsWith('.ogg') ||
@@ -172,6 +175,10 @@ struct WebView: UIViewRepresentable {
             };
 
             window.handleHttpUrl = function(url, filename) {
+                if (url && !isImageUrl(url)) {
+                    window.sendUrlToIos(url, filename);
+                    return;
+                }
                 var xhr = new XMLHttpRequest();
                 xhr.open('GET', url, true);
                 xhr.responseType = 'blob';
@@ -498,11 +505,13 @@ struct WebView: UIViewRepresentable {
                 request.setValue("*/*", forHTTPHeaderField: "Accept")
                 
                 if !cookies.isEmpty {
-                    let host = url.host ?? ""
+                    let host = url.host?.lowercased() ?? ""
                     let matchedCookies = cookies.filter { cookie in
-                        let cookieDomain = cookie.domain.lowercased()
-                        let hostLower = host.lowercased()
-                        return hostLower == cookieDomain || hostLower.hasSuffix("." + cookieDomain) || cookieDomain.hasSuffix("." + hostLower)
+                        var cookieDomain = cookie.domain.lowercased()
+                        if cookieDomain.hasPrefix(".") {
+                            cookieDomain.removeFirst()
+                        }
+                        return host == cookieDomain || host.hasSuffix("." + cookieDomain)
                     }
                     if !matchedCookies.isEmpty {
                         let cookieHeaders = HTTPCookie.requestHeaderFields(with: matchedCookies)
