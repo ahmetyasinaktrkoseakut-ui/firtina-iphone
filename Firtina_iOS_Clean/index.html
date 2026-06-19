@@ -1747,7 +1747,7 @@
             <div id="studioTabGrader" class="space-y-6">
                 <div class="glass-card p-6 rounded-2xl border border-white/5 bg-slate-900/60 max-w-2xl mx-auto">
                     <h3 class="text-lg font-bold text-white mb-3" id="graderTitle">Prompt Analiz Paneli</h3>
-                    <textarea id="graderInput" rows="5" class="w-full bg-slate-950/80 border border-white/10 rounded-xl p-4 text-white text-sm placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all resize-none" placeholder="Promptunuzu buraya yazın veya yapıştırın..."></textarea>
+                    <textarea id="graderInput" rows="5" aria-label="Analiz edilecek prompt" class="w-full bg-slate-950/80 border border-white/10 rounded-xl p-4 text-white text-sm placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all resize-none" placeholder="Promptunuzu buraya yazın veya yapıştırın..."></textarea>
                     
                     <div class="flex gap-3 mt-4">
                         <button onclick="gradePrompt()" id="btnGrade" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-500/20 active:scale-98">
@@ -1803,15 +1803,15 @@
                             <span id="optimizationTip" class="text-xs text-blue-400">Puanı artırmak için şablonu doldurun.</span>
                         </div>
                         <div id="optimizerSuggestions" class="text-xs text-slate-400 leading-relaxed border-b border-white/5 pb-3"></div>
-                        <textarea id="optimizedTextarea" rows="6" class="w-full bg-slate-900 border border-white/10 rounded-lg p-3 text-white text-xs font-mono focus:border-blue-500 outline-none transition-all resize-none"></textarea>
+                        <textarea id="optimizedTextarea" rows="6" aria-label="Geliştirilmiş prompt" class="w-full bg-slate-900 border border-white/10 rounded-lg p-3 text-white text-xs font-mono focus:border-blue-500 outline-none transition-all resize-none"></textarea>
                         
                         <div class="flex gap-2">
                             <button onclick="copyOptimizedPrompt()" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 active:scale-98">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                                <svg class="w-3.5 h-3.5" style="fill: none; stroke: currentColor;" viewBox="0 0 24 24"><path style="stroke-linecap: round; stroke-linejoin: round; stroke-width: 2;" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
                                 <span id="btnCopyOpt">Kopyala</span>
                             </button>
                             <button onclick="saveOptimizedToLibrary()" class="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 active:scale-98">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+                                <svg class="w-3.5 h-3.5" style="fill: none; stroke: currentColor;" viewBox="0 0 24 24"><path style="stroke-linecap: round; stroke-linejoin: round; stroke-width: 2;" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
                                 <span id="btnSaveOpt">Kütüphaneye Kaydet</span>
                             </button>
                         </div>
@@ -1826,7 +1826,7 @@
                     <h3 class="text-lg font-bold text-white mb-3" id="budgetAddTitle">Abonelik Ekle</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <!-- Tools Pre-List Select -->
-                        <select id="budgetPresetSelect" onchange="handlePresetSelect(this.value)" class="bg-slate-950/80 border border-white/10 rounded-xl px-3 py-3 text-white text-sm outline-none focus:border-blue-500 min-h-[48px]">
+                        <select id="budgetPresetSelect" onchange="handlePresetSelect(this.value)" aria-label="Hazır abonelik seçimi" class="bg-slate-950/80 border border-white/10 rounded-xl px-3 py-3 text-white text-sm outline-none focus:border-blue-500 min-h-[48px]">
                             <option value="" id="optSelectTool">Bir Yapay Zeka Seçin...</option>
                             <option value="chatgpt_plus">ChatGPT Plus ($20.00)</option>
                             <option value="claude_pro">Claude Pro ($20.00)</option>
@@ -1840,15 +1840,15 @@
                         </select>
 
                         <!-- Tool Custom Name -->
-                        <input type="text" id="budgetNameInput" placeholder="Özel Araç İsmi..." class="bg-slate-950/80 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-slate-500 focus:border-blue-500 outline-none min-h-[48px]">
+                        <input type="text" id="budgetNameInput" placeholder="Özel Araç İsmi..." aria-label="Abonelik adı" class="bg-slate-950/80 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-slate-500 focus:border-blue-500 outline-none min-h-[48px]">
                         
                         <!-- Tool Custom Price -->
-                        <input type="number" id="budgetPriceInput" placeholder="Fiyat ($)..." class="bg-slate-950/80 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-slate-500 focus:border-blue-500 outline-none min-h-[48px]">
+                        <input type="number" id="budgetPriceInput" placeholder="Fiyat ($)..." aria-label="Abonelik ücreti" class="bg-slate-950/80 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-slate-500 focus:border-blue-500 outline-none min-h-[48px]">
                     </div>
 
                     <!-- Hidden Category Select -->
                     <div id="budgetCategoryWrapper" class="hidden mt-3">
-                        <select id="budgetCategorySelect" class="w-full bg-slate-950/80 border border-white/10 rounded-xl px-3 py-3 text-white text-sm outline-none focus:border-blue-500 min-h-[48px]">
+                        <select id="budgetCategorySelect" class="w-full bg-slate-950/80 border border-white/10 rounded-xl px-3 py-3 text-white text-sm outline-none focus:border-blue-500 min-h-[48px]" aria-label="Kategori seçimi">
                             <option value="text">Metin (Text) AI</option>
                             <option value="visual">Görsel (Visual) AI</option>
                             <option value="media">Multimedya (Video/Audio) AI</option>
@@ -1916,7 +1916,7 @@
                         <!-- Savings Tips -->
                         <div class="p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl space-y-2">
                             <h4 class="text-xs font-bold text-blue-400 flex items-center gap-1.5">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <svg class="w-4 h-4" style="fill: none; stroke: currentColor;" viewBox="0 0 24 24"><path style="stroke-linecap: round; stroke-linejoin: round; stroke-width: 2;" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                 <span id="lblSavingsTips">Tasarruf & Akıllı Öneriler</span>
                             </h4>
                             <div id="savingsTipsContainer" class="text-[11px] text-slate-300 space-y-1.5 leading-relaxed">
@@ -1933,9 +1933,9 @@
                 <div class="glass-card p-6 rounded-2xl border border-white/5 bg-slate-900/60 max-w-2xl mx-auto space-y-4">
                     <h3 class="text-lg font-bold text-white" id="lblAddPrompt">Yeni Prompt Ekle</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <input type="text" id="myPromptTitleInput" placeholder="Başlık..." class="bg-slate-950/80 border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm placeholder-slate-500 focus:border-blue-500 outline-none">
+                        <input type="text" id="myPromptTitleInput" placeholder="Başlık..." aria-label="Prompt başlığı" class="bg-slate-950/80 border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm placeholder-slate-500 focus:border-blue-500 outline-none">
                         
-                        <select id="myPromptCategorySelect" class="bg-slate-950/80 border border-white/10 rounded-xl px-3 py-3.5 text-white text-sm outline-none focus:border-blue-500">
+                        <select id="myPromptCategorySelect" class="bg-slate-950/80 border border-white/10 rounded-xl px-3 py-3.5 text-white text-sm outline-none focus:border-blue-500" aria-label="Prompt kategorisi">
                             <option value="Metin">Metin (Text)</option>
                             <option value="Görsel">Görsel (Visual)</option>
                             <option value="Müzik">Müzik / Ses (Audio)</option>
@@ -1944,7 +1944,7 @@
                         </select>
                     </div>
 
-                    <textarea id="myPromptTextInput" rows="4" placeholder="Prompt içeriğini buraya yazın..." class="w-full bg-slate-950/80 border border-white/10 rounded-xl p-4 text-white text-sm placeholder-slate-500 focus:border-blue-500 outline-none transition-all resize-none"></textarea>
+                    <textarea id="myPromptTextInput" rows="4" aria-label="Prompt içeriği" placeholder="Prompt içeriğini buraya yazın..." class="w-full bg-slate-950/80 border border-white/10 rounded-xl p-4 text-white text-sm placeholder-slate-500 focus:border-blue-500 outline-none transition-all resize-none"></textarea>
                     
                     <button onclick="saveMyPrompt()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-500/20 active:scale-98" id="btnSavePromptText">
                         Kaydet
