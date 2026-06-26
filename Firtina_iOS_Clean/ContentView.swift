@@ -46,8 +46,7 @@ struct WebView: UIViewRepresentable {
             setTimeout(function(){ window.scrollTo(0,0); }, 50);
         });
         
-        // Gizlilik politikasını uygulama içinde açar
-        window.openPrivacy = function() { window.location.href = "privacy.html"; };
+
         """
         let script = WKUserScript(source: jsCode, injectionTime: .atDocumentEnd, forMainFrameOnly: false)
         configuration.userContentController.addUserScript(script)

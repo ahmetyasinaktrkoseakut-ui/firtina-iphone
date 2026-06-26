@@ -2006,7 +2006,7 @@
                 <span class="text-white text-2xl font-bold tracking-wider">F</span>
             </div>
             <h3 class="text-2xl font-bold text-white mb-1">FIRTINA AI</h3>
-            <p class="text-xs text-slate-400 mb-4" id="infoModalVersion">Versiyon 1.12</p>
+            <p class="text-xs text-slate-400 mb-4" id="infoModalVersion">Versiyon 1.13</p>
             
             <div class="w-full border-t border-white/5 my-2"></div>
             
@@ -2023,6 +2023,50 @@
             </div>
             
             <button onclick="closeInfoModal()" id="infoModalCloseBtn" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors font-medium shadow-lg shadow-blue-900/30">Kapat</button>
+        </div>
+    </div>
+
+    <!-- Privacy Modal -->
+    <div id="privacyModal" class="fixed inset-0 z-[70] hidden">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closePrivacyModal()"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-900 border border-white/10 rounded-2xl p-6 w-[90%] max-w-md max-h-[80vh] overflow-y-auto shadow-2xl flex flex-col">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between mb-4 border-b border-white/5 pb-2">
+                <h3 class="text-lg font-bold text-white">Gizlilik Politikası / Privacy Policy</h3>
+                <button onclick="closePrivacyModal()" type="button" class="text-slate-400 hover:text-white" aria-label="Kapat">
+                    <svg class="w-5 h-5" style="fill:none; stroke:currentColor;" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Modal Content (Scrollable) -->
+            <div class="space-y-4 text-left text-sm text-slate-300 overflow-y-auto pr-1">
+                <p>Bu politika, <b>Ahmet Yasin Aktürk</b> tarafından geliştirilen FIRTINA AI mobil uygulaması için geçerlidir.</p>
+                <p class="text-slate-400 text-xs italic">This privacy policy applies to the FIRTINA AI mobile application developed by <b>Ahmet Yasin Aktürk</b>.</p>
+                
+                <h4 class="font-bold text-blue-400">1. Toplanan Veriler / Data Collected</h4>
+                <p>Uygulamamız, kullanıcılara ücretsiz eğitim videoları sunmak amacıyla yalnızca <b>e-posta adreslerini</b> toplar.</p>
+                <p class="text-slate-400 text-xs italic">Our application only collects <b>email addresses</b> in order to offer free educational videos to our users.</p>
+                
+                <h4 class="font-bold text-blue-400">2. Veri Kullanımı ve Saklama / Data Usage and Retention</h4>
+                <p>Toplanan e-posta adresleri Firebase (Google) sunucularında güvenli bir şekilde saklanır ve üçüncü taraflarla kesinlikle paylaşılmaz.</p>
+                <p class="text-slate-400 text-xs italic">Collected email addresses are securely stored in Firebase (Google) servers and are absolutely not shared with third parties.</p>
+                
+                <h4 class="font-bold text-blue-400">3. Eser Sahibi ve Yasal Statü / Authorship and Legal Status</h4>
+                <p>Bu uygulama 5846 sayılı Fikir ve Sanat Eserleri Kanunu kapsamında tescilli bir eserdir.</p>
+                <p class="text-slate-400 text-xs italic">This application is a registered work under the Turkish Law on Intellectual and Artistic Works No. 5846.</p>
+                
+                <h4 class="font-bold text-blue-400">4. Veri Silme Talebi / Data Deletion Request</h4>
+                <p>Kullanıcılarımız, topladığımız e-posta adreslerinin sistemimizden kalıcı olarak silinmesini her zaman talep edebilirler.</p>
+                <p>Verilerinizin silinmesi için <b>ahmetyasinaktrkoseakut@gmail.com</b> adresine, konuya "Veri Silme Talebi" veya "Data Deletion Request" yazarak bir e-posta göndermeniz yeterlidir. Talebiniz en geç 7 iş günü içerisinde işleme alınacaktır.</p>
+                <p class="text-slate-400 text-xs italic">To request deletion, simply send an email to <b>ahmetyasinaktrkoseakut@gmail.com</b> with the subject "Veri Silme Talebi" or "Data Deletion Request". Your request will be processed within 7 business days.</p>
+            </div>
+            
+            <!-- Close button -->
+            <button onclick="closePrivacyModal()" type="button" class="mt-6 w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors">
+                Kapat / Close
+            </button>
         </div>
     </div>
 
@@ -6296,7 +6340,7 @@
             if (document.getElementById('promptsSubtitle')) document.getElementById('promptsSubtitle').innerText = getTranslation(currentLang, 'prompts.subtitle', 'Ready-made AI templates.');
 
             // Info Modal Localization
-            if (document.getElementById('infoModalVersion')) document.getElementById('infoModalVersion').innerText = (getTranslation(currentLang, 'infoModal.version', 'Version')) + ' 1.12';
+            if (document.getElementById('infoModalVersion')) document.getElementById('infoModalVersion').innerText = (getTranslation(currentLang, 'infoModal.version', 'Version')) + ' 1.13';
             if (document.getElementById('infoModalDevTitle')) document.getElementById('infoModalDevTitle').innerText = getTranslation(currentLang, 'infoModal.devTitle', 'Developer');
             if (document.getElementById('infoModalPrivacyBtn')) document.getElementById('infoModalPrivacyBtn').innerText = getTranslation(currentLang, 'infoModal.privacyBtn', 'Privacy Policy');
             if (document.getElementById('infoModalCloseBtn')) document.getElementById('infoModalCloseBtn').innerText = getTranslation(currentLang, 'infoModal.closeBtn', 'Close');
@@ -6361,7 +6405,7 @@
         }
 
         // Veri Yükleme
-        const APP_VERSION = '1.12'; // Suno AI eklendi - localStorage cache temizlenir
+        const APP_VERSION = '1.13'; // Suno AI eklendi - localStorage cache temizlenir
 
         // NOT: APK içindeki assets/tools_data.json salt okunurdur ve APK yüklendikten sonra değiştirilemez.
         // Uzaktan (re-build yapmadan) güncelleme yapmak için veriyi bir URL'e host etmelisiniz (Firebase, GitHub vb.)
@@ -8796,16 +8840,18 @@
 
         // Privacy Policy Navigation
         window.openPrivacy = () => {
-            const url = "privacy.html";
-            try {
-                if (window.Android && typeof window.Android.openCustomTab === 'function') {
-                    window.Android.openCustomTab(url);
-                } else {
-                    window.location.href = url;
-                }
-            } catch (e) {
-               // "Privacy Navigation Error:", e);
-                window.location.href = url;
+            const modal = document.getElementById('privacyModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.style.display = 'block';
+            }
+        };
+
+        window.closePrivacyModal = () => {
+            const modal = document.getElementById('privacyModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.style.display = 'none';
             }
         };
     </script>
