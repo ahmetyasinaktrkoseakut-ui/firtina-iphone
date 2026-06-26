@@ -2060,7 +2060,7 @@
                     btnEnter: "Uygulamaya Gir 🚀"
                 },
                 aiAssistant: { fabLabel: "Araç Bul", headerTitle: "AI Asistan", welcomeMsg: "Merhaba, FIRTINA AI olarak sana yardımcı olabilirim. Ne için araç arıyorsun?", inputPlaceholder: "Örn: Sunum hazırlama aracı...", noResults: "Maalesef bu konuda bir araç bulamadım. 😔<br>Farklı kelimelerle tekrar dener misin?", resultsHeader: "İşte bulduğum en iyi araçlar: 👇<br>", viewBtn: "İncele" },
-                nav: { home: "Ana Sayfa", assistant: "ASİSTAN", prompts: "Promptlar", favorites: "Favoriler", studio: "Atölye" },
+                nav: { home: "Keşfet", assistant: "ASİSTAN", prompts: "Promptlar", favorites: "Favoriler", studio: "Atölye" },
                 studio: {
                     title: "Yapay Zeka Atölyesi",
                     subtitle: "Promptlarınızı yerel olarak analiz edip puanlayın ve abonelik bütçenizi yönetin.",
@@ -2136,7 +2136,7 @@
                 cats: { "Genel": "General", "Metin": "Text", "Görsel": "Image", "Video": "Video", "3D": "3D", "Müzik": "Music", "Kodlama": "Coding", "Akademik": "Academic", "Verimlilik": "Productivity", "Ses": "Voice", "Sohbet": "Chat" },
                 pricing: { "Ücretsiz": "Free", "Freemium": "Freemium", "Ücretli": "Paid", "Deneme Sürümü": "Trial" },
                 aiAssistant: { fabLabel: "Find Tool", headerTitle: "AI Assistant (Offline)", welcomeMsg: "Hello! 👋<br>I can help you offline. What are you looking for?", inputPlaceholder: "Ex: Presentation tool...", noResults: "Sorry, nothing found. 😔<br>Try other keywords?", resultsHeader: "Here are the best tools: 👇<br>", viewBtn: "View" },
-                nav: { home: "Home", assistant: "ASSISTANT", prompts: "Prompts", favorites: "Favorites", studio: "Studio" },
+                nav: { home: "Explore", assistant: "ASSISTANT", prompts: "Prompts", favorites: "Favorites", studio: "Studio" },
                 studio: {
                     title: "AI Studio",
                     subtitle: "Locally grade and optimize your prompts, and manage your subscription budget.",
@@ -6234,7 +6234,19 @@
             if (activeCategory) {
                 showTools();
             } else {
-                showCategories();
+                showStudioScreen();
+            }
+
+            // Pre-populate prompt grader input and trigger grading
+            const graderIn = document.getElementById('graderInput');
+            if (graderIn && !graderIn.value.trim()) {
+                const samplePrompt = currentLang === 'tr' 
+                    ? "Sen deneyimli bir Türkçe öğretmenisin. 8. sınıf öğrencileri için paragrafta anlam konusunu eğlenceli hale getirecek 3 farklı sınıf etkinliği planı hazırla. Etkinlikleri tablo halinde göster, her birinin adını, süresini ve uygulayış adımlarını belirt."
+                    : "Act as an expert English teacher. Prepare 3 engaging classroom activities about reading comprehension for 8th-grade students. Present them in a markdown table showing the activity name, duration, and step-by-step instructions.";
+                graderIn.value = samplePrompt;
+                setTimeout(() => {
+                    gradePrompt();
+                }, 100);
             }
         });
 
@@ -8040,11 +8052,45 @@
             } catch (e) {
                 customPrompts = [];
             }
+            if (customPrompts.length === 0) {
+                customPrompts = [
+                    {
+                        id: 'default-summary',
+                        title: currentLang === 'tr' ? 'Metin Özetleyici' : 'Text Summarizer',
+                        category: 'text',
+                        content: currentLang === 'tr' 
+                            ? 'Lütfen aşağıdaki metni ana fikirlerini koruyarak, maddeler halinde özetle:\n\n[Metni buraya yapıştırın]' 
+                            : 'Please summarize the following text in bullet points, preserving the main ideas:\n\n[Paste text here]'
+                    },
+                    {
+                        id: 'default-debug',
+                        title: currentLang === 'tr' ? 'Kod Hata Bulucu' : 'Code Debugger',
+                        category: 'coding',
+                        content: currentLang === 'tr'
+                            ? 'Aşağıdaki kod bloğundaki olası hataları (bug) tespit et, düzeltilmiş halini yaz ve yapılan değişiklikleri açıkla:\n\n[Kodu buraya yapıştırın]'
+                            : 'Identify potential bugs in the following code block, provide the corrected code, and explain the changes:\n\n[Paste code here]'
+                    }
+                ];
+                try {
+                    localStorage.setItem('firtina_custom_prompts', JSON.stringify(customPrompts));
+                } catch (e) {}
+            }
+
             try {
                 budgetStack = JSON.parse(localStorage.getItem('firtina_budget_stack')) || [];
             } catch (e) {
                 budgetStack = [];
             }
+            if (budgetStack.length === 0) {
+                budgetStack = [
+                    { id: 'default-chatgpt', name: 'ChatGPT Plus', price: 20, category: 'text' },
+                    { id: 'default-midjourney', name: 'Midjourney', price: 10, category: 'visual' }
+                ];
+                try {
+                    localStorage.setItem('firtina_budget_stack', JSON.stringify(budgetStack));
+                } catch (e) {}
+            }
+
             setStudioTab(activeStudioTab);
             renderBudgetList();
             renderMyPromptsList();
@@ -8982,12 +9028,12 @@
     <!-- BOTTOM NAVIGATION (HIDDEN BY DEFAULT, visible only after onboarding) -->
     <nav id="bottomNav" class="bottom-nav flex hidden" style="display: none;">
 <div class="nav-content">
-<!-- Home -->
-<div id="navItemHome" onclick="returnToCategories()" class="nav-item active">
-<svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
-<path d="M12 3l10 9h-3v8h-5v-6h-4v6h-5v-8h-3l10-9z" />
+<!-- Atölye -->
+<div id="navItemStudio" onclick="showStudioScreen()" class="nav-item active">
+<svg class="w-6 h-6 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
+<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
 </svg>
-<span id="navTextHome" class="text-xs font-medium">Ana Sayfa</span>
+<span id="navTextStudio" class="text-xs font-medium">Atölye</span>
 </div>
 
 <!-- Prompts -->
@@ -9019,12 +9065,12 @@
 <span id="navTextFavorites" class="text-xs font-medium">Favoriler</span>
 </div>
 
-<!-- Atölye -->
-<div id="navItemStudio" onclick="showStudioScreen()" class="nav-item">
-<svg class="w-6 h-6 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
-<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+<!-- Home -->
+<div id="navItemHome" onclick="returnToCategories()" class="nav-item">
+<svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
+<path d="M12 3l10 9h-3v8h-5v-6h-4v6h-5v-8h-3l10-9z" />
 </svg>
-<span id="navTextStudio" class="text-xs font-medium">Atölye</span>
+<span id="navTextHome" class="text-xs font-medium">Ana Sayfa</span>
 </div>
 </div>
 </nav>
