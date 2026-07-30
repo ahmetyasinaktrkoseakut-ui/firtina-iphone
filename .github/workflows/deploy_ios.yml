@@ -43,10 +43,8 @@ jobs:
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0">
           <dict>
-              <key>destination</key>
-              <string>upload</string>
               <key>method</key>
-              <string>app-store-connect</string>
+              <string>app-store</string>
               <key>signingStyle</key>
               <string>automatic</string>
               <key>teamID</key>
@@ -75,12 +73,21 @@ jobs:
             -authenticationKeyPath "$HOME/.appstoreconnect/private_keys/AuthKey_${{ secrets.APPSTORE_KEY_ID }}.p8" \
             DEVELOPMENT_TEAM="7GB34ALWCP"
 
-      - name: Export & Direct Upload to App Store Connect
+      - name: Export IPA
         run: |
           xcodebuild -exportArchive \
             -archivePath build/Firtina_AI.xcarchive \
             -exportOptionsPlist ExportOptions.plist \
+            -exportPath build/output \
             -allowProvisioningUpdates \
             -authenticationKeyID "${{ secrets.APPSTORE_KEY_ID }}" \
             -authenticationKeyIssuerID "${{ secrets.APPSTORE_ISSUER_ID }}" \
             -authenticationKeyPath "$HOME/.appstoreconnect/private_keys/AuthKey_${{ secrets.APPSTORE_KEY_ID }}.p8"
+
+      - name: Upload IPA to App Store Connect
+        run: |
+          IPA_FILE=$(find build/output -name "*.ipa" | head -n 1)
+          echo "Found IPA: $IPA_FILE"
+          xcrun altool --upload-app --type ios --file "$IPA_FILE" \
+            --apiKey "${{ secrets.APPSTORE_KEY_ID }}" \
+            --apiIssuer "${{ secrets.APPSTORE_ISSUER_ID }}"
