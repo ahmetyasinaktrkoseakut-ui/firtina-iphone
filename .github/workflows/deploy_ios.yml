@@ -32,7 +32,9 @@ jobs:
       - name: Setup App Store Connect API Key
         run: |
           mkdir -p ~/.appstoreconnect/private_keys
+          mkdir -p ~/.private_keys
           echo "${{ secrets.APPSTORE_PRIVATE_KEY }}" > ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APPSTORE_KEY_ID }}.p8
+          echo "${{ secrets.APPSTORE_PRIVATE_KEY }}" > ~/.private_keys/AuthKey_${{ secrets.APPSTORE_KEY_ID }}.p8
 
       - name: Create ExportOptions.plist
         run: |
@@ -42,7 +44,7 @@ jobs:
           <plist version="1.0">
           <dict>
               <key>destination</key>
-              <string>export</string>
+              <string>upload</string>
               <key>method</key>
               <string>app-store-connect</string>
               <key>signingStyle</key>
@@ -73,23 +75,12 @@ jobs:
             -authenticationKeyPath "$HOME/.appstoreconnect/private_keys/AuthKey_${{ secrets.APPSTORE_KEY_ID }}.p8" \
             DEVELOPMENT_TEAM="7GB34ALWCP"
 
-      - name: Export & Upload to App Store Connect
+      - name: Export & Direct Upload to App Store Connect
         run: |
           xcodebuild -exportArchive \
             -archivePath build/Firtina_AI.xcarchive \
             -exportOptionsPlist ExportOptions.plist \
-            -exportPath build/output \
             -allowProvisioningUpdates \
             -authenticationKeyID "${{ secrets.APPSTORE_KEY_ID }}" \
             -authenticationKeyIssuerID "${{ secrets.APPSTORE_ISSUER_ID }}" \
-            -authenticationKeyPath "$HOME/.appstoreconnect/private_keys/AuthKey_${{ secrets.APPSTORE_KEY_ID }}.p8" || true
-
-      - name: Upload IPA via xcrun altool (Fallback)
-        run: |
-          IPA_PATH=$(find build/output -name "*.ipa" | head -n 1)
-          if [ -n "$IPA_PATH" ]; then
-            echo "Uploading $IPA_PATH to App Store Connect..."
-            xcrun altool --upload-app -f "$IPA_PATH" --type ios \
-              --apiKey "${{ secrets.APPSTORE_KEY_ID }}" \
-              --apiIssuer "${{ secrets.APPSTORE_ISSUER_ID }}" || true
-          fi
+            -authenticationKeyPath "$HOME/.appstoreconnect/private_keys/AuthKey_${{ secrets.APPSTORE_KEY_ID }}.p8"
