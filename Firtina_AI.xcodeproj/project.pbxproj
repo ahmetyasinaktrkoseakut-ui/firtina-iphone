@@ -283,7 +283,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.15;
-				PRODUCT_BUNDLE_IDENTIFIER = com.ahmetyasin.aitools;
+				PRODUCT_BUNDLE_IDENTIFIER = com.hasanakturk.firtinaai.Firtina-AI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -309,7 +309,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.15;
-				PRODUCT_BUNDLE_IDENTIFIER = com.ahmetyasin.aitools;
+				PRODUCT_BUNDLE_IDENTIFIER = com.hasanakturk.firtinaai.Firtina-AI;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
