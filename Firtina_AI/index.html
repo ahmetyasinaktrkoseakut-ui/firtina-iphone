@@ -6267,11 +6267,26 @@
             }
         }
 
+        
+        // --- PLATFORM & FIREBASE REVIEW MODE CONTROL ---
+        const isiOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) || (window.webkit && window.webkit.messageHandlers);
+        let isIOSReviewMode = true; // Default true for Apple review, controlled remotely via Firebase JSON (is_ios_review_mode)
+
+        function applyPlatformReviewMode() {
+            const homeTab = document.getElementById('navItemHome');
+            if (isiOSDevice && isIOSReviewMode) {
+                if (homeTab) homeTab.style.display = 'none';
+            } else {
+                if (homeTab) homeTab.style.display = 'flex';
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             // Varsayılan dili ayarla
             languageSelect.value = currentLang;
             loadData();
             initStudio();
+            applyPlatformReviewMode();
             updateLanguageUI();
 
             setupEventListeners();
@@ -6442,6 +6457,7 @@
                 }
 
                 const remoteTools = await response.json();
+                if (remoteTools && typeof remoteTools.is_ios_review_mode !== "undefined") { isIOSReviewMode = !!remoteTools.is_ios_review_mode; applyPlatformReviewMode(); }
                 updateInternalTools(remoteTools);
             } catch (error) {
                // "Sync failed, using cached data.", error);
@@ -8170,6 +8186,7 @@
             if (studioTab) studioTab.classList.add('active');
             
             initStudio();
+            applyPlatformReviewMode();
         };
 
         window.setStudioTab = (tab) => {
