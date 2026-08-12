@@ -6274,7 +6274,7 @@
 
         function applyPlatformReviewMode() {
             const homeTab = document.getElementById('navItemHome');
-            if (isiOSDevice && isIOSReviewMode) {
+            if (isIOSReviewMode) {
                 if (homeTab) homeTab.style.display = 'none';
             } else {
                 if (homeTab) homeTab.style.display = 'flex';
