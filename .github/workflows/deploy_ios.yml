@@ -8,14 +8,15 @@ on:
 jobs:
   deploy:
     name: Build & Upload to App Store
-    runs-on: macos-14
+    runs-on: macos-13
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Show Xcode Version
+      - name: Select Xcode
         run: |
+          sudo xcode-select -s /Applications/Xcode_15.4.app || sudo xcode-select -s /Applications/Xcode.app || true
           xcodebuild -version
 
       - name: Inject GROQ API Key
@@ -72,7 +73,7 @@ jobs:
             -authenticationKeyPath "$HOME/.appstoreconnect/private_keys/AuthKey_${{ secrets.APPSTORE_KEY_ID }}.p8" \
             DEVELOPMENT_TEAM="7GB34ALWCP"
 
-      - name: Export & Upload IPA to App Store Connect
+      - name: Export IPA
         run: |
           xcodebuild -exportArchive \
             -archivePath build/Firtina_AI.xcarchive \
@@ -81,11 +82,12 @@ jobs:
             -allowProvisioningUpdates \
             -authenticationKeyID "${{ secrets.APPSTORE_KEY_ID }}" \
             -authenticationKeyIssuerID "${{ secrets.APPSTORE_ISSUER_ID }}" \
-            -authenticationKeyPath "$HOME/.appstoreconnect/private_keys/AuthKey_${{ secrets.APPSTORE_KEY_ID }}.p8" || \
-          (
-            IPA_FILE=$(find build/output -name "*.ipa" | head -n 1)
-            echo "Uploading via altool fallback: $IPA_FILE"
-            xcrun altool --upload-app --type ios --file "$IPA_FILE" \
-              --apiKey "${{ secrets.APPSTORE_KEY_ID }}" \
-              --apiIssuer "${{ secrets.APPSTORE_ISSUER_ID }}"
-          )
+            -authenticationKeyPath "$HOME/.appstoreconnect/private_keys/AuthKey_${{ secrets.APPSTORE_KEY_ID }}.p8"
+
+      - name: Upload IPA to App Store Connect
+        run: |
+          IPA_FILE=$(find build/output -name "*.ipa" | head -n 1)
+          echo "Found IPA: $IPA_FILE"
+          xcrun altool --upload-app --type ios --file "$IPA_FILE" \
+            --apiKey "${{ secrets.APPSTORE_KEY_ID }}" \
+            --apiIssuer "${{ secrets.APPSTORE_ISSUER_ID }}"
