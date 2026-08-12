@@ -6270,7 +6270,7 @@
         
         // --- PLATFORM & FIREBASE REVIEW MODE CONTROL ---
         const isiOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) || (window.webkit && window.webkit.messageHandlers);
-        let isIOSReviewMode = true; // Default true for Apple review, controlled remotely via Firebase JSON (is_ios_review_mode)
+        let isIOSReviewMode = false; // Default true for Apple review, controlled remotely via Firebase JSON (is_ios_review_mode)
 
         function applyPlatformReviewMode() {
             const homeTab = document.getElementById('navItemHome');
@@ -6297,7 +6297,7 @@
             if (activeCategory) {
                 showTools();
             } else {
-                showStudioScreen();
+                showCategoryGrid();
             }
 
             // Pre-populate prompt grader input and trigger grading
@@ -9095,7 +9095,7 @@
 
     </script>
     <!-- BOTTOM NAVIGATION (HIDDEN BY DEFAULT, visible only after onboarding) -->
-    <nav id="bottomNav" class="bottom-nav flex hidden" style="display: none;">
+    <nav id="bottomNav" class="bottom-nav flex" style="display: flex;">
 <div class="nav-content">
 <!-- Atölye -->
 <div id="navItemStudio" onclick="showStudioScreen()" class="nav-item active">
