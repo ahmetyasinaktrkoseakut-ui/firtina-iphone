@@ -6300,27 +6300,15 @@
                 showCategoryGrid();
             }
 
-            // Pre-populate prompt grader input and trigger grading
+            // Prompt grader input - empty by default
             const graderIn = document.getElementById('graderInput');
             if (graderIn) {
                 const savedGraderVal = localStorage.getItem('firtina_grader_user_val');
-                const isCleared = localStorage.getItem('firtina_grader_user_cleared');
                 if (savedGraderVal !== null) { graderIn.value = savedGraderVal; }
-                else if (!isCleared && !graderIn.value.trim()) {
-                const samplePrompt = currentLang === 'tr' 
-                    ? "Sen deneyimli bir Türkçe öğretmenisin. 8. sınıf öğrencileri için paragrafta anlam konusunu eğlenceli hale getirecek 3 farklı sınıf etkinliği planı hazırla. Etkinlikleri tablo halinde göster, her birinin adını, süresini ve uygulayış adımlarını belirt."
-                    : "Act as an expert English teacher. Prepare 3 engaging classroom activities about reading comprehension for 8th-grade students. Present them in a markdown table showing the activity name, duration, and step-by-step instructions.";
-                graderIn.value = samplePrompt;
-                setTimeout(() => {
-                    gradePrompt();
-                }, 100);
-            }
-            graderIn.addEventListener('input', () => {
-                    const val = graderIn.value;
-                    localStorage.setItem('firtina_grader_user_val', val);
-                    if (!val.trim()) { localStorage.setItem('firtina_grader_user_cleared', 'true'); }
-                    else { localStorage.removeItem('firtina_grader_user_cleared'); }
+                graderIn.addEventListener('input', () => {
+                    localStorage.setItem('firtina_grader_user_val', graderIn.value);
                 });
+            }
             }
         });
 
@@ -8128,47 +8116,11 @@
             } catch (e) {
                 customPrompts = [];
             }
-            const promptsSeeded = localStorage.getItem('firtina_prompts_seeded');
-            if (!promptsSeeded && customPrompts.length === 0) {
-                customPrompts = [
-                    {
-                        id: 'default-summary',
-                        title: currentLang === 'tr' ? 'Metin Özetleyici' : 'Text Summarizer',
-                        category: 'text',
-                        content: currentLang === 'tr' 
-                            ? 'Lütfen aşağıdaki metni ana fikirlerini koruyarak, maddeler halinde özetle:\n\n[Metni buraya yapıştırın]' 
-                            : 'Please summarize the following text in bullet points, preserving the main ideas:\n\n[Paste text here]'
-                    },
-                    {
-                        id: 'default-debug',
-                        title: currentLang === 'tr' ? 'Kod Hata Bulucu' : 'Code Debugger',
-                        category: 'coding',
-                        content: currentLang === 'tr'
-                            ? 'Aşağıdaki kod bloğundaki olası hataları (bug) tespit et, düzeltilmiş halini yaz ve yapılan değişiklikleri açıkla:\n\n[Kodu buraya yapıştırın]'
-                            : 'Identify potential bugs in the following code block, provide the corrected code, and explain the changes:\n\n[Paste code here]'
-                    }
-                ];
-                try {
-                    localStorage.setItem('firtina_custom_prompts', JSON.stringify(customPrompts)); localStorage.setItem('firtina_prompts_seeded', 'true');
-                } catch (e) {}
-            }
-
             try {
                 budgetStack = JSON.parse(localStorage.getItem('firtina_budget_stack')) || [];
             } catch (e) {
                 budgetStack = [];
             }
-            const budgetSeeded = localStorage.getItem('firtina_budget_seeded');
-            if (!budgetSeeded && budgetStack.length === 0) {
-                budgetStack = [
-                    { id: 'default-chatgpt', name: 'ChatGPT Plus', price: 20, category: 'text' },
-                    { id: 'default-midjourney', name: 'Midjourney', price: 10, category: 'visual' }
-                ];
-                try {
-                    localStorage.setItem('firtina_budget_stack', JSON.stringify(budgetStack)); localStorage.setItem('firtina_budget_seeded', 'true');
-                } catch (e) {}
-            }
-
             setStudioTab(activeStudioTab);
             renderBudgetList();
             renderMyPromptsList();
