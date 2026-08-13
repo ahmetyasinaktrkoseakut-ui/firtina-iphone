@@ -6432,7 +6432,7 @@
         }
 
         // Veri Yükleme
-        const APP_VERSION = '1.16'; // Suno AI eklendi - localStorage cache temizlenir
+        const APP_VERSION = '1.17'; // Suno AI eklendi - localStorage cache temizlenir
 
         // NOT: APK içindeki assets/tools_data.json salt okunurdur ve APK yüklendikten sonra değiştirilemez.
         // Uzaktan (re-build yapmadan) güncelleme yapmak için veriyi bir URL'e host etmelisiniz (Firebase, GitHub vb.)
@@ -6475,7 +6475,7 @@
         // Merges remote tools with our current state. 
         // We no longer support user-added tools so we strictly load what Firebase/Android provides.
         function updateInternalTools(newTools) {
-            if (Array.isArray(newTools) && newTools.length > 0) {
+            if (Array.isArray(newTools) && newTools.length >= 10) {
                 tools = newTools;
                 saveData();
                 renderCategories();
@@ -6504,16 +6504,15 @@
 
                 if (storedVersion === APP_VERSION && storedToolsJson) {
                     const parsedTools = JSON.parse(storedToolsJson);
-                    if (Array.isArray(parsedTools) && parsedTools.length > 0) {
+                    if (Array.isArray(parsedTools) && parsedTools.length >= 10) {
                         tools = parsedTools;
                     } else {
                         tools = initialTools;
+                        saveData();
                     }
                 } else {
-                    // Version mismatch or no stored data → use initialTools
                     tools = initialTools;
-                    localStorage.setItem('appVersion', APP_VERSION);
-                    localStorage.setItem('aiTools', JSON.stringify(initialTools));
+                    saveData();
                 }
             } catch (e) {
                // 'loadData error, falling back to initialTools:', e);
