@@ -72,8 +72,7 @@ jobs:
             -authenticationKeyIssuerID "${{ secrets.APPSTORE_ISSUER_ID }}" \
             -authenticationKeyPath "$HOME/.appstoreconnect/private_keys/AuthKey_${{ secrets.APPSTORE_KEY_ID }}.p8" \
             DEVELOPMENT_TEAM="7GB34ALWCP" \
-            CODE_SIGN_IDENTITY="Apple Distribution" \
-            CODE_SIGN_STYLE="Automatic"
+
 
       - name: Export IPA
         run: |
