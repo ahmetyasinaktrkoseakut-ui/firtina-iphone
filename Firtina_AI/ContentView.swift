@@ -1,5 +1,6 @@
 import SwiftUI
 import WebKit
+import SafariServices
 
 struct ContentView: View {
     var body: some View {
@@ -27,33 +28,36 @@ struct WebView: UIViewRepresentable {
         let configuration = WKWebViewConfiguration()
         configuration.preferences.javaScriptCanOpenWindowsAutomatically = true
         
-        // --- 3. CSS VE JS KURTARMA YAMASI ---
+        // --- 3. CSS VE JS KURTARMA YAMASI (Yalnızca yerel file:// ana belgesinde çalışır) ---
         let jsCode = """
-        var style = document.createElement('style');
-        style.innerHTML = `
-            /* Sadece alt menüyü en üste alır (arama çubuğunu veya diğerlerini bozmaz) */
-            .bottom-nav { z-index: 999999 !important; }
-            /* Uygulama kartlarındaki açıklamaların kesilmesini önler */
-            .tool-card { height: auto !important; min-height: 160px !important; padding-bottom: 15px !important; }
-            .tool-desc { -webkit-line-clamp: 4 !important; max-height: none !important; }
-            /* En alttaki telif/gizlilik yazısının Asistan butonunun altında kalmaması için ekstra boşluk */
-            footer { padding-bottom: 140px !important; }
-        `;
-        document.head.appendChild(style);
-        
-        // İlk açılışta sayfayı en tepeye sabitle (window.onload ezmeden event listener ile)
-        window.addEventListener('load', function() {
-            setTimeout(function(){ window.scrollTo(0,0); }, 50);
-        });
-        
-
+        (function() {
+            if (window.location.protocol !== 'file:') return;
+            var style = document.createElement('style');
+            style.innerHTML = `
+                /* Sadece alt menüyü en üste alır (arama çubuğunu veya diğerlerini bozmaz) */
+                .bottom-nav { z-index: 999999 !important; }
+                /* Uygulama kartlarındaki açıklamaların kesilmesini önler */
+                .tool-card { height: auto !important; min-height: 160px !important; padding-bottom: 15px !important; }
+                .tool-desc { -webkit-line-clamp: 4 !important; max-height: none !important; }
+                /* En alttaki telif/gizlilik yazısının Asistan butonunun altında kalmaması için ekstra boşluk */
+                footer { padding-bottom: 140px !important; }
+            `;
+            document.head.appendChild(style);
+            
+            // İlk açılışta sayfayı en tepeye sabitle (window.onload ezmeden event listener ile)
+            window.addEventListener('load', function() {
+                setTimeout(function(){ window.scrollTo(0,0); }, 50);
+            });
+        })();
         """
-        let script = WKUserScript(source: jsCode, injectionTime: .atDocumentEnd, forMainFrameOnly: false)
+        let script = WKUserScript(source: jsCode, injectionTime: .atDocumentEnd, forMainFrameOnly: true)
         configuration.userContentController.addUserScript(script)
         
-        // --- IOS DOWNLOAD BRIDGE SCRIPT (atDocumentStart) ---
+        // --- IOS DOWNLOAD BRIDGE SCRIPT (atDocumentStart - Yalnızca yerel file:// ana belgesinde çalışır) ---
         let iosDownloadBridgeScriptCode = """
         (function() {
+            if (window.location.protocol !== 'file:') return;
+
             var getUrlPath = function(url) {
                 return (url || '').split('?')[0].split('#')[0].toLowerCase();
             };
@@ -329,11 +333,12 @@ struct WebView: UIViewRepresentable {
             }
         })();
         """
-        let iosDownloadBridgeScript = WKUserScript(source: iosDownloadBridgeScriptCode, injectionTime: .atDocumentStart, forMainFrameOnly: false)
+        let iosDownloadBridgeScript = WKUserScript(source: iosDownloadBridgeScriptCode, injectionTime: .atDocumentStart, forMainFrameOnly: true)
         configuration.userContentController.addUserScript(iosDownloadBridgeScript)
         
-        // Register script message handler
+        // Register script message handlers
         configuration.userContentController.add(context.coordinator, name: "iosDownloadBridge")
+        configuration.userContentController.add(context.coordinator, name: "openCustomTab")
         // ---------------------------------
 
         let webView = WKWebView(frame: .zero, configuration: configuration)
@@ -344,15 +349,9 @@ struct WebView: UIViewRepresentable {
         webView.backgroundColor = .clear
         webView.scrollView.backgroundColor = .clear
         
-        // Bypasses disallowed_useragent on Google Login
-        webView.customUserAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1"
-        
         // Sayfanın gereksiz esnemesini kapatır
         webView.scrollView.contentInsetAdjustmentBehavior = .automatic
         webView.scrollView.bounces = false
-        
-        // KRİTİK: iOS'ta fiziksel geri tuşu olmadığı için, dış siteye (Gemini vb.) girildiğinde
-        // parmakla ekranın solundan sağa kaydırarak uygulamaya geri dönülmesini sağlar.
         webView.allowsBackForwardNavigationGestures = true
         
         // 4. SAYFA YÜKLEME ÇÖZÜMÜ (updateUIView'den taşındı)
@@ -368,12 +367,32 @@ struct WebView: UIViewRepresentable {
         // Sayfanın sonsuz döngüde yeniden yüklenmesini önlemek için boş bırakıldı
     }
 
-    class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate, WKDownloadDelegate, WKScriptMessageHandler {
+    class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate, WKDownloadDelegate, WKScriptMessageHandler, SFSafariViewControllerDelegate {
         var downloadURL: URL?
         var isPresentingShareSheet = false
+        var isPresentingSafari = false
+        weak var presentedSafariVC: SFSafariViewController?
         
-        // Handle Javascript message calls (Blob/Base64/URL Downloads)
+        // Handle Javascript message calls (openCustomTab & Blob/Base64/URL Downloads)
         func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+            if message.name == "openCustomTab" {
+                let rawUrlString: String?
+                if let urlStr = message.body as? String {
+                    rawUrlString = urlStr
+                } else if let bodyDict = message.body as? [String: Any],
+                          let urlStr = bodyDict["url"] as? String {
+                    rawUrlString = urlStr
+                } else {
+                    rawUrlString = nil
+                }
+
+                if let rawUrlString = rawUrlString,
+                   let validURL = validatedHttpUrl(from: rawUrlString) {
+                    presentSafariViewController(url: validURL)
+                }
+                return
+            }
+
             if message.name == "iosDownloadBridge",
                let body = message.body as? [String: Any] {
                 
@@ -391,6 +410,97 @@ struct WebView: UIViewRepresentable {
                 }
             }
         }
+
+        private func validatedHttpUrl(from urlString: String) -> URL? {
+            let trimmed = urlString.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !trimmed.isEmpty, let url = URL(string: trimmed) else { return nil }
+            return validatedHttpUrl(url)
+        }
+
+        private func validatedHttpUrl(_ url: URL) -> URL? {
+            guard let scheme = url.scheme?.lowercased(),
+                  (scheme == "http" || scheme == "https"),
+                  let host = url.host,
+                  !host.isEmpty else {
+                return nil
+            }
+            return url
+        }
+
+        private func topMostViewController() -> UIViewController? {
+            let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+            let activeScene = scenes.first(where: { $0.activationState == .foregroundActive })
+                ?? scenes.first(where: { $0.activationState == .foregroundInactive })
+                ?? scenes.first
+
+            guard let windowScene = activeScene else { return nil }
+            let keyWindow = windowScene.windows.first(where: { $0.isKeyWindow }) ?? windowScene.windows.first
+            guard var topVC = keyWindow?.rootViewController else { return nil }
+
+            while true {
+                if let presented = topVC.presentedViewController {
+                    topVC = presented
+                } else if let navigation = topVC as? UINavigationController, let visible = navigation.visibleViewController {
+                    topVC = visible
+                } else if let tab = topVC as? UITabBarController, let selected = tab.selectedViewController {
+                    topVC = selected
+                } else {
+                    break
+                }
+            }
+            return topVC
+        }
+
+        private func presentSafariViewController(url: URL) {
+            guard let validURL = validatedHttpUrl(url) else { return }
+
+            DispatchQueue.main.async {
+                if let existingSafari = self.presentedSafariVC,
+                   existingSafari.presentingViewController == nil && !existingSafari.isBeingPresented {
+                    self.presentedSafariVC = nil
+                    self.isPresentingSafari = false
+                }
+
+                if self.isPresentingSafari || self.isPresentingShareSheet {
+                    return
+                }
+
+                guard let topVC = self.topMostViewController() else {
+                    return
+                }
+
+                if topVC is SFSafariViewController || topVC is UIActivityViewController || topVC.presentedViewController != nil {
+                    return
+                }
+
+                self.isPresentingSafari = true
+
+                let safariConfig = SFSafariViewController.Configuration()
+                safariConfig.entersReaderIfAvailable = false
+                safariConfig.barCollapsingEnabled = false
+
+                let safariVC = SFSafariViewController(url: validURL, configuration: safariConfig)
+                safariVC.delegate = self
+                safariVC.dismissButtonStyle = .done
+                safariVC.modalPresentationStyle = .fullScreen
+
+                self.presentedSafariVC = safariVC
+                topVC.present(safariVC, animated: true) {
+                    if safariVC.presentingViewController == nil {
+                        self.presentedSafariVC = nil
+                        self.isPresentingSafari = false
+                    }
+                }
+            }
+        }
+
+        func safariViewControllerDidFinish(_ controller: SFSafariViewController) {
+            DispatchQueue.main.async {
+                self.presentedSafariVC = nil
+                self.isPresentingSafari = false
+            }
+        }
+
         private func sanitizedFilename(_ filename: String) -> String {
             var cleaned = filename.trimmingCharacters(in: .whitespacesAndNewlines)
             if cleaned.isEmpty {
@@ -506,9 +616,6 @@ struct WebView: UIViewRepresentable {
             let handleDownload = { (cookies: [HTTPCookie]) in
                 var request = URLRequest(url: url)
                 
-                let userAgent = webView?.customUserAgent ?? "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1"
-                request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
-                
                 if let webViewUrl = webView?.url?.absoluteString {
                     request.setValue(webViewUrl, forHTTPHeaderField: "Referer")
                 }
@@ -591,36 +698,19 @@ struct WebView: UIViewRepresentable {
 
         private func presentShareSheet(fileURL: URL) {
             DispatchQueue.main.async {
-                if self.isPresentingShareSheet {
-                    print("Warning: Share sheet presentation is already in progress, ignoring duplicate request.")
+                if self.isPresentingShareSheet || self.isPresentingSafari {
+                    print("Warning: Modal presentation is already in progress, ignoring duplicate request.")
                     return
                 }
 
-                guard let windowScene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene,
-                      let keyWindow = windowScene.windows.first(where: { $0.isKeyWindow }),
-                      let rootVC = keyWindow.rootViewController else {
+                guard let topVC = self.topMostViewController() else {
                     print("Error: Could not find key window root VC")
                     return
                 }
                 
-                var topVC = rootVC
-                while true {
-                    if let presented = topVC.presentedViewController {
-                        topVC = presented
-                    } else if let navigation = topVC as? UINavigationController, let visible = navigation.visibleViewController {
-                        topVC = visible
-                    } else if let tab = topVC as? UITabBarController, let selected = tab.selectedViewController {
-                        topVC = selected
-                    } else if let child = topVC.children.last {
-                        topVC = child
-                    } else {
-                        break
-                    }
-                }
-                
                 // CRITICAL SAFETY CHECK: Prevent double presentation crashes
-                if topVC is UIActivityViewController {
-                    print("Warning: UIActivityViewController is already presented, ignoring duplicate request.")
+                if topVC is UIActivityViewController || topVC is SFSafariViewController || topVC.presentedViewController != nil {
+                    print("Warning: Modal is already presented, ignoring duplicate request.")
                     return
                 }
                 
@@ -642,8 +732,18 @@ struct WebView: UIViewRepresentable {
             }
         }
 
-        // Tüm navigasyonlara şartsız izin ver veya download ise indir
+        // Ana frame'e giden tüm harici http/https isteklerini WKWebView'da iptal et ve SFSafariViewController'da aç
         func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+            if let url = navigationAction.request.url,
+               let validURL = validatedHttpUrl(url) {
+                let isMainFrameOrNewWindow = (navigationAction.targetFrame == nil) || (navigationAction.targetFrame?.isMainFrame == true)
+                if isMainFrameOrNewWindow && !navigationAction.shouldPerformDownload {
+                    decisionHandler(.cancel)
+                    presentSafariViewController(url: validURL)
+                    return
+                }
+            }
+
             if navigationAction.shouldPerformDownload {
                 decisionHandler(.download)
             } else {
@@ -684,10 +784,12 @@ struct WebView: UIViewRepresentable {
             download.delegate = self
         }
 
-        // target="_blank" olan linkleri zorla mevcut ekranda kendi içinde açar
+        // target="_blank" veya window.open ile açılan harici linkleri WKWebView'a yükleme; SFSafariViewController ile aç
         func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
-            if navigationAction.targetFrame == nil {
-                webView.load(navigationAction.request)
+            if navigationAction.targetFrame == nil,
+               let url = navigationAction.request.url,
+               let validURL = validatedHttpUrl(url) {
+                presentSafariViewController(url: validURL)
             }
             return nil
         }

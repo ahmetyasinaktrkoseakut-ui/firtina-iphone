@@ -6269,16 +6269,18 @@
             }
         }
 
-        // Android WebView Entegrasyonu
+        // Android & iOS WebView Entegrasyonu
         function openExternal(e, url) {
-            e.preventDefault();
+            if (e && typeof e.preventDefault === 'function') {
+                e.preventDefault();
+            }
 
             if (!validateURL(url)) {
                // "Geçersiz veya güvensiz URL engellendi:", url);
                 return;
             }
 
-            // Android Bridge Kontrolü
+            // Android & iOS Bridge Kontrolü
             if (window.Android && window.Android.openCustomTab) {
                 window.Android.openCustomTab(url);
             } else if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.openCustomTab) {
