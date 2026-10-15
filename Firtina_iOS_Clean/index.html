@@ -2273,6 +2273,35 @@
         // Başlangıç Verisi
         const initialTools = [
     {
+        "id": 0,
+        "name": "Fotoğraf Uygulaması",
+        "url": "https://gemini.google.com/share/296f560476c2?skid=cbfdd28c-c92b-45c8-85c2-7b14c0000a5c",
+        "categories": [
+            "Görsel",
+            "Genel"
+        ],
+        "pricing": "Ücretsiz",
+        "description": {
+            "tr": "Gemini Canvas tabanlı, prompt yazmadan sınırsız ve ücretsiz görsel/fotoğraf üretici.",
+            "en": "Gemini Canvas based, unlimited and free image/photo generator without prompts.",
+            "de": "Gemini Canvas-basierter, unbegrenzter und kostenloser Bild-/Fotogenerator ohne Prompts.",
+            "es": "Generador de imágenes/fotos gratuito e ilimitado basado en Gemini Canvas sin prompts.",
+            "fr": "Générateur d'images/photos gratuit et illimité basé sur Gemini Canvas sans prompts.",
+            "it": "Generatore di immagini/foto gratuito e illimitato basato su Gemini Canvas senza prompt.",
+            "pt": "Gerador de imagens/fotos gratuito e ilimitado baseado em Gemini Canvas sem prompts.",
+            "nl": "Op Gemini Canvas gebaseerde, onbeperkte en gratis beeld-/fotogenerator zonder prompts.",
+            "pl": "Oparty na Gemini Canvas, nielimitowany i darmowy generator obrazów/zdjęć bez promptów.",
+            "ru": "Бесплатный и безлимитный генератор изображений/фото на базе Gemini Canvas без промптов.",
+            "zh": "基于 Gemini Canvas 的无提示词无限免费图像/照片生成器。",
+            "ja": "プロンプト不要のGemini Canvasベース無制限・無料画像/写真ジェネレーター。",
+            "ko": "프롬프트 없는 Gemini Canvas 기반 무제한 무료 이미지/사진 생성기.",
+            "ar": "مولد صور غير محدود ومجاني قائم على Gemini Canvas بدون مطالبات.",
+            "hi": "बिना प्रॉम्प्ट के जेमिनी कैनवास आधारित असीमित और मुफ्त छवि/फोटो जनरेटर।",
+            "id": "Generator gambar/foto gratis dan tanpa batas berbasis Gemini Canvas tanpa prompt.",
+            "vi": "Trình tạo hình ảnh/ảnh miễn phí và không giới hạn dựa trên Gemini Canvas không cần prompt."
+        }
+    },
+    {
         "id": 1,
         "name": "Google Gemini",
         "url": "https://gemini.google.com",
@@ -6432,7 +6461,7 @@
         }
 
         // Veri Yükleme
-        const APP_VERSION = '1.18';
+        const APP_VERSION = '1.19'; // Fotoğraf Uygulaması eklendi - localStorage cache temizlenir
 
         // NOT: APK içindeki assets/tools_data.json salt okunurdur ve APK yüklendikten sonra değiştirilemez.
         // Uzaktan (re-build yapmadan) güncelleme yapmak için veriyi bir URL'e host etmelisiniz (Firebase, GitHub vb.)
@@ -6476,6 +6505,10 @@
         // We no longer support user-added tools so we strictly load what Firebase/Android provides.
         function updateInternalTools(newTools) {
             if (Array.isArray(newTools) && newTools.length >= 10) {
+                const photoAppTool = initialTools.find(t => t.id === 0);
+                if (photoAppTool && !newTools.some(t => t.id === 0 || t.url === photoAppTool.url)) {
+                    newTools.unshift(photoAppTool);
+                }
                 tools = newTools;
                 saveData();
                 renderCategories();
@@ -6536,6 +6569,10 @@
                 if (!jsonString) return;
                 const newTools = JSON.parse(jsonString);
                 if (Array.isArray(newTools) && newTools.length > 0) {
+                    const photoAppTool = initialTools.find(t => t.id === 0);
+                    if (photoAppTool && !newTools.some(t => t.id === 0 || t.url === photoAppTool.url)) {
+                        newTools.unshift(photoAppTool);
+                    }
                     tools = newTools;
                     // LocalStorage güncelle
                     localStorage.setItem('aiTools', JSON.stringify(tools));
@@ -6700,6 +6737,10 @@
             if (sponsorContainer) {
                 sponsorContainer.classList.add('hidden');
             }
+            const photoAppBanner = document.getElementById('photoAppBanner');
+            if (photoAppBanner) {
+                photoAppBanner.classList.add('hidden');
+            }
 
             // Show back button
             if (activeCategory === 'favorites') {
@@ -6807,6 +6848,38 @@
                 sponsorContainer.innerHTML = '';
                 sponsorContainer.classList.add('hidden');
             }
+
+            // RENDER FOTOĞRAF UYGULAMASI BANNER (KEŞFET ÖNE ÇIKAN ARAÇ)
+            let photoAppBanner = document.getElementById('photoAppBanner');
+            if (!photoAppBanner) {
+                photoAppBanner = document.createElement('div');
+                photoAppBanner.id = 'photoAppBanner';
+                photoAppBanner.className = 'w-full mb-4';
+                categoryGrid.parentNode.insertBefore(photoAppBanner, categoryGrid);
+            }
+
+            photoAppBanner.innerHTML = `
+                <div onclick="openExternal(event, 'https://gemini.google.com/share/296f560476c2?skid=cbfdd28c-c92b-45c8-85c2-7b14c0000a5c')" 
+                     class="cursor-pointer glass-card group relative p-4 rounded-2xl border border-indigo-500/40 hover:border-indigo-400 bg-gradient-to-r from-indigo-950/70 via-purple-950/60 to-slate-900/80 shadow-[0_4px_20px_rgba(99,102,241,0.25)] hover:shadow-[0_4px_25px_rgba(99,102,241,0.4)] transition-all duration-300 flex items-center justify-between">
+                    <div class="flex items-center gap-3.5 min-w-0">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-2xl shadow-lg shrink-0 group-hover:scale-105 transition-transform">
+                            📸
+                        </div>
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2 mb-0.5">
+                                <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-500 text-white shadow-sm">ÖZEL ARAÇ</span>
+                                <span class="text-[10px] font-semibold text-emerald-400">Ücretsiz & Sınırsız</span>
+                            </div>
+                            <h3 class="font-bold text-base text-white group-hover:text-indigo-300 transition-colors truncate">Fotoğraf Uygulaması</h3>
+                            <p class="text-xs text-slate-300 truncate">Promptsuz, tek tıkla fotoğraf ve görsel üretimi</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 group-hover:bg-indigo-500 group-hover:text-white transition-all shrink-0 ml-2 shadow-sm">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </div>
+                </div>
+            `;
+            photoAppBanner.classList.remove('hidden');
 
             // "Tümü" ve Diğer Kategorileri Tek Bir Döngüde Birleştir (Sıralama İçin)
             // Tümü en başta, sonra diğerleri
@@ -7124,6 +7197,8 @@
                         activeCategory = null; // Clear category filter context
                         categoryGrid.classList.add('hidden'); // Force hide categories
                         toolsGrid.classList.remove('hidden'); // Force show tools
+                        const photoAppBanner = document.getElementById('photoAppBanner');
+                        if (photoAppBanner) photoAppBanner.classList.add('hidden');
 
                         // Fix: Toggle hidden class AND set display
                         backToCategoriesBtn.classList.remove('hidden');
