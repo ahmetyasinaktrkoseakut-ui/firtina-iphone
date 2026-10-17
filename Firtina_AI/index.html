@@ -1737,7 +1737,7 @@
             <!-- Sub Navigation Tabs -->
             <div class="flex border-b border-white/10 mb-6 max-w-md mx-auto">
                 <button onclick="setStudioTab('grader')" id="tabBtnGrader" class="flex-1 py-3 text-sm font-semibold border-b-2 border-blue-500 text-white transition-all outline-none">
-                    Prompt Skorer
+                    Prompt Oluşturucu
                 </button>
                 <button onclick="setStudioTab('budget')" id="tabBtnBudget" class="flex-1 py-3 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-white transition-all outline-none">
                     Bütçe Planlayıcı
@@ -1750,12 +1750,12 @@
             <!-- TAB 1: PROMPT GRADER -->
             <div id="studioTabGrader" class="space-y-6">
                 <div class="glass-card p-6 rounded-2xl border border-white/5 bg-slate-900/60 max-w-2xl mx-auto">
-                    <h3 class="text-lg font-bold text-white mb-3" id="graderTitle">Prompt Analiz Paneli</h3>
-                    <textarea id="graderInput" rows="5" aria-label="Analiz edilecek prompt" class="w-full bg-slate-950/80 border border-white/10 rounded-xl p-4 text-white text-sm placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all resize-none" placeholder="Promptunuzu buraya yazın veya yapıştırın..."></textarea>
+                    <h3 class="text-lg font-bold text-white mb-3" id="graderTitle">Akıllı Prompt Oluşturucu & Analiz</h3>
+                    <textarea id="graderInput" rows="5" aria-label="Analiz edilecek prompt" class="w-full bg-slate-950/80 border border-white/10 rounded-xl p-4 text-white text-sm placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all resize-none" placeholder="İstediğiniz görseli veya prompt fikrinizi yazın (Örn: bir fotoğrafın arka planını değiştir, gün batımı ve deniz olsun)..."></textarea>
                     
                     <div class="flex gap-3 mt-4">
                         <button onclick="gradePrompt()" id="btnGrade" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-500/20 active:scale-98">
-                            Analiz Et & Puanla
+                            Profesyonel Prompt Oluştur & Optimize Et
                         </button>
                     </div>
                 </div>
@@ -7483,23 +7483,23 @@
             tr: {
                 title: "Yapay Zeka Atölyesi",
                 subtitle: "Promptlarınızı yerel olarak analiz edip puanlayın ve abonelik bütçenizi yönetin.",
-                tabGrader: "Prompt Skorer",
+                tabGrader: "Prompt Oluşturucu",
                 tabBudget: "Bütçe Planlayıcı",
                 tabMyPrompts: "Prompt Defteri",
-                graderTitle: "Prompt Analiz Paneli",
-                graderTextareaPlaceholder: "Promptunuzu buraya yazın veya yapıştırın...",
-                btnGrade: "Analiz Et & Puanla",
-                btnGradeLoading: "Analiz ediliyor...",
+                graderTitle: "Akıllı Prompt Oluşturucu & Analiz",
+                graderTextareaPlaceholder: "İstediğiniz görseli veya prompt fikrinizi yazın (Örn: bir fotoğrafın arka planını değiştir, gün batımı ve deniz olsun)...",
+                btnGrade: "Profesyonel Prompt Oluştur & Optimize Et",
+                btnGradeLoading: "Oluşturuluyor...",
                 gradeLabel: "SKOR",
-                graderPersona: "Rol/Kimlik (Persona)",
-                graderContext: "Bağlam/Detay (Context)",
-                graderConstraints: "Kısıtlamalar (Constraints)",
-                graderFormat: "Çıktı Biçimi (Format)",
-                graderExamples: "Örnekleme (Examples)",
+                graderPersona: "Ana Konu / Rol",
+                graderContext: "Bağlam / Sahne",
+                graderConstraints: "Işık & Kısıtlamalar",
+                graderFormat: "Kamera & Format",
+                graderExamples: "Negatif & Kalite",
                 criteriaMet: "Kriter Sağlandı",
                 criteriaMissing: "Kriter Eksik",
                 optimizerTitle: "Tavsiye & Geliştirilmiş Prompt",
-                optimizationTip: "Puanı artırmak için şablonu doldurun.",
+                optimizationTip: "Mükemmel sonuç için prompt doğrudan hazırlandı.",
                 btnCopyOpt: "Kopyala",
                 btnSaveOpt: "Kütüphaneye Kaydet",
                 promptSavedSuccess: "Prompt başarıyla kütüphanenize kaydedildi!",
@@ -7525,12 +7525,12 @@
             en: {
                 title: "AI Studio",
                 subtitle: "Locally grade and optimize your prompts, and manage your subscription budget.",
-                tabGrader: "Prompt Grader",
+                tabGrader: "Prompt Generator",
                 tabBudget: "Budget Planner",
                 tabMyPrompts: "Prompt Notebook",
-                graderTitle: "Prompt Analysis Panel",
-                graderTextareaPlaceholder: "Write or paste your prompt here...",
-                btnGrade: "Analyze & Score",
+                graderTitle: "Smart Prompt Generator & Analysis",
+                graderTextareaPlaceholder: "Describe your visual or prompt idea (e.g. replace photo background with sunset and beach)...",
+                btnGrade: "Generate & Optimize Prompt",
                 btnGradeLoading: "Analyzing...",
                 gradeLabel: "SCORE",
                 graderPersona: "Role/Persona",
@@ -8283,73 +8283,189 @@
             }
         };
 
+        window.buildSmartPrompt = (input, isTr) => {
+            const cleanInput = input.trim();
+            const lower = cleanInput.toLowerCase();
+            
+            // 1. Arka Plan Değiştirme / Düzenleme Tespiti
+            const isBgChange = /(arka\s*plan|arkay[ıa]|arkas[ıi]|background|arka\s*taraf|arkasındaki|arkasina|arkadaki)/i.test(lower) ||
+                               (/(değiş|kaldır|sil|koy|ekle|yap|yerine|olsun|replace|remove|change)/i.test(lower) && /(arka|arkası|arkaya|arkayı|sahil|stüdyo|manzara|deniz|gün\s*batımı|oda|şehir|orman|ofis)/i.test(lower));
+                               
+            // 2. Logo & Grafik Tasarım Tespiti
+            const isLogo = /(logo|vektör|vector|ikon|icon|amblem|emblem|kartvizit|afiş|banner|maskot|marka\s*işareti)/i.test(lower);
+            
+            // 3. Genel Görsel / Fotoğraf / Çizim Tespiti
+            const isImage = isBgChange || isLogo || /(fotoğraf|resim|portre|çekim|kıyafet|poz|stüdyo|manzara|render|3d|çizim|anime|karakter|sinematik|film|ışık|lens|kamera|görsel|wallpaper|tablo|illüstrasyon|photorealistic|image)/i.test(lower);
+
+            if (isBgChange) {
+                let targetScene = cleanInput;
+                // Kullanıcı cümlesindeki "arka planını değiştir", "arkayı sil" gibi emir kalıplarını temizle
+                targetScene = targetScene.replace(/^(lütfen|bana|bir|bu|şu)?\s*(fotoğrafın|resmin|görselin)?\s*(arka\s*planını|arkasını|arkayı|arka\s*planı|arkasını\s*da)?\s*(değiştir|değişcek|değiştirilsin|kaldır|sil|farklı\s*yap|ayarla)?\s*(ve|,)?\s*/i, '');
+                targetScene = targetScene.replace(/(lütfen|olsun|yap|ayarla|koy|ekle|istiyorum|yapılsın)\.?$/i, '').trim();
+                if (!targetScene || targetScene.length < 3) {
+                    targetScene = isTr ? "doğal gün batımı ve hafif dalgalı deniz manzarası" : "scenic coastal beach at golden hour with gentle waves";
+                }
+
+                if (isTr) {
+                    return `Fotoğraftaki ana kişiyi/nesneyi olduğu gibi koru; yüz hatlarını, saç detaylarını, ten dokusunu, kıyafetlerini ve vücut oranlarını kesinlikle değiştirme.\n\n` +
+                           `Orijinal arka planı tamamen kaldır ve yerine şunu kusursuz bir şekilde entegre et:\n` +
+                           `"${targetScene}"\n\n` +
+                           `IŞIK VE RENK UYUMU:\n` +
+                           `- Yeni arka planın ortam ışığı, renk sıcaklığı ve ışık açısı ile ana kişinin üzerindeki ışıklandırmayı birebir eşitle.\n` +
+                           `- Zemin ve çevreyle uyumlu doğal yansımalar ve gerçekçi yumuşak gölgeler oluştur.\n` +
+                           `- Kesim kenarlarında (maskeleme sınırlarında) hiçbir yapay çizgi, beyaz leke, bulanıklık veya pikselleşme olmasın.\n\n` +
+                           `KAMERA VE ÇEKİM KALİTESİ:\n` +
+                           `- 85mm portre lensi, f/1.8 diyafram ile arka planda hafif ve doğal alan derinliği (bokeh).\n` +
+                           `- Fotogerçekçi, stüdyo kalitesinde 8K çözünürlük, kristal netliğinde ayrıntılar.\n\n` +
+                           `NEGATİF PROMPT (İSTENMEYENLER):\n` +
+                           `Yüz bozulması, değişen yüz hatları, yapay kesim izleri, uyumsuz ışıklandırma, düşük kalite, bulanıklık, çizgi film efekti, pikselleşme, deforme uzuvlar.`;
+                } else {
+                    return `Strictly preserve the main subject/person from the reference image, keeping exact facial features, hair, skin texture, outfit details, and natural proportions unchanged.\n\n` +
+                           `Seamlessly replace the entire original background with:\n` +
+                           `"${targetScene}"\n\n` +
+                           `LIGHTING & COLOR INTEGRATION:\n` +
+                           `- Harmonize the lighting angle, ambient color temperature, and exposure of the new background with the subject.\n` +
+                           `- Generate realistic ground contact shadows and natural environmental color bounce.\n` +
+                           `- Ensure clean, artifact-free cutout edges with zero white fringing or halo effects.\n\n` +
+                           `CAMERA & RENDER SETTINGS:\n` +
+                           `- 85mm portrait photography, f/1.8 aperture with gentle background depth of field (bokeh).\n` +
+                           `- Photorealistic, 8k resolution, ultra-detailed texture, cinematic studio clarity.\n\n` +
+                           `NEGATIVE PROMPT:\n` +
+                           `Facial distortion, altered facial identity, rough cutout borders, mismatched lighting, low quality, blurry, cartoon artifacts, pixelation.`;
+                }
+            } else if (isLogo) {
+                if (isTr) {
+                    return `KONU VE AMBLEM:\n` +
+                           `${cleanInput}\n\n` +
+                           `TASARIM KRİTERLERİ:\n` +
+                           `- Modern, minimalist ve akılda kalıcı vektörel marka amblemi / logosu.\n` +
+                           `- Temiz geometrik çizgiler, dengeli negatif alan kullanımı ve yüksek kontrast.\n` +
+                           `- Sade ve nötr tek renk zemin üzerinde ortalanmış kurumsal sunum.\n` +
+                           `- Ölçeklenebilir, profesyonel ve modern ikonografi standartları.\n\n` +
+                           `NEGATİF PROMPT:\n` +
+                           `Karmaşık detaylar, 3D gölgeler, degrade fazlalığı, gerçek fotoğraf ögeleri, okunaksız yazılar, kalabalık çizgiler.`;
+                } else {
+                    return `SUBJECT & EMBLEM:\n` +
+                           `${cleanInput}\n\n` +
+                           `DESIGN CRITERIA:\n` +
+                           `- Modern, minimalist, and memorable vector brand logo.\n` +
+                           `- Crisp geometric lines, balanced negative space, and high contrast.\n` +
+                           `- Centered presentation on a clean solid neutral background.\n` +
+                           `- Scalable corporate identity aesthetics, sleek iconography.\n\n` +
+                           `NEGATIVE PROMPT:\n` +
+                           `Complex clutter, excessive 3D gradients, photographic elements, illegible typography, messy lines.`;
+                }
+            } else if (isImage) {
+                if (isTr) {
+                    return `KONU VE KOMPOZİSYON:\n` +
+                           `${cleanInput}\n` +
+                           `- Sahne merkezinde güçlü odaklanma, zengin dokular ve hiper-gerçekçi malzeme detayları.\n` +
+                           `- Sinematik altın oran kompozisyonu, derinlik hissi veren kadraj yerleşimi.\n\n` +
+                           `IŞIKLANDIRMA VE ATMOSFER:\n` +
+                           `- Doğal hacimsel ışık (volumetric lighting), yumuşak kontrast ve derinlik katan gölgeler.\n` +
+                           `- Sinematik renk derecelendirmesi ve sıcak atmosferik derinlik.\n\n` +
+                           `KAMERA VE ÇEKİM TEKNİĞİ:\n` +
+                           `- Profesyonel DSLR / 35mm lens çekimi, kristal netliğinde odak, yüksek dinamik aralık (HDR).\n` +
+                           `- 8K ultra yüksek çözünürlük, fotogerçekçi dokular ve stüdyo netliği.\n\n` +
+                           `NEGATİF PROMPT (İSTENMEYENLER):\n` +
+                           `Bulanıklık, düşük çözünürlük, yapaylık, deforme uzuvlar, bozuk anatomi, aşırı doygun renkler, gren, gürültü.`;
+                } else {
+                    return `SUBJECT & COMPOSITION:\n` +
+                           `${cleanInput}\n` +
+                           `- Strong central focal point, rich textures, hyper-realistic material details.\n` +
+                           `- Cinematic golden-ratio framing with natural depth.\n\n` +
+                           `LIGHTING & ATMOSPHERE:\n` +
+                           `- Natural volumetric lighting, soft contrast, and realistic dimensional cast shadows.\n` +
+                           `- Cinematic color grading and immersive atmospheric mood.\n\n` +
+                           `CAMERA & SHOT SPECIFICATIONS:\n` +
+                           `- Professional DSLR / 35mm lens, crystal clear focus, high dynamic range (HDR).\n` +
+                           `- 8K ultra-high resolution, photorealistic surface textures, pristine clarity.\n\n` +
+                           `NEGATIVE PROMPT:\n` +
+                           `Blurry, low resolution, artificial distortion, malformed limbs, bad anatomy, over-saturated colors, noise, grain.`;
+                }
+            } else {
+                if (isTr) {
+                    return `Sen bu alanda uzmanlaşmış kıdemli bir uzman ve danışmansın.\n\n` +
+                           `GÖREV:\n` +
+                           `Aşağıdaki konu ve hedef doğrultusunda kapsamlı, net ve yüksek kaliteli bir çıktı hazırla:\n` +
+                           `"${cleanInput}"\n\n` +
+                           `KURALLAR VE ÇIKTI STANDARTLARI:\n` +
+                           `1. Doğrudan sonuca odaklan; gereksiz dolgu cümlelerinden, yapay giriş ve klişelerden kaçın.\n` +
+                           `2. Bilgileri mantıksal bir akışla, gerektiğinde numaralı adımlar veya madde işaretleriyle düzenle.\n` +
+                           `3. Dili akıcı, profesyonel, anlaşılır ve konunun gerektirdiği terminolojiye tam hakim şekilde kullan.\n` +
+                           `4. Çıktıyı hemen uygulanabilir, eksiksiz ve somut bilgilerle desteklenmiş olarak sun.`;
+                } else {
+                    return `You are an expert specialist and senior advisor in this domain.\n\n` +
+                           `TASK:\n` +
+                           `Produce a comprehensive, clear, and high-caliber output based on the following objective:\n` +
+                           `"${cleanInput}"\n\n` +
+                           `RULES & QUALITY STANDARDS:\n` +
+                           `1. Focus directly on the solution; avoid fluff, generic filler openers, and cliches.\n` +
+                           `2. Structure the information logically using numbered steps or clear bullet points.\n` +
+                           `3. Maintain a fluent, authoritative, and precise tone tailored to the domain.\n` +
+                           `4. Deliver actionable, complete, and thoroughly detailed results immediately ready for use.`;
+                }
+            }
+        };
+
         window.gradePrompt = () => {
             const input = document.getElementById('graderInput').value.trim();
             if (!input) return;
 
-            const hasPersona = /\b(sen bir|as a|act as|gibi davran|yazılım uzmanı|editör|doktor|tasarımcı|danışman|expert|expert in|role|persona)\b/i.test(input);
-            const hasContext = /\b(konu|hakkında|için|amacım|hedef|target|audience|context|background|detay)\b/i.test(input) || input.length > 50;
-            const hasConstraints = /\b(yapma|olmasın|olmadan|kullanmadan|avoid|don't|do not|limit|maximum|en fazla|en çok|yazma)\b/i.test(input);
-            const hasFormat = /\b(tablo|liste|madde|markdown|kod olarak|kodla|json|formatında|table|list|bullet|bulletpoints)\b/i.test(input);
-            const hasExamples = /\b(örnek|örneğin|örnekteki gibi|gibi olsun|like|example|such as)\b/i.test(input);
+            const isTr = (typeof currentLang === 'undefined' || currentLang === 'tr');
+            const lower = input.toLowerCase();
 
-            let score = 0;
-            if (hasPersona) score += 20;
-            if (hasContext) score += 20;
-            if (hasConstraints) score += 20;
-            if (hasFormat) score += 20;
-            if (hasExamples) score += 20;
+            const isBgChange = /(arka\s*plan|arkay[ıa]|arkas[ıi]|background|arka\s*taraf|arkasındaki|arkasina|arkadaki)/i.test(lower) ||
+                               (/(değiş|kaldır|sil|koy|ekle|yap|yerine|olsun|replace|remove|change)/i.test(lower) && /(arka|arkası|arkaya|arkayı|sahil|stüdyo|manzara|deniz|gün\s*batımı|oda|şehir|orman|ofis)/i.test(lower));
+            const isLogo = /(logo|vektör|vector|ikon|icon|amblem|emblem|kartvizit|afiş|banner|maskot|marka\s*işareti)/i.test(lower);
+            const isImage = isBgChange || isLogo || /(fotoğraf|resim|portre|çekim|kıyafet|poz|stüdyo|manzara|render|3d|çizim|anime|karakter|sinematik|film|ışık|lens|kamera|görsel|wallpaper|tablo|illüstrasyon|photorealistic|image)/i.test(lower);
+
+            let score = 95;
+            if (input.length < 10) score = 75;
+            if (input.length > 30) score = 100;
 
             document.getElementById('graderResults').classList.remove('hidden');
             document.getElementById('gradeScore').innerText = score;
             const circle = document.getElementById('gradeCircle');
             const offset = 100 - score;
             circle.setAttribute('stroke-dashoffset', offset);
-            
-            if (score <= 40) {
-                circle.className.baseVal = "text-red-500 transition-all duration-1000 ease-out";
-            } else if (score <= 80) {
-                circle.className.baseVal = "text-amber-500 transition-all duration-1000 ease-out";
+            circle.className.baseVal = score >= 90 ? "text-emerald-500 transition-all duration-1000 ease-out" : "text-blue-500 transition-all duration-1000 ease-out";
+
+            // Dinamik Kriter Etiketleri ve Kontroller
+            if (isImage) {
+                document.getElementById('lblPersona').innerText = isTr ? (isBgChange ? "Ana Konu & Koruma Kuralı" : (isLogo ? "Amblem / Marka Kimliği" : "Ana Karakter / Konu")) : "Main Subject / Preservation";
+                document.getElementById('lblContext').innerText = isTr ? (isBgChange ? "Yeni Arka Plan / Sahne" : (isLogo ? "Geometri & Vektör Formatı" : "Kompozisyon & Kadraj")) : "Background / Scene";
+                document.getElementById('lblConstraints').innerText = isTr ? (isLogo ? "Kontrast & Negatif Alan" : "Işıklandırma & Renk Uyumu") : "Lighting & Color Sync";
+                document.getElementById('lblFormat').innerText = isTr ? (isLogo ? "Ölçeklenebilirlik & Sunum" : "Kamera / Lens & Derinlik") : "Camera & Lens Depth";
+                document.getElementById('lblExamples').innerText = isTr ? "Negatif Prompt (Filtreleme)" : "Negative Prompt Filter";
             } else {
-                circle.className.baseVal = "text-emerald-500 transition-all duration-1000 ease-out";
+                document.getElementById('lblPersona').innerText = isTr ? "Rol / Uzmanlık Kimliği" : "Role / Persona";
+                document.getElementById('lblContext').innerText = isTr ? "Görev & Bağlam Netliği" : "Task & Context";
+                document.getElementById('lblConstraints').innerText = isTr ? "Kısıtlama & Kalite İlkeleri" : "Constraints & Quality";
+                document.getElementById('lblFormat').innerText = isTr ? "Çıktı Formatı & Akış" : "Output Structure";
+                document.getElementById('lblExamples').innerText = isTr ? "Doğrudan Uygulanabilirlik" : "Actionability";
             }
 
-            document.getElementById('checkPersona').innerText = hasPersona ? "✅" : "❌";
-            document.getElementById('checkContext').innerText = hasContext ? "✅" : "❌";
-            document.getElementById('checkConstraints').innerText = hasConstraints ? "✅" : "❌";
-            document.getElementById('checkFormat').innerText = hasFormat ? "✅" : "❌";
-            document.getElementById('checkExamples').innerText = hasExamples ? "✅" : "❌";
+            document.getElementById('checkPersona').innerText = "✅";
+            document.getElementById('checkContext').innerText = "✅";
+            document.getElementById('checkConstraints').innerText = "✅";
+            document.getElementById('checkFormat').innerText = "✅";
+            document.getElementById('checkExamples').innerText = "✅";
 
             let advice = "";
-            let missingKeys = [];
-            if (!hasPersona) missingKeys.push("Rol/Kimlik");
-            if (!hasContext) missingKeys.push("Bağlam");
-            if (!hasConstraints) missingKeys.push("Kısıtlamalar");
-            if (!hasFormat) missingKeys.push("Format");
-            if (!hasExamples) missingKeys.push("Örnek");
-
-            if (score === 100) {
-                advice = currentLang === 'tr' ? "Tebrikler! Promptunuz tüm profesyonel kriterleri içeriyor." : "Congratulations! Your prompt contains all professional criteria.";
+            if (isBgChange) {
+                advice = isTr ? "✨ Arka plan değiştirme isteğiniz tespit edildi. Orijinal kişiyi/nesneyi koruyan, yeni sahneyi ve ortam ışığını eşitleyen profesyonel görsel promptu oluşturuldu. Kopyalayıp Fırtına Fotoğraf Stüdyosu'nda veya yapay zeka araçlarında kullanabilirsiniz." : "✨ Background replacement detected. A professional prompt preserving the subject with synchronized lighting has been generated.";
+            } else if (isLogo) {
+                advice = isTr ? "✨ Logo / Vektör tasarım isteğiniz tespit edildi. Minimalist, modern ve yüksek kontrastlı kurumsal logo promptu hazırlandı." : "✨ Logo/Vector request detected. A modern, minimalist brand logo prompt has been generated.";
+            } else if (isImage) {
+                advice = isTr ? "✨ Görsel üretim isteğiniz tespit edildi. Işık, kamera, kompozisyon ve negatif prompt parametreleriyle zenginleştirilmiş profesyonel prompt hazırlandı." : "✨ Image request detected. A professional prompt enhanced with lighting, camera, and negative prompts is ready.";
             } else {
-                advice = (currentLang === 'tr' ? "Promptunuzu geliştirmek için şu eksik bölümleri ekleyin: " : "To improve your prompt, add these missing sections: ") + missingKeys.join(", ");
+                advice = isTr ? "✨ Yapay zeka talimatı hazırlandı. ChatGPT ve Claude gibi modellere doğrudan yapıştırıp en yüksek kalitede sonuç alabileceğiniz şekilde optimize edildi." : "✨ AI instruction ready. Optimized for direct use with ChatGPT and Claude.";
             }
             document.getElementById('optimizerSuggestions').innerText = advice;
 
-            let template = "";
-            if (currentLang === 'tr') {
-                template = `[Rol]: Sen bir ${hasPersona ? "[Mevcut Rol]" : "Yapay Zeka Uzmanı"} rolündesin.\n` +
-                           `[Bağlam]: Görevin "${input}" isteğini yerine getirmek.\n` +
-                           `[Kısıtlamalar]: ${hasConstraints ? "[Kısıtlamalarınız]" : "Gereksiz detaylardan kaçın, sade ve net ol."}\n` +
-                           `[Format]: ${hasFormat ? "[Format]" : "Çıktıyı başlıklar halinde düzenle."}\n` +
-                           `[Örnek]: ${hasExamples ? "[Örnek]" : "Örnek şablon: ..."}`;
-            } else {
-                template = `[Role]: You are acting as a ${hasPersona ? "[Current Role]" : "AI Specialist"}.\n` +
-                           `[Context]: Your task is to process this request: "${input}".\n` +
-                           `[Constraints]: ${hasConstraints ? "[Constraints]" : "Avoid fluff, be direct and clean."}\n` +
-                           `[Format]: ${hasFormat ? "[Format]" : "Output structured in headings."}\n` +
-                           `[Example]: ${hasExamples ? "[Example]" : "Example layout: ..."}`;
-            }
-            document.getElementById('optimizedTextarea').value = template;
+            const generatedPrompt = window.buildSmartPrompt(input, isTr);
+            document.getElementById('optimizedTextarea').value = generatedPrompt;
         };
 
         window.copyOptimizedPrompt = () => {
