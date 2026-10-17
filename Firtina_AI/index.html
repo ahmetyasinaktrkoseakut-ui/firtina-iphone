@@ -6282,18 +6282,16 @@
             }
         }
 
-        // Android & iOS WebView Entegrasyonu
+        // Android WebView Entegrasyonu
         function openExternal(e, url) {
-            if (e && typeof e.preventDefault === 'function') {
-                e.preventDefault();
-            }
+            e.preventDefault();
 
             if (!validateURL(url)) {
                // "Geçersiz veya güvensiz URL engellendi:", url);
                 return;
             }
 
-            // Android & iOS Bridge Kontrolü
+            // Android Bridge Kontrolü
             if (window.Android && window.Android.openCustomTab) {
                 window.Android.openCustomTab(url);
             } else if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.openCustomTab) {
@@ -6341,24 +6339,14 @@
             if (activeCategory) {
                 showTools();
             } else {
-                showCategories();
+                showCategoryGrid();
             }
 
-            // Pre-populate prompt grader input with rich sample prompt
+            // Prompt grader input - empty by default
             const graderIn = document.getElementById('graderInput');
             if (graderIn) {
                 const savedGraderVal = localStorage.getItem('firtina_grader_user_val');
-                if (savedGraderVal !== null) {
-                    graderIn.value = savedGraderVal;
-                } else if (!graderIn.value.trim()) {
-                    const samplePrompt = currentLang === 'tr'
-                        ? "Sen deneyimli bir Türkçe öğretmenisin. 8. sınıf öğrencileri için paragrafta anlam konusunu eğlenceli hale getirecek 3 farklı sınıf etkinliği planı hazırla. Etkinlikleri tablo halinde göster, her birinin adını, süresini ve uygulayış adımlarını belirt."
-                        : "Act as an expert English teacher. Prepare 3 engaging classroom activities about reading comprehension for 8th-grade students. Present them in a markdown table showing the activity name, duration, and step-by-step instructions.";
-                    graderIn.value = samplePrompt;
-                }
-                if (graderIn.value.trim()) {
-                    setTimeout(() => { gradePrompt(); }, 100);
-                }
+                if (savedGraderVal !== null) { graderIn.value = savedGraderVal; }
                 graderIn.addEventListener('input', () => {
                     localStorage.setItem('firtina_grader_user_val', graderIn.value);
                 });
@@ -6476,7 +6464,7 @@
         }
 
         // Veri Yükleme
-        const APP_VERSION = '1.21'; // Fotoğraf Uygulaması güncel link - localStorage cache temizlenir
+        const APP_VERSION = '1.19'; // Fotoğraf Uygulaması güncel link - localStorage cache temizlenir
 
         // NOT: APK içindeki assets/tools_data.json salt okunurdur ve APK yüklendikten sonra değiştirilemez.
         // Uzaktan (re-build yapmadan) güncelleme yapmak için veriyi bir URL'e host etmelisiniz (Firebase, GitHub vb.)
@@ -6519,7 +6507,7 @@
         // Merges remote tools with our current state. 
         // We no longer support user-added tools so we strictly load what Firebase/Android provides.
         function updateInternalTools(newTools) {
-            if (Array.isArray(newTools) && newTools.length >= 10) {
+            if (Array.isArray(newTools) && newTools.length > 0) {
                 const photoAppTool = initialTools.find(t => t.id === 0);
                 if (photoAppTool) {
                     const existingIdx = newTools.findIndex(t => t.id === 0);
@@ -6557,15 +6545,16 @@
 
                 if (storedVersion === APP_VERSION && storedToolsJson) {
                     const parsedTools = JSON.parse(storedToolsJson);
-                    if (Array.isArray(parsedTools) && parsedTools.length >= 10) {
+                    if (Array.isArray(parsedTools) && parsedTools.length > 0) {
                         tools = parsedTools;
                     } else {
                         tools = initialTools;
-                        saveData();
                     }
                 } else {
+                    // Version mismatch or no stored data → use initialTools
                     tools = initialTools;
-                    saveData();
+                    localStorage.setItem('appVersion', APP_VERSION);
+                    localStorage.setItem('aiTools', JSON.stringify(initialTools));
                 }
             } catch (e) {
                // 'loadData error, falling back to initialTools:', e);
@@ -8224,52 +8213,10 @@
             } catch (e) {
                 customPrompts = [];
             }
-            if (customPrompts.length === 0) {
-                customPrompts = [
-                    {
-                        id: 'default-summary',
-                        title: currentLang === 'tr' ? 'Metin Özetleyici' : 'Text Summarizer',
-                        category: 'text',
-                        content: currentLang === 'tr' 
-                            ? 'Lütfen aşağıdaki metni ana fikirlerini koruyarak, maddeler halinde özetle:\n\n[Metni buraya yapıştırın]' 
-                            : 'Please summarize the following text in bullet points, preserving the main ideas:\n\n[Paste text here]'
-                    },
-                    {
-                        id: 'default-debug',
-                        title: currentLang === 'tr' ? 'Kod Hata Bulucu' : 'Code Debugger',
-                        category: 'coding',
-                        content: currentLang === 'tr'
-                            ? 'Aşağıdaki kod bloğundaki olası hataları (bug) tespit et, düzeltilmiş halini yaz ve yapılan değişiklikleri açıkla:\n\n[Kodu buraya yapıştırın]'
-                            : 'Identify potential bugs in the following code block, provide the corrected code, and explain the changes:\n\n[Paste code here]'
-                    },
-                    {
-                        id: 'default-content-ideas',
-                        title: currentLang === 'tr' ? 'Sosyal Medya İçerik Üretici' : 'Social Media Idea Generator',
-                        category: 'text',
-                        content: currentLang === 'tr'
-                            ? 'Belirtilen konu hakkında Instagram ve Twitter için 5 özgün içerik fikri ve dikkat çekici başlıklar oluştur:\n\n[Konu]'
-                            : 'Generate 5 creative social media content ideas with eye-catching headlines for the given topic:\n\n[Topic]'
-                    }
-                ];
-                try {
-                    localStorage.setItem('firtina_custom_prompts', JSON.stringify(customPrompts));
-                } catch (e) {}
-            }
-
             try {
                 budgetStack = JSON.parse(localStorage.getItem('firtina_budget_stack')) || [];
             } catch (e) {
                 budgetStack = [];
-            }
-            if (budgetStack.length === 0) {
-                budgetStack = [
-                    { id: 'default-chatgpt', name: 'ChatGPT Plus', price: 20, category: 'text' },
-                    { id: 'default-midjourney', name: 'Midjourney', price: 10, category: 'visual' },
-                    { id: 'default-claude', name: 'Claude Pro', price: 20, category: 'text' }
-                ];
-                try {
-                    localStorage.setItem('firtina_budget_stack', JSON.stringify(budgetStack));
-                } catch (e) {}
             }
             setStudioTab(activeStudioTab);
             renderBudgetList();
@@ -9080,16 +9027,25 @@
                 if (Array.isArray(data)) {
                     if (typeof updateInternalTools === 'function') {
                         updateInternalTools(data);
-                       // "✅ Remote tools data synced via base64: " + data.length + " tools");
+                    } else if (typeof window.updateToolsData === 'function') {
+                        window.updateToolsData(decodedJson);
                     } else {
-                        tools = data; // Fallback Update global tools array
+                        const photoAppTool = initialTools.find(t => t.id === 0);
+                        if (photoAppTool) {
+                            const existingIdx = data.findIndex(t => t.id === 0);
+                            if (existingIdx !== -1) {
+                                data[existingIdx] = photoAppTool;
+                            } else {
+                                data.unshift(photoAppTool);
+                            }
+                        }
+                        tools = data;
                         const statsCount = document.getElementById('statsToolCount');
                         if (statsCount) {
                             statsCount.innerText = tools.length + '+';
                         }
                         renderCategories();
                         renderTools();
-                       // "✅ Remote tools data synced successfully (fallback): " + tools.length + " tools");
                     }
                 }
             } catch (e) {
@@ -9255,7 +9211,7 @@
 <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
 <path d="M12 3l10 9h-3v8h-5v-6h-4v6h-5v-8h-3l10-9z" />
 </svg>
-<span id="navTextHome" class="text-xs font-medium">Keşfet</span>
+<span id="navTextHome" class="text-xs font-medium">Ana Sayfa</span>
 </div>
 </div>
 </nav>

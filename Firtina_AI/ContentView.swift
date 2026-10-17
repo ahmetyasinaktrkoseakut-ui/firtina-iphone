@@ -1008,8 +1008,251 @@ final class GeminiToolWebViewController: UIViewController, WKNavigationDelegate,
                             }
                         });
                     }
+                    setInterval(function() {
+                        try {
+                            var confirmBtn = document.querySelector('mat-dialog-container button.confirm-button');
+                            if (confirmBtn) confirmBtn.click();
+                        } catch (e) {}
+                    }, 400);
                 }
             } catch (e) {}
+            var portalPatchFn = function() {
+                if (typeof state !== 'undefined' && typeof window.generationLoop === 'function' && !window.__firtinaPortalPatchedV5) {
+                    window.__firtinaPortalPatchedV5 = true;
+                    state.runId = state.runId || 0;
+                    state.abortController = null;
+                    window.abortActiveGeneration = function() {
+                        state.runId = (state.runId || 0) + 1;
+                        state.isLoopRunning = false;
+                        state.retryCount = 0;
+                        clearLoopTimer();
+                        if (state.abortController) {
+                            try { state.abortController.abort(); } catch (e) {}
+                            state.abortController = null;
+                        }
+                        try {
+                            document.querySelectorAll('#galleryGrid .firtina-loading-card').forEach(function(el) { el.remove(); });
+                        } catch (e) {}
+                    };
+                    window.stopAndGoBack = function() {
+                        state.isGenerating = false;
+                        window.abortActiveGeneration();
+                        updateStopBtn();
+                        goToScreen('screen-mode-select');
+                    };
+                    window.startPresetGeneration = function(name) {
+                        window.abortActiveGeneration();
+                        state.styleName = name;
+                        state.mode = 'preset';
+                        var titleEl = document.getElementById('galleryTitle');
+                        if (titleEl) titleEl.textContent = 'CANLI AKIŞ: ' + name;
+                        goToScreen('screen-gallery');
+                        state.isGenerating = true;
+                        updateStopBtn();
+                        window.generationLoop();
+                    };
+                    window.startCustomGeneration = function() {
+                        var locEl = document.getElementById('inputLocation');
+                        var outfitEl = document.getElementById('inputOutfit');
+                        var poseEl = document.getElementById('inputPose');
+                        var loc = locEl ? locEl.value.trim() : '';
+                        var outfit = outfitEl ? outfitEl.value.trim() : '';
+                        var pose = poseEl ? poseEl.value.trim() : '';
+                        if (!loc || !outfit) {
+                            alert('Lütfen mekan ve kıyafet alanlarını doldurunuz.');
+                            return;
+                        }
+                        window.abortActiveGeneration();
+                        state.customLocation = loc;
+                        state.customOutfit = outfit;
+                        state.customPose = pose;
+                        state.mode = 'custom';
+                        var titleEl = document.getElementById('galleryTitle');
+                        if (titleEl) titleEl.textContent = 'CANLI AKIŞ: ÖZEL SENARYO';
+                        goToScreen('screen-gallery');
+                        state.isGenerating = true;
+                        updateStopBtn();
+                        window.generationLoop();
+                    };
+                    window.toggleGeneration = function() {
+                        state.isGenerating = !state.isGenerating;
+                        state.retryCount = 0;
+                        updateStopBtn();
+                        if (state.isGenerating) {
+                            if (!state.isLoopRunning) {
+                                window.generationLoop();
+                            }
+                        } else {
+                            window.abortActiveGeneration();
+                        }
+                    };
+                    window.buildPrompt = function(attempt) {
+                        var tryNum = attempt || 1;
+                        var isMulti = state.images.length > 1;
+                        var subjectCount = state.images.length;
+                        if (!isMulti) {
+                            var lightings = ['Cinematic lighting', 'Golden hour', 'Volumetric lighting', 'Rembrandt lighting', 'Soft window light', 'Warm ambient lighting'];
+                            var light = lightings[Math.floor(Math.random() * lightings.length)];
+                            if (state.mode === 'preset') {
+                                var presetAngles = ['Low angle', 'Eye level', 'Slightly high angle', 'Medium shot', 'Three-quarter shot'];
+                                var presetAngle = presetAngles[Math.floor(Math.random() * presetAngles.length)];
+                                var candidActions = ['Walking through the scene', 'Looking away thoughtfully', 'Adjusting gear/clothes', 'Interacting with environment', 'Resting casually', 'Observing something distant'];
+                                var action = candidActions[Math.floor(Math.random() * candidActions.length)];
+                                if (tryNum >= 2) {
+                                    return 'Create a realistic, cinematic portrait photograph of the person in the reference image. Theme and setting: ' + state.styleName + '. Action: ' + action + '. Lighting: ' + light + '. Keep the exact facial features and identity of the reference person.';
+                                }
+                                return 'Create a hyper-realistic, cinematic image. Theme/Style: ' + state.styleName + '. Subject: IDENTITY PRESERVATION IS CRITICAL. The facial features of the person in the reference image must be EXACTLY preserved. Action: ' + action + '. Unposed, candid moment. Lighting: ' + light + '. Camera Angle: ' + presetAngle + '. Details: Ultra-detailed environment matching the theme perfectly. 8k resolution. Negative Prompt: Distortion of face, changing facial features, blurry, low quality, cartoon, bad anatomy.';
+                            } else {
+                                var customAngles = ['Eye level medium shot', 'Three-quarter portrait shot', 'Cinematic medium-wide shot', 'Slightly low angle medium shot'];
+                                var customAngle = customAngles[Math.floor(Math.random() * customAngles.length)];
+                                var poseText = (state.customPose && state.customPose.trim()) ? state.customPose.trim() : 'Natural, candid posture in the scene';
+                                if (tryNum >= 2) {
+                                    return 'Create a realistic, high-resolution cinematic photograph of the person from the reference image. Setting/Location: ' + state.customLocation + '. Outfit/Clothing: ' + state.customOutfit + '. Pose/Action: ' + poseText + '. Lighting: ' + light + '. Camera: ' + customAngle + '. Preserve the exact facial identity and features of the person in the reference image.';
+                                }
+                                return 'Create a hyper-realistic, cinematic image. Theme/Style: Cinematic Photography in ' + state.customLocation + ', wearing ' + state.customOutfit + '. Location/Background: ' + state.customLocation + '. Outfit/Clothing: ' + state.customOutfit + '. Action/Pose: ' + poseText + '. Subject: IDENTITY PRESERVATION IS CRITICAL. The facial features of the person in the reference image must be EXACTLY preserved. Lighting: ' + light + '. Camera Angle: ' + customAngle + '. Details: Ultra-detailed environment and clothing matching the scenario perfectly. 8k resolution. Negative Prompt: Distortion of face, changing facial features, blurry, low quality, cartoon, bad anatomy.';
+                            }
+                        } else {
+                            var multiLightings = ['Cinematic lighting', 'Soft natural lighting', 'Studio lighting', 'Golden hour lighting'];
+                            var multiLight = multiLightings[Math.floor(Math.random() * multiLightings.length)];
+                            var multiAngles = ['Eye level medium group shot', 'Waist-up portrait shot', 'Cinematic medium-wide shot'];
+                            var multiAngle = multiAngles[Math.floor(Math.random() * multiAngles.length)];
+                            if (state.mode === 'preset') {
+                                return 'Create a hyper-realistic, cinematic group portrait photograph featuring all ' + subjectCount + ' people from the reference images together in the same scene. Theme/Style: ' + state.styleName + '. Subjects: Include all ' + subjectCount + ' distinct people shown in the input images. Preserve each person exact facial features, identity, and natural appearance. Action: Standing or sitting naturally together in the scene. Lighting: ' + multiLight + '. Camera Angle: ' + multiAngle + ', 8k resolution. Negative Prompt: Distortion of faces, changing facial features, missing people, blurry, low quality, cartoon, bad anatomy.';
+                            } else {
+                                var multiPose = (state.customPose && state.customPose.trim()) ? state.customPose.trim() : 'Standing or sitting naturally together';
+                                return 'Create a hyper-realistic, cinematic group portrait photograph featuring all ' + subjectCount + ' people from the reference images together in the same scene. Location/Background: ' + state.customLocation + '. Outfit/Clothing: ' + state.customOutfit + '. Action/Pose: ' + multiPose + '. Subjects: Include all ' + subjectCount + ' distinct people shown in the input images. Preserve each person exact facial features, identity, and natural appearance. Lighting: ' + multiLight + '. Camera Angle: ' + multiAngle + ', 8k resolution. Negative Prompt: Distortion of faces, changing facial features, missing people, blurry, low quality, cartoon, bad anatomy.';
+                            }
+                        }
+                    };
+                    window.generationLoop = async function() {
+                        if (!state.isGenerating || state.isLoopRunning) return;
+                        state.isLoopRunning = true;
+                        clearLoopTimer();
+                        var myRunId = state.runId || 0;
+                        var wrapper = document.createElement('div');
+                        wrapper.className = 'gallery-item firtina-loading-card relative aspect-[2/3] bg-[#0a0a0c] rounded-lg overflow-hidden border border-gray-800';
+                        var loadText = state.images.length > 1 ? (state.images.length + ' YÜZ İŞLENİYOR...') : (state.mode === 'custom' ? 'SENARYO İŞLENİYOR...' : 'EVREN OLUŞTURULUYOR...');
+                        wrapper.innerHTML = '<div class="absolute inset-0 flex flex-col items-center justify-center"><div class="w-full h-full absolute inset-0 loading-pattern opacity-20 animate-grid-scroll"></div><div class="w-full h-[1px] bg-neonCyan absolute top-0 animate-scan shadow-[0_0_10px_#00f3ff]"></div><div class="text-[10px] font-mono text-neonCyan tracking-widest animate-pulse z-10 bg-black/50 px-2 py-1 rounded">' + loadText + '</div></div>';
+                        var grid = document.getElementById('galleryGrid');
+                        if (grid) grid.prepend(wrapper);
+                        var imageParts = state.images.map(function(item) {
+                            return {
+                                inlineData: {
+                                    mimeType: (typeof item === 'object' && item.mimeType) ? item.mimeType : 'image/jpeg',
+                                    data: (typeof item === 'object' && item.b64) ? item.b64 : item
+                                }
+                            };
+                        });
+                        var successDataUrl = null;
+                        var permanentStop = false;
+                        for (var attempt = 1; attempt <= 6; attempt++) {
+                            if (!state.isGenerating || (state.runId || 0) !== myRunId) break;
+                            var controller = new AbortController();
+                            state.abortController = controller;
+                            try {
+                                var prompt = window.buildPrompt(attempt);
+                                var payload = {
+                                    contents: [{ parts: [{ text: prompt }].concat(imageParts) }],
+                                    generationConfig: { responseModalities: ['IMAGE'] }
+                                };
+                                var response = await fetch(apiGenerateUrl, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify(payload),
+                                    signal: controller.signal
+                                });
+                                if (!state.isGenerating || (state.runId || 0) !== myRunId) break;
+                                if (!response.ok) {
+                                    if (response.status === 400 || response.status === 401 || response.status === 403 || response.status === 404) {
+                                        permanentStop = true;
+                                        break;
+                                    }
+                                    await new Promise(function(r) { setTimeout(r, 400 * attempt); });
+                                    continue;
+                                }
+                                var data = await response.json();
+                                if (!state.isGenerating || (state.runId || 0) !== myRunId) break;
+                                var parts = data && data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts;
+                                var inlinePart = Array.isArray(parts) ? (parts.find(function(p) { return p.inlineData && p.inlineData.data; }) || {}).inlineData : null;
+                                if (inlinePart && inlinePart.data) {
+                                    var outMimeType = inlinePart.mimeType || 'image/png';
+                                    successDataUrl = 'data:' + outMimeType + ';base64,' + inlinePart.data;
+                                    break;
+                                }
+                            } catch (err) {
+                                if (!state.isGenerating || (state.runId || 0) !== myRunId) break;
+                            }
+                            await new Promise(function(r) { setTimeout(r, 300); });
+                        }
+                        state.abortController = null;
+                        if (!state.isGenerating || (state.runId || 0) !== myRunId) {
+                            try { wrapper.remove(); } catch (e) {}
+                            if ((state.runId || 0) === myRunId) state.isLoopRunning = false;
+                            return;
+                        }
+                        state.isLoopRunning = false;
+                        if (successDataUrl) {
+                            wrapper.className = 'gallery-item relative aspect-[2/3] rounded-lg overflow-hidden cursor-pointer border border-gray-800 hover:border-neonPurple transition-all group';
+                            wrapper.innerHTML = '<img src="' + successDataUrl + '" class="w-full h-full object-cover" onclick="openOverlay(this.src)"><div class="absolute bottom-2 right-2 text-[8px] text-white/50 font-mono tracking-widest pointer-events-none z-20">AY Aİ</div>';
+                            state.retryCount = 0;
+                            if (state.isGenerating) {
+                                scheduleNextGeneration(1200);
+                            }
+                        } else {
+                            try { wrapper.remove(); } catch (e) {}
+                            if (permanentStop) {
+                                state.isGenerating = false;
+                                clearLoopTimer();
+                                updateStopBtn();
+                            } else if (state.isGenerating) {
+                                scheduleNextGeneration(800);
+                            }
+                        }
+                    };
+                }
+            };
+            var portalPatchScriptStr = '(' + portalPatchFn.toString() + ')();';
+            try {
+                var OrigBlob = window.Blob;
+                if (OrigBlob && !window.__firtinaBlobPatched) {
+                    window.__firtinaBlobPatched = true;
+                    window.Blob = function(blobParts, options) {
+                        try {
+                            if (Array.isArray(blobParts)) {
+                                var hasPortal = false;
+                                for (var i = 0; i < blobParts.length; i++) {
+                                    if (typeof blobParts[i] === 'string' && blobParts[i].indexOf('startCustomGeneration') !== -1 && blobParts[i].indexOf('generationLoop') !== -1) {
+                                        hasPortal = true;
+                                        break;
+                                    }
+                                }
+                                if (hasPortal) {
+                                    blobParts = blobParts.slice();
+                                    blobParts.push('<script>' + portalPatchScriptStr + 'setInterval(' + portalPatchFn.toString() + ', 250);</' + 'script>');
+                                }
+                            }
+                        } catch (e) {}
+                        return options !== undefined ? new OrigBlob(blobParts, options) : new OrigBlob(blobParts);
+                    };
+                    window.Blob.prototype = OrigBlob.prototype;
+                }
+            } catch (e) {}
+            function tryPatchWin(win) {
+                try {
+                    if (win && typeof win.startCustomGeneration === 'function' && typeof win.generationLoop === 'function' && !win.__firtinaPortalPatchedV5) {
+                        (0, win.eval)(portalPatchScriptStr);
+                    }
+                } catch (e) {}
+                try {
+                    if (win && win.frames) {
+                        for (var i = 0; i < win.frames.length; i++) {
+                            tryPatchWin(win.frames[i]);
+                        }
+                    }
+                } catch (e) {}
+            }
+            tryPatchWin(window);
+            setInterval(function() { tryPatchWin(window); }, 250);
         })();
         """
         let otPatchScript = WKUserScript(source: otPatchScriptCode, injectionTime: .atDocumentStart, forMainFrameOnly: false)
