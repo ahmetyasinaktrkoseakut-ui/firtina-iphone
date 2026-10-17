@@ -270,9 +270,12 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 32;
+				CURRENT_PROJECT_VERSION = 33;
 				DEVELOPMENT_TEAM = 7GB34ALWCP;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Yapay zeka araçlarında görsel oluşturmak ve düzenlemek için kameranızı kullanabilirsiniz.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Oluşturulan görselleri fotoğraf galerinize kaydetmek için izin gereklidir.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Yapay zeka araçlarına fotoğraf yüklemek için galerinize erişim izni gereklidir.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -296,9 +299,12 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 32;
+				CURRENT_PROJECT_VERSION = 33;
 				DEVELOPMENT_TEAM = 7GB34ALWCP;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Yapay zeka araçlarında görsel oluşturmak ve düzenlemek için kameranızı kullanabilirsiniz.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Oluşturulan görselleri fotoğraf galerinize kaydetmek için izin gereklidir.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Yapay zeka araçlarına fotoğraf yüklemek için galerinize erişim izni gereklidir.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

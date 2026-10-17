@@ -2288,7 +2288,7 @@
     {
         "id": 0,
         "name": "Fotoğraf Uygulaması",
-        "url": "https://gemini.google.com/share/296f560476c2?skid=cbfdd28c-c92b-45c8-85c2-7b14c0000a5c",
+        "url": "https://share.gemini.google/9VD9ST0MM6Ol",
         "categories": [
             "Görsel",
             "Genel"
@@ -6476,7 +6476,7 @@
         }
 
         // Veri Yükleme
-        const APP_VERSION = '1.19'; // Fotoğraf Uygulaması eklendi - localStorage cache temizlenir
+        const APP_VERSION = '1.21'; // Fotoğraf Uygulaması güncel link - localStorage cache temizlenir
 
         // NOT: APK içindeki assets/tools_data.json salt okunurdur ve APK yüklendikten sonra değiştirilemez.
         // Uzaktan (re-build yapmadan) güncelleme yapmak için veriyi bir URL'e host etmelisiniz (Firebase, GitHub vb.)
@@ -6521,8 +6521,13 @@
         function updateInternalTools(newTools) {
             if (Array.isArray(newTools) && newTools.length >= 10) {
                 const photoAppTool = initialTools.find(t => t.id === 0);
-                if (photoAppTool && !newTools.some(t => t.id === 0 || t.url === photoAppTool.url)) {
-                    newTools.unshift(photoAppTool);
+                if (photoAppTool) {
+                    const existingIdx = newTools.findIndex(t => t.id === 0);
+                    if (existingIdx !== -1) {
+                        newTools[existingIdx] = photoAppTool;
+                    } else {
+                        newTools.unshift(photoAppTool);
+                    }
                 }
                 tools = newTools;
                 saveData();
@@ -6585,8 +6590,13 @@
                 const newTools = JSON.parse(jsonString);
                 if (Array.isArray(newTools) && newTools.length > 0) {
                     const photoAppTool = initialTools.find(t => t.id === 0);
-                    if (photoAppTool && !newTools.some(t => t.id === 0 || t.url === photoAppTool.url)) {
-                        newTools.unshift(photoAppTool);
+                    if (photoAppTool) {
+                        const existingIdx = newTools.findIndex(t => t.id === 0);
+                        if (existingIdx !== -1) {
+                            newTools[existingIdx] = photoAppTool;
+                        } else {
+                            newTools.unshift(photoAppTool);
+                        }
                     }
                     tools = newTools;
                     // LocalStorage güncelle
@@ -6874,7 +6884,7 @@
             }
 
             photoAppBanner.innerHTML = `
-                <div onclick="openExternal(event, 'https://gemini.google.com/share/296f560476c2?skid=cbfdd28c-c92b-45c8-85c2-7b14c0000a5c')" 
+                <div onclick="openExternal(event, 'https://share.gemini.google/9VD9ST0MM6Ol')" 
                      class="cursor-pointer glass-card group relative p-4 rounded-2xl border border-indigo-500/40 hover:border-indigo-400 bg-gradient-to-r from-indigo-950/70 via-purple-950/60 to-slate-900/80 shadow-[0_4px_20px_rgba(99,102,241,0.25)] hover:shadow-[0_4px_25px_rgba(99,102,241,0.4)] transition-all duration-300 flex items-center justify-between">
                     <div class="flex items-center gap-3.5 min-w-0">
                         <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-2xl shadow-lg shrink-0 group-hover:scale-105 transition-transform">

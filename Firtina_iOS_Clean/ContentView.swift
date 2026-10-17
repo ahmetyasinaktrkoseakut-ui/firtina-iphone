@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import WebKit
 import SafariServices
 
@@ -371,7 +372,9 @@ struct WebView: UIViewRepresentable {
         var downloadURL: URL?
         var isPresentingShareSheet = false
         var isPresentingSafari = false
+        var isPresentingGeminiWebView = false
         weak var presentedSafariVC: SFSafariViewController?
+        weak var presentedGeminiVC: GeminiToolWebViewController?
         
         // Handle Javascript message calls (openCustomTab & Blob/Base64/URL Downloads)
         func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
@@ -388,7 +391,7 @@ struct WebView: UIViewRepresentable {
 
                 if let rawUrlString = rawUrlString,
                    let validURL = validatedHttpUrl(from: rawUrlString) {
-                    presentSafariViewController(url: validURL)
+                    openExternalOrToolUrl(validURL)
                 }
                 return
             }
@@ -408,6 +411,26 @@ struct WebView: UIViewRepresentable {
                     saveBase64AndPresent(base64String: base64String, mimeType: mimeType, filename: filename)
                     return
                 }
+            }
+        }
+
+        private func isGeminiShareUrl(_ url: URL) -> Bool {
+            guard let host = url.host?.lowercased() else { return false }
+            let path = url.path.lowercased()
+            if host == "share.gemini.google" || host.hasSuffix(".share.gemini.google") {
+                return true
+            }
+            if host.contains("gemini.google") && path.hasPrefix("/share") {
+                return true
+            }
+            return false
+        }
+
+        private func openExternalOrToolUrl(_ url: URL) {
+            if isGeminiShareUrl(url) {
+                presentGeminiWebViewController(url: url)
+            } else {
+                presentSafariViewController(url: url)
             }
         }
 
@@ -451,6 +474,48 @@ struct WebView: UIViewRepresentable {
             return topVC
         }
 
+        private func presentGeminiWebViewController(url: URL) {
+            guard let validURL = validatedHttpUrl(url) else { return }
+
+            DispatchQueue.main.async {
+                if let existingGemini = self.presentedGeminiVC,
+                   existingGemini.presentingViewController == nil && !existingGemini.isBeingPresented {
+                    self.presentedGeminiVC = nil
+                    self.isPresentingGeminiWebView = false
+                }
+
+                if self.isPresentingGeminiWebView || self.isPresentingSafari || self.isPresentingShareSheet {
+                    return
+                }
+
+                guard let topVC = self.topMostViewController() else {
+                    return
+                }
+
+                if topVC is SFSafariViewController || topVC is UIActivityViewController || topVC is GeminiToolWebViewController || topVC.presentedViewController != nil {
+                    return
+                }
+
+                self.isPresentingGeminiWebView = true
+
+                let geminiVC = GeminiToolWebViewController(url: validURL, coordinator: self) { [weak self] in
+                    DispatchQueue.main.async {
+                        self?.presentedGeminiVC = nil
+                        self?.isPresentingGeminiWebView = false
+                    }
+                }
+                geminiVC.modalPresentationStyle = .fullScreen
+
+                self.presentedGeminiVC = geminiVC
+                topVC.present(geminiVC, animated: true) {
+                    if geminiVC.presentingViewController == nil {
+                        self.presentedGeminiVC = nil
+                        self.isPresentingGeminiWebView = false
+                    }
+                }
+            }
+        }
+
         private func presentSafariViewController(url: URL) {
             guard let validURL = validatedHttpUrl(url) else { return }
 
@@ -461,7 +526,7 @@ struct WebView: UIViewRepresentable {
                     self.isPresentingSafari = false
                 }
 
-                if self.isPresentingSafari || self.isPresentingShareSheet {
+                if self.isPresentingSafari || self.isPresentingShareSheet || self.isPresentingGeminiWebView {
                     return
                 }
 
@@ -469,7 +534,7 @@ struct WebView: UIViewRepresentable {
                     return
                 }
 
-                if topVC is SFSafariViewController || topVC is UIActivityViewController || topVC.presentedViewController != nil {
+                if topVC is SFSafariViewController || topVC is UIActivityViewController || topVC is GeminiToolWebViewController || topVC.presentedViewController != nil {
                     return
                 }
 
@@ -732,14 +797,14 @@ struct WebView: UIViewRepresentable {
             }
         }
 
-        // Ana frame'e giden tüm harici http/https isteklerini WKWebView'da iptal et ve SFSafariViewController'da aç
+        // Ana frame'e giden tüm harici http/https isteklerini WKWebView'da iptal et ve uygun ekranda aç
         func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
             if let url = navigationAction.request.url,
                let validURL = validatedHttpUrl(url) {
                 let isMainFrameOrNewWindow = (navigationAction.targetFrame == nil) || (navigationAction.targetFrame?.isMainFrame == true)
                 if isMainFrameOrNewWindow && !navigationAction.shouldPerformDownload {
                     decisionHandler(.cancel)
-                    presentSafariViewController(url: validURL)
+                    openExternalOrToolUrl(validURL)
                     return
                 }
             }
@@ -784,12 +849,12 @@ struct WebView: UIViewRepresentable {
             download.delegate = self
         }
 
-        // target="_blank" veya window.open ile açılan harici linkleri WKWebView'a yükleme; SFSafariViewController ile aç
+        // target="_blank" veya window.open ile açılan harici linkleri WKWebView'a yükleme; uygun ekranda aç
         func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
             if navigationAction.targetFrame == nil,
                let url = navigationAction.request.url,
                let validURL = validatedHttpUrl(url) {
-                presentSafariViewController(url: validURL)
+                openExternalOrToolUrl(validURL)
             }
             return nil
         }
@@ -815,6 +880,553 @@ struct WebView: UIViewRepresentable {
 
         func download(_ download: WKDownload, didFailWithError error: Error, resumeData: Data?) {
             // Hata durumunda sessizce geç
+        }
+    }
+}
+
+final class WeakScriptMessageHandler: NSObject, WKScriptMessageHandler {
+    weak var delegate: WKScriptMessageHandler?
+
+    init(delegate: WKScriptMessageHandler) {
+        self.delegate = delegate
+        super.init()
+    }
+
+    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        delegate?.userContentController(userContentController, didReceive: message)
+    }
+}
+
+final class GeminiToolWebViewController: UIViewController, WKNavigationDelegate, WKUIDelegate {
+    private let initialURL: URL
+    private weak var coordinator: WebView.Coordinator?
+    private let onDismiss: () -> Void
+    private var webView: WKWebView?
+    private var hasNotifiedDismiss = false
+
+    init(url: URL, coordinator: WebView.Coordinator, onDismiss: @escaping () -> Void) {
+        self.initialURL = url
+        self.coordinator = coordinator
+        self.onDismiss = onDismiss
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        .lightContent
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = UIColor(red: 8/255, green: 8/255, blue: 10/255, alpha: 1.0)
+
+        let topBar = UIView()
+        topBar.translatesAutoresizingMaskIntoConstraints = false
+        topBar.backgroundColor = UIColor(red: 15/255, green: 23/255, blue: 42/255, alpha: 1.0)
+        view.addSubview(topBar)
+
+        let closeButton = UIButton(type: .system)
+        closeButton.translatesAutoresizingMaskIntoConstraints = false
+        closeButton.setTitle("Bitti", for: .normal)
+        closeButton.setTitleColor(UIColor(red: 56/255, green: 189/255, blue: 248/255, alpha: 1.0), for: .normal)
+        closeButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
+        closeButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
+        topBar.addSubview(closeButton)
+
+        let titleLabel = UILabel()
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        titleLabel.text = "Fotoğraf Uygulaması"
+        titleLabel.textColor = .white
+        titleLabel.font = UIFont.systemFont(ofSize: 15, weight: .semibold)
+        titleLabel.textAlignment = .center
+        topBar.addSubview(titleLabel)
+
+        let reloadButton = UIButton(type: .system)
+        reloadButton.translatesAutoresizingMaskIntoConstraints = false
+        reloadButton.setTitle("↻", for: .normal)
+        reloadButton.setTitleColor(.white, for: .normal)
+        reloadButton.titleLabel?.font = UIFont.systemFont(ofSize: 20, weight: .medium)
+        reloadButton.addTarget(self, action: #selector(reloadTapped), for: .touchUpInside)
+        topBar.addSubview(reloadButton)
+
+        let configuration = WKWebViewConfiguration()
+        configuration.preferences.javaScriptCanOpenWindowsAutomatically = true
+        configuration.allowsInlineMediaPlayback = true
+        configuration.websiteDataStore = .default()
+
+        let otPatchScriptCode = """
+        (function() {
+            try {
+                if (window.location && window.location.hostname && window.location.hostname.indexOf('gemini.google') !== -1 && !window.__firtinaOtPatched) {
+                    window.__firtinaOtPatched = true;
+                    var origFetch = window.fetch;
+                    if (origFetch) {
+                        window.fetch = async function(input, init) {
+                            var url = typeof input === 'string' ? input : (input && input.url ? input.url : '');
+                            var res = await origFetch.apply(this, arguments);
+                            if (url.indexOf('otAQ7b') !== -1) {
+                                try {
+                                    var clone = res.clone();
+                                    var txt = await clone.text();
+                                    var modified = txt.replace(/,1016,/g, ',1000,');
+                                    return new Response(modified, { status: res.status, statusText: res.statusText, headers: res.headers });
+                                } catch (e) {}
+                            }
+                            return res;
+                        };
+                    }
+                    var origOpen = XMLHttpRequest.prototype.open;
+                    XMLHttpRequest.prototype.open = function(method, url) {
+                        this.__firtinaUrl = typeof url === 'string' ? url : String(url || '');
+                        return origOpen.apply(this, arguments);
+                    };
+                    var respTextDesc = Object.getOwnPropertyDescriptor(XMLHttpRequest.prototype, 'responseText');
+                    if (respTextDesc && respTextDesc.get) {
+                        Object.defineProperty(XMLHttpRequest.prototype, 'responseText', {
+                            get: function() {
+                                var val = respTextDesc.get.call(this);
+                                if (this.__firtinaUrl && this.__firtinaUrl.indexOf('otAQ7b') !== -1 && typeof val === 'string') {
+                                    return val.replace(/,1016,/g, ',1000,');
+                                }
+                                return val;
+                            }
+                        });
+                    }
+                    var respDesc = Object.getOwnPropertyDescriptor(XMLHttpRequest.prototype, 'response');
+                    if (respDesc && respDesc.get) {
+                        Object.defineProperty(XMLHttpRequest.prototype, 'response', {
+                            get: function() {
+                                var val = respDesc.get.call(this);
+                                if (this.__firtinaUrl && this.__firtinaUrl.indexOf('otAQ7b') !== -1 && typeof val === 'string') {
+                                    return val.replace(/,1016,/g, ',1000,');
+                                }
+                                return val;
+                            }
+                        });
+                    }
+                }
+            } catch (e) {}
+        })();
+        """
+        let otPatchScript = WKUserScript(source: otPatchScriptCode, injectionTime: .atDocumentStart, forMainFrameOnly: false)
+        configuration.userContentController.addUserScript(otPatchScript)
+
+        let multiFrameDownloadBridgeScriptCode = """
+        (function() {
+            if (window.IosDownloadBridgeInjected) return;
+            window.IosDownloadBridgeInjected = true;
+
+            try {
+                if (navigator && navigator.canShare) {
+                    navigator.canShare = function() { return false; };
+                }
+            } catch (e) {}
+
+            var getUrlPath = function(url) {
+                return (url || '').split('?')[0].split('#')[0].toLowerCase();
+            };
+
+            var isImageUrl = function(url) {
+                if (!url) return false;
+                var fullUrl = url.toLowerCase();
+                var lower = getUrlPath(url);
+                if (fullUrl.indexOf('googleusercontent.com') !== -1) return true;
+                if (fullUrl.indexOf('oaiusercontent.com') !== -1) return true;
+                if (fullUrl.indexOf('oaidalleapiprodscus.blob.core.windows.net') !== -1) return true;
+                return lower.endsWith('.png') || lower.endsWith('.jpg') ||
+                       lower.endsWith('.jpeg') || lower.endsWith('.webp') ||
+                       lower.endsWith('.gif') || lower.endsWith('.bmp');
+            };
+
+            var isDownloadableUrl = function(url) {
+                var lower = getUrlPath(url);
+                return isImageUrl(url) ||
+                       lower.endsWith('.pdf') || lower.endsWith('.zip') ||
+                       lower.endsWith('.mp3') || lower.endsWith('.m4a') ||
+                       lower.endsWith('.wav') || lower.endsWith('.ogg') ||
+                       lower.endsWith('.aac') || lower.endsWith('.mp4') ||
+                       lower.endsWith('.mov') || lower.endsWith('.webm');
+            };
+
+            var getMimeFromDataUrl = function(url) {
+                var match = /^data:([^;,]+)/i.exec(url || '');
+                return match && match[1] ? match[1] : 'application/octet-stream';
+            };
+
+            if (!window.URL.originalCreateObjectURL) {
+                window.URL.originalCreateObjectURL = window.URL.createObjectURL;
+                window.URL.blobMap = new Map();
+                window.URL.createObjectURL = function(obj) {
+                    var url = window.URL.originalCreateObjectURL(obj);
+                    if (obj instanceof Blob) {
+                        window.URL.blobMap.set(url, obj);
+                    }
+                    return url;
+                };
+            }
+
+            if (!window.URL.originalRevokeObjectURL) {
+                window.URL.originalRevokeObjectURL = window.URL.revokeObjectURL;
+                window.URL.revokeObjectURL = function(url) {
+                    setTimeout(function() { window.URL.originalRevokeObjectURL(url); }, 15000);
+                };
+            }
+
+            window.sendBase64ToIos = function(base64data, mimeType, filename) {
+                if (base64data.indexOf(',') !== -1) {
+                    base64data = base64data.substring(base64data.indexOf(',') + 1);
+                }
+                var payload = {
+                    base64: base64data,
+                    mimeType: mimeType,
+                    filename: filename || 'downloaded_file'
+                };
+                if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.iosDownloadBridge) {
+                    window.webkit.messageHandlers.iosDownloadBridge.postMessage(payload);
+                } else if (window.top && window.top !== window) {
+                    window.top.postMessage({
+                        type: 'iosDownloadBridgeMessage',
+                        data: payload
+                    }, '*');
+                }
+            };
+
+            window.sendUrlToIos = function(url, filename) {
+                var payload = {
+                    url: url,
+                    filename: filename || 'downloaded_file'
+                };
+                if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.iosDownloadBridge) {
+                    window.webkit.messageHandlers.iosDownloadBridge.postMessage(payload);
+                } else if (window.top && window.top !== window) {
+                    window.top.postMessage({
+                        type: 'iosDownloadBridgeMessage',
+                        data: payload
+                    }, '*');
+                }
+            };
+
+            window.handleBlobUrl = function(url, filename) {
+                if (window.URL.blobMap && window.URL.blobMap.has(url)) {
+                    var blob = window.URL.blobMap.get(url);
+                    var reader = new FileReader();
+                    reader.readAsDataURL(blob);
+                    reader.onloadend = function() {
+                        window.sendBase64ToIos(reader.result, blob.type, filename);
+                    };
+                    return;
+                }
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', url, true);
+                xhr.responseType = 'blob';
+                xhr.onload = function() {
+                    if (this.status === 200) {
+                        var blob = this.response;
+                        var reader = new FileReader();
+                        reader.readAsDataURL(blob);
+                        reader.onloadend = function() {
+                            window.sendBase64ToIos(reader.result, blob.type, filename);
+                        };
+                    }
+                };
+                xhr.send();
+            };
+
+            window.handleHttpUrl = function(url, filename) {
+                if (url && !isImageUrl(url)) {
+                    window.sendUrlToIos(url, filename);
+                    return;
+                }
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', url, true);
+                xhr.responseType = 'blob';
+                xhr.onload = function() {
+                    if (this.status === 200) {
+                        var blob = this.response;
+                        var reader = new FileReader();
+                        reader.readAsDataURL(blob);
+                        reader.onloadend = function() {
+                            window.sendBase64ToIos(reader.result, blob.type, filename);
+                        };
+                    } else {
+                        window.sendUrlToIos(url, filename);
+                    }
+                };
+                xhr.onerror = function() {
+                    window.sendUrlToIos(url, filename);
+                };
+                xhr.send();
+            };
+
+            window.document.addEventListener('click', function(e) {
+                var path = e.composedPath ? e.composedPath() : [];
+                var target = null;
+                for (var i = 0; i < path.length; i++) {
+                    if (path[i] && path[i].tagName === 'A') {
+                        target = path[i];
+                        break;
+                    }
+                }
+                if (!target) {
+                    target = e.target;
+                    while (target && target.tagName !== 'A') {
+                        target = target.parentNode;
+                    }
+                }
+                if (target && target.tagName === 'A') {
+                    var href = target.getAttribute('href') || target.href;
+                    var download = target.getAttribute('download');
+                    if (href) {
+                        if (href.startsWith('blob:')) {
+                            window.handleBlobUrl(href, download);
+                            e.preventDefault();
+                        } else if (href.startsWith('data:')) {
+                            window.sendBase64ToIos(href, getMimeFromDataUrl(href), download);
+                            e.preventDefault();
+                        } else if (target.hasAttribute('download') || isDownloadableUrl(href)) {
+                            window.handleHttpUrl(href, download);
+                            e.preventDefault();
+                        }
+                    }
+                }
+            }, true);
+
+            if (window.HTMLAnchorElement) {
+                var originalClick = window.HTMLAnchorElement.prototype.click;
+                window.HTMLAnchorElement.prototype.click = function() {
+                    var href = this.href;
+                    var download = this.getAttribute('download');
+                    if (href) {
+                        if (href.startsWith('blob:')) {
+                            window.handleBlobUrl(href, download);
+                            return;
+                        } else if (href.startsWith('data:')) {
+                            window.sendBase64ToIos(href, getMimeFromDataUrl(href), download);
+                            return;
+                        } else if (this.hasAttribute('download') || isDownloadableUrl(href)) {
+                            window.handleHttpUrl(href, download);
+                            return;
+                        }
+                    }
+                    if (!this.ownerDocument.body.contains(this)) {
+                        this.style.display = 'none';
+                        window.document.body.appendChild(this);
+                        try {
+                            originalClick.apply(this, arguments);
+                        } finally {
+                            window.document.body.removeChild(this);
+                        }
+                    } else {
+                        originalClick.apply(this, arguments);
+                    }
+                };
+            }
+
+            if (window.EventTarget) {
+                var originalDispatch = window.EventTarget.prototype.dispatchEvent;
+                window.EventTarget.prototype.dispatchEvent = function(event) {
+                    if (event && event.type === 'click' && this.tagName === 'A') {
+                        var href = this.getAttribute('href') || this.href;
+                        var download = this.getAttribute('download');
+                        if (href) {
+                            if (href.startsWith('blob:')) {
+                                window.handleBlobUrl(href, download);
+                                return false;
+                            } else if (href.startsWith('data:')) {
+                                window.sendBase64ToIos(href, getMimeFromDataUrl(href), download);
+                                return false;
+                            } else if (this.hasAttribute('download') || isDownloadableUrl(href)) {
+                                window.handleHttpUrl(href, download);
+                                return false;
+                            }
+                        }
+                    }
+                    return originalDispatch.apply(this, arguments);
+                };
+            }
+
+            if (window.open) {
+                var originalOpen = window.open;
+                window.open = function(url, name, specs) {
+                    if (url) {
+                        if (url.startsWith('blob:')) {
+                            window.handleBlobUrl(url, 'downloaded_file');
+                            return null;
+                        } else if (url.startsWith('data:')) {
+                            window.sendBase64ToIos(url, getMimeFromDataUrl(url), name || 'downloaded_file');
+                            return null;
+                        } else if (isDownloadableUrl(url)) {
+                            window.handleHttpUrl(url, 'downloaded_file');
+                            return null;
+                        }
+                    }
+                    return originalOpen.apply(this, arguments);
+                };
+            }
+
+            if (window.top === window.self) {
+                window.addEventListener('message', function(e) {
+                    if (e.data && e.data.type === 'iosDownloadBridgeMessage' && e.data.data) {
+                        if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.iosDownloadBridge) {
+                            window.webkit.messageHandlers.iosDownloadBridge.postMessage(e.data.data);
+                        }
+                    }
+                });
+            }
+        })();
+        """
+        let multiFrameDownloadBridgeScript = WKUserScript(source: multiFrameDownloadBridgeScriptCode, injectionTime: .atDocumentStart, forMainFrameOnly: false)
+        configuration.userContentController.addUserScript(multiFrameDownloadBridgeScript)
+
+        if let coordinator = coordinator {
+            configuration.userContentController.add(WeakScriptMessageHandler(delegate: coordinator), name: "iosDownloadBridge")
+        }
+
+        let createdWebView = WKWebView(frame: .zero, configuration: configuration)
+        createdWebView.translatesAutoresizingMaskIntoConstraints = false
+        createdWebView.navigationDelegate = self
+        createdWebView.uiDelegate = self
+        createdWebView.customUserAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1"
+        createdWebView.isOpaque = false
+        createdWebView.backgroundColor = UIColor(red: 8/255, green: 8/255, blue: 10/255, alpha: 1.0)
+        createdWebView.scrollView.backgroundColor = UIColor(red: 8/255, green: 8/255, blue: 10/255, alpha: 1.0)
+        createdWebView.allowsBackForwardNavigationGestures = true
+        view.addSubview(createdWebView)
+        self.webView = createdWebView
+
+        NSLayoutConstraint.activate([
+            topBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            topBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            topBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            topBar.heightAnchor.constraint(equalToConstant: 48),
+
+            closeButton.leadingAnchor.constraint(equalTo: topBar.leadingAnchor, constant: 16),
+            closeButton.centerYAnchor.constraint(equalTo: topBar.centerYAnchor),
+
+            titleLabel.centerXAnchor.constraint(equalTo: topBar.centerXAnchor),
+            titleLabel.centerYAnchor.constraint(equalTo: topBar.centerYAnchor),
+            titleLabel.leadingAnchor.constraint(greaterThanOrEqualTo: closeButton.trailingAnchor, constant: 8),
+            titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: reloadButton.leadingAnchor, constant: -8),
+
+            reloadButton.trailingAnchor.constraint(equalTo: topBar.trailingAnchor, constant: -16),
+            reloadButton.centerYAnchor.constraint(equalTo: topBar.centerYAnchor),
+
+            createdWebView.topAnchor.constraint(equalTo: topBar.bottomAnchor),
+            createdWebView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            createdWebView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            createdWebView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+
+        createdWebView.load(URLRequest(url: initialURL))
+    }
+
+    private func cleanupAndNotifyDismiss() {
+        webView?.configuration.userContentController.removeScriptMessageHandler(forName: "iosDownloadBridge")
+        webView?.stopLoading()
+        if !hasNotifiedDismiss {
+            hasNotifiedDismiss = true
+            onDismiss()
+        }
+    }
+
+    @objc private func closeTapped() {
+        cleanupAndNotifyDismiss()
+        dismiss(animated: true, completion: nil)
+    }
+
+    @objc private func reloadTapped() {
+        webView?.reload()
+    }
+
+    deinit {
+        webView?.configuration.userContentController.removeScriptMessageHandler(forName: "iosDownloadBridge")
+        if !hasNotifiedDismiss {
+            hasNotifiedDismiss = true
+            onDismiss()
+        }
+    }
+
+    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        if navigationAction.shouldPerformDownload {
+            decisionHandler(.download)
+            return
+        }
+
+        if let url = navigationAction.request.url,
+           let scheme = url.scheme?.lowercased() {
+            if scheme != "http" && scheme != "https" && scheme != "blob" && scheme != "data" && scheme != "about" {
+                UIApplication.shared.open(url, options: [:], completionHandler: nil)
+                decisionHandler(.cancel)
+                return
+            }
+
+            if let host = url.host?.lowercased(),
+               (navigationAction.targetFrame == nil || navigationAction.targetFrame?.isMainFrame == true),
+               (host.contains("instagram.com") || host.contains("wa.me") || host.contains("whatsapp.com")) {
+                UIApplication.shared.open(url, options: [:], completionHandler: nil)
+                decisionHandler(.cancel)
+                return
+            }
+        }
+
+        decisionHandler(.allow)
+    }
+
+    func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse, decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
+        if let mimeType = navigationResponse.response.mimeType?.lowercased() {
+            let isMedia = mimeType.hasPrefix("image/") ||
+                          mimeType.hasPrefix("audio/") ||
+                          mimeType.hasPrefix("video/") ||
+                          mimeType == "application/pdf" ||
+                          mimeType == "application/octet-stream"
+            let isWebPage = mimeType.contains("html") ||
+                            mimeType.contains("javascript") ||
+                            mimeType.contains("text/css")
+            if isMedia && !isWebPage {
+                decisionHandler(.download)
+                return
+            }
+        }
+        if navigationResponse.canShowMIMEType {
+            decisionHandler(.allow)
+        } else {
+            decisionHandler(.download)
+        }
+    }
+
+    func webView(_ webView: WKWebView, navigationAction: WKNavigationAction, didBecome download: WKDownload) {
+        download.delegate = coordinator
+    }
+
+    func webView(_ webView: WKWebView, navigationResponse: WKNavigationResponse, didBecome download: WKDownload) {
+        download.delegate = coordinator
+    }
+
+    func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
+        if let url = navigationAction.request.url {
+            let host = url.host?.lowercased() ?? ""
+            if host.contains("instagram.com") || host.contains("wa.me") || host.contains("whatsapp.com") {
+                UIApplication.shared.open(url, options: [:], completionHandler: nil)
+            } else if url.scheme == "http" || url.scheme == "https" {
+                webView.load(URLRequest(url: url))
+            }
+        }
+        return nil
+    }
+
+    func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
+        let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Tamam", style: .default) { _ in
+            completionHandler()
+        })
+        if presentedViewController == nil {
+            present(alert, animated: true, completion: nil)
+        } else {
+            completionHandler()
         }
     }
 }
